@@ -268,6 +268,15 @@
             }
         };
 
+        const IconMap = { Coffee, ShoppingCart, HomeIcon, FileText, Bell, CheckCircle2, Users, ImageIcon, Key, LayoutGrid };
+
+        // เพิ่มตัวแปร mockUserDefault ตามที่ได้รับแจ้ง
+        const mockUserDefault = {
+            name: 'Khemjira',
+            email: 'khemjira@example.com',
+            avatar: 'https://i.pravatar.cc/150?img=47'
+        };
+
         const App = () => {
             const [user, setUser] = useState(null);
             const [currentScreen, setCurrentScreen] = useState('SIGN_IN');
@@ -322,7 +331,7 @@
                     if (err.code === 'auth/unauthorized-domain') {
                         console.warn("Domain bypass for Preview Environment");
                         // Mock login for preview
-                        setUser({ uid: 'mock-uid', displayName: 'Khemjira Preview', email: 'preview@example.com' });
+                        setUser({ ...mockUserDefault, uid: 'mock-uid' });
                         navigate('MAIN', 'HOME');
                     } else {
                         setLoginError(err.message);
@@ -374,7 +383,7 @@
                         {currentScreen === 'EDIT_PROFILE' && <EditProfileScreen {...common} onBack={() => navigate('MAIN', 'PROFILE')} />}
                         {currentScreen === 'LANGUAGE_SETTINGS' && <LanguageSettingsScreen {...common} onBack={() => navigate('MAIN', 'PROFILE')} />}
                         {currentScreen === 'SECURITY_SETTINGS' && <SecuritySettingsScreen {...common} onBack={() => navigate('MAIN', 'PROFILE')} />}
-                        {currentScreen === 'THEME_SETTINGS' && <ThemeSettingsScreen {...common} onBack={() => navigate('MAIN', 'PROFILE')} />}
+                        {currentScreen === 'THEME_SETTINGS' && <ThemeSettingsScreen {...common} onBack window.lucide={{}} onBack={() => navigate('MAIN', 'PROFILE')} />}
                         {currentScreen === 'NOTIFICATION_SETTINGS' && <NotificationSettingsScreen {...common} onBack={() => navigate('MAIN', 'PROFILE')} />}
                         {currentScreen === 'RECEIPT_DETAIL' && <ReceiptDetailScreen {...common} onBack={() => navigate('TRANSACTION_DETAIL')} />}
                     </div>
@@ -454,7 +463,7 @@
                     <div className="flex justify-between items-center mb-8">
                         <div className="flex items-center gap-3">
                             <img src={mockUserDefault.avatar} className="w-12 h-12 rounded-full border-2 border-white shadow-md" alt="avatar"/>
-                            <div><p className="text-xs text-slate-500 font-bold">{t('welcome')},</p><h2 className="text-lg font-black text-slate-800">Khemjira</h2></div>
+                            <div><p className="text-xs text-slate-500 font-bold">{t('welcome')},</p><h2 className="text-lg font-black text-slate-800">{mockUserDefault.name}</h2></div>
                         </div>
                         <button onClick={()=>navigate('NOTIFICATIONS')} className="p-2 bg-white rounded-full shadow-sm text-[#2F80ED] border border-slate-100">
                             <Icon name="bell" size={20}/>
@@ -555,8 +564,8 @@
                             <Icon name="edit-2" size={14}/>
                         </div>
                     </div>
-                    <h1 className="text-2xl font-black text-slate-800">Khemjira</h1>
-                    <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">khemjira@example.com</p>
+                    <h1 className="text-2xl font-black text-slate-800">{mockUserDefault.name}</h1>
+                    <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">{mockUserDefault.email}</p>
                 </div>
                 <div className="space-y-4">
                     <MenuBtn icon="globe" label={t('language')} onClick={()=>navigate('LANGUAGE_SETTINGS')} IconComp={Icon} />
@@ -672,6 +681,7 @@
         const SplitTransactionScreen = ({ t, onBack, Icon }) => <div className="p-8 flex flex-col h-full bg-[#F7F9FC]"><button onClick={onBack} className="mb-10"><Icon name="chevron-left" size={24}/></button><h2 className="text-2xl font-black mb-10">Split Bill</h2><button onClick={onBack} className="bg-[#2F80ED] text-white p-5 rounded-full font-black uppercase tracking-widest shadow-xl mt-auto">Confirm Split</button></div>;
         const EditProfileScreen = ({ t, onBack, Icon }) => <div className="p-8 flex flex-col h-full bg-[#F7F9FC]"><button onClick={onBack} className="mb-10"><Icon name="chevron-left" size={24}/></button><h2 className="text-2xl font-black mb-10">Edit Profile</h2><button onClick={onBack} className="bg-[#2F80ED] text-white p-5 rounded-full font-black uppercase tracking-widest shadow-xl mt-auto">Save Changes</button></div>;
         const NotificationSettingsScreen = ({ t, onBack, Icon }) => <div className="p-8 flex flex-col h-full bg-[#F7F9FC]"><button onClick={onBack} className="mb-10"><Icon name="chevron-left" size={24}/></button><h2 className="text-2xl font-black mb-10">Notification Settings</h2></div>;
+        const NotificationsScreen = ({ t, onBack, Icon }) => <div className="p-8 flex flex-col h-full bg-[#F7F9FC]"><button onClick={onBack} className="mb-10"><Icon name="chevron-left" size={24}/></button><h2 className="text-2xl font-black mb-10">Notifications</h2></div>;
         const ReceiptDetailScreen = ({ onBack, Icon }) => <div className="p-4 flex flex-col h-full bg-black"><button onClick={onBack} className="mb-10 text-white"><Icon name="chevron-left" size={24}/></button></div>;
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
