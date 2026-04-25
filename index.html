@@ -1,0 +1,1566 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Home, Wallet, ScanLine, Clock, User, Bell, ChevronLeft, ChevronRight,
+  Plus, MoreHorizontal, Coffee, ShoppingCart, Home as HomeIcon, Search,
+  Settings, Shield, Moon, LogOut, Camera, Image as ImageIcon, CheckCircle2,
+  FileText, Key, Users, Edit2, Check, Receipt, AlertTriangle, ToggleRight,
+  ToggleLeft, Smartphone, Download, Sun, Mail, AlignLeft, Lock, Fingerprint,
+  Laptop, BellRing, PieChart, ShieldAlert, Palette, LayoutGrid, Sparkles, Globe, Coins, Trash2, Archive, X
+} from 'lucide-react';
+
+// --- Firebase Configuration (Canvas Environment Pattern) ---
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, addDoc, query } from 'firebase/firestore';
+
+// การตั้งค่า Firebase สำหรับโปรเจกต์ของคุณ (ใช้เมื่อรันนอก Canvas เช่น Github Pages)
+const myFirebaseConfig = {
+  apiKey: "AIzaSyCv1D7XjSuSYWJxpFxT7umaCAb9o8fY2o8",
+  authDomain: "qr-scanner-a29e3.firebaseapp.com",
+  projectId: "qr-scanner-a29e3",
+  storageBucket: "qr-scanner-a29e3.firebasestorage.app",
+  messagingSenderId: "1070573788877",
+  appId: "1:1070573788877:web:cd65246772c629f380d384",
+  measurementId: "G-DGH02NSB7R"
+};
+
+// เช็กว่าอยู่ใน Canvas หรือไม่ ถ้าไม่อยู่ ให้สลับไปใช้ config ของโปรเจกต์คุณ
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : myFirebaseConfig;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'cozy-finance';
+
+// --- Full i18n Dictionary (Expense Tracker Mode) ---
+const dict = {
+  TH: {
+    welcome: 'ยินดีต้อนรับกลับมา',
+    subWelcome: 'มุมการเงินแสนอบอุ่นของคุณรออยู่',
+    totalSpend: 'ยอดใช้จ่ายทั้งหมด (เดือนนี้)',
+    safeToSpend: 'ยอดเงินคงเหลือที่ใช้ได้',
+    pockets: 'กระเป๋าเงิน',
+    recentActivity: 'รายการล่าสุด',
+    seeAll: 'ดูทั้งหมด',
+    home: 'หน้าหลัก',
+    wallet: 'กระเป๋าเงิน',
+    history: 'ประวัติ',
+    profile: 'โปรไฟล์',
+    signIn: 'เข้าสู่ระบบ',
+    email: 'อีเมล',
+    password: 'รหัสผ่าน',
+    confirmPassword: 'ยืนยันรหัสผ่าน',
+    loginGoogle: 'เข้าสู่ระบบด้วย Google',
+    signUp: 'สมัครเลย',
+    fullName: 'ชื่อ - นามสกุล',
+    createAccount: 'สร้างบัญชี',
+    joinCommunity: 'เข้าร่วมคอมมูนิตี้',
+    subJoin: 'เริ่มต้นการเดินทางทางการเงินที่เรียบง่ายที่นี่',
+    forgotPassword: 'ลืมรหัสผ่าน?',
+    recoverPass: 'กู้คืนรหัสผ่าน',
+    subRecover: 'ไม่ต้องห่วง เราจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปที่อีเมลของคุณ',
+    sendResetLink: 'ส่งลิงก์ยืนยัน',
+    backToSignIn: 'กลับไปหน้าเข้าสู่ระบบ',
+    emailSent: 'ส่งอีเมลเรียบร้อยแล้ว!',
+    notifications: 'การแจ้งเตือน',
+    recentAlerts: 'รายการล่าสุด',
+    clearAll: 'ล้างทั้งหมด',
+    manageBudget: 'จัดการงบประมาณ',
+    createNewPocket: 'สร้างกระเป๋าเงินใหม่',
+    scanReceipt: 'สแกนสลิปโอนเงิน',
+    gallery: 'อัลบั้มภาพ',
+    manual: 'กรอกเอง',
+    addTransaction: 'บันทึกรายการ',
+    amount: 'จำนวนเงิน',
+    category: 'หมวดหมู่',
+    date: 'วันที่',
+    memo: 'บันทึกช่วยจำ',
+    save: 'บันทึก',
+    search: 'ค้นหารายการ...',
+    all: 'ทั้งหมด',
+    food: 'อาหาร',
+    travel: 'เดินทาง',
+    shopping: 'ช้อปปิ้ง',
+    today: 'วันนี้',
+    yesterday: 'เมื่อวาน',
+    account: 'บัญชีผู้ใช้',
+    appSettings: 'การตั้งค่าแอปพลิเคชัน',
+    language: 'ภาษา (Language)',
+    logout: 'ออกจากระบบ',
+    passMismatch: 'รหัสผ่านไม่ตรงกัน',
+    pocketName: 'ชื่อกระเป๋า',
+    initialAmount: 'จำนวนเงินตั้งต้น',
+    monthlyTarget: 'ตั้งเป้าหมายรายเดือน',
+    chooseIcon: 'เลือกไอคอน',
+    reviewDetails: 'ตรวจสอบข้อมูลสลิป',
+    merchant: 'ชื่อร้านค้า / ผู้รับโอน',
+    pocketDeducted: 'กระเป๋าที่หักเงิน',
+    confirmDetails: 'ยืนยันข้อมูล',
+    status: 'สถานะ',
+    completed: 'สำเร็จ',
+    splitBill: 'หารบิลกับเพื่อน',
+    dispute: 'แจ้งปัญหา',
+    viewReceipt: 'ดูสลิปโอนเงิน',
+    totalAmount: 'ยอดเงินรวมทั้งหมด',
+    selectFriends: 'เลือกเพื่อนที่จะหาร',
+    addNewContact: 'เพิ่มผู้ติดต่อใหม่',
+    sendRequests: 'ส่งคำขอเก็บเงิน',
+    editProfile: 'จัดการบัญชีทั่วไป',
+    bio: 'ประวัติส่วนตัว',
+    security: 'ความปลอดภัย',
+    changePass: 'เปลี่ยนรหัสผ่าน',
+    lastUpdated: 'อัปเดตล่าสุดเมื่อ 3 เดือนที่แล้ว',
+    twoFactor: 'ยืนยันตัวตน 2 ขั้นตอน',
+    biometric: 'ล็อกอินด้วยชีวมิติ',
+    pinCode: 'รหัส PIN (6 หลัก)',
+    setPin: 'ตั้งค่ารหัส PIN',
+    changePin: 'เปลี่ยนรหัส PIN',
+    pinStatusNotSet: 'ยังไม่ได้ตั้งค่า',
+    pinStatusSet: 'ตั้งค่าแล้ว',
+    yourDevices: 'อุปกรณ์ของคุณ',
+    currentDevice: 'ปัจจุบัน',
+    signOutDevice: 'ออกจากระบบ',
+    theme: 'ธีมแอปพลิเคชัน',
+    light: 'สว่าง',
+    dark: 'มืด',
+    system: 'ตามระบบ',
+    accentColor: 'สีประจำแอป',
+    reduceMotion: 'ลดการเคลื่อนไหว (Reduce Motion)',
+    archivePocket: 'ซ่อนกระเป๋า (Archive)',
+    deletePocket: 'ลบกระเป๋า (Delete)',
+    cannotUndone: 'ไม่สามารถกู้คืนได้',
+    uploadConstraint: 'รองรับไฟล์ PNG, JPG (สูงสุด 5MB)'
+  },
+  EN: {
+    welcome: 'Welcome back',
+    subWelcome: 'Secure, calm, and simple finance.',
+    totalSpend: 'Total Spending (This Month)',
+    safeToSpend: 'Safe to Spend',
+    pockets: 'Pockets',
+    recentActivity: 'Recent Activity',
+    seeAll: 'See all',
+    home: 'Home',
+    wallet: 'Pockets',
+    history: 'History',
+    profile: 'Profile',
+    signIn: 'Sign In',
+    email: 'Email',
+    password: 'Password',
+    confirmPassword: 'Confirm Password',
+    loginGoogle: 'Sign in with Google',
+    signUp: 'Sign Up',
+    fullName: 'Full Name',
+    createAccount: 'Create Account',
+    joinCommunity: 'Join the Community',
+    subJoin: 'Start your simple financial journey here.',
+    forgotPassword: 'Forgot Password?',
+    recoverPass: 'Recover Password',
+    subRecover: 'Don\'t worry, we\'ll send a reset link to your email.',
+    sendResetLink: 'Send Reset Link',
+    backToSignIn: 'Back to Sign In',
+    emailSent: 'Email sent successfully!',
+    notifications: 'Notifications',
+    recentAlerts: 'Recent Alerts',
+    clearAll: 'Clear All',
+    manageBudget: 'Manage Budgets',
+    createNewPocket: 'Create New Pocket',
+    scanReceipt: 'Scan Receipt',
+    gallery: 'Gallery',
+    manual: 'Manual',
+    addTransaction: 'Add Transaction',
+    amount: 'Amount',
+    category: 'Category',
+    date: 'Date',
+    memo: 'Memo',
+    save: 'Save',
+    search: 'Search transactions...',
+    all: 'All',
+    food: 'Food',
+    travel: 'Travel',
+    shopping: 'Shopping',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    account: 'Account',
+    appSettings: 'App Settings',
+    language: 'Language',
+    logout: 'Log Out',
+    passMismatch: 'Passwords do not match',
+    pocketName: 'Pocket Name',
+    initialAmount: 'Initial Amount',
+    monthlyTarget: 'Set a monthly target',
+    chooseIcon: 'Choose an Icon',
+    reviewDetails: 'Review Details',
+    merchant: 'Merchant',
+    pocketDeducted: 'Pocket',
+    confirmDetails: 'Confirm Details',
+    status: 'Status',
+    completed: 'Completed',
+    splitBill: 'Split Bill',
+    dispute: 'Dispute',
+    viewReceipt: 'View Receipt',
+    totalAmount: 'TOTAL AMOUNT',
+    selectFriends: 'Select Friends',
+    addNewContact: 'Add New Contact',
+    sendRequests: 'Send Requests',
+    editProfile: 'Edit Profile',
+    bio: 'Bio',
+    security: 'Security',
+    changePass: 'Change Password',
+    lastUpdated: 'Last updated 3 months ago',
+    twoFactor: 'Two-Factor Auth',
+    biometric: 'Biometric Login',
+    pinCode: 'PIN Code (6 Digits)',
+    setPin: 'Set up PIN',
+    changePin: 'Change PIN',
+    pinStatusNotSet: 'Not configured',
+    pinStatusSet: 'Configured',
+    yourDevices: 'Your Devices',
+    currentDevice: 'Current',
+    signOutDevice: 'Sign Out',
+    theme: 'App Theme',
+    light: 'Light',
+    dark: 'Dark',
+    system: 'System',
+    accentColor: 'Accent Color',
+    reduceMotion: 'Reduce Motion',
+    archivePocket: 'Archive Pocket',
+    deletePocket: 'Delete Pocket',
+    cannotUndone: 'Cannot be undone',
+    uploadConstraint: 'Supports PNG, JPG (up to 5MB)'
+  }
+};
+
+// --- Mock Defaults (Expense Only) ---
+const mockUser = { name: 'Khemjira', email: 'khemjira@example.com', avatar: 'https://i.pravatar.cc/150?img=47' };
+const IconMap = { Coffee, ShoppingCart, HomeIcon, FileText, Bell, CheckCircle2, Users, ImageIcon };
+
+const initialMockTransactions = [
+  { id: '1', title: 'Starbucks', category: 'Food & Drink', amount: 150.00, date: 'Today', iconName: 'Coffee', colorClass: 'bg-[#2F80ED]/10 text-[#2F80ED]' },
+  { id: '2', title: 'Shopee', category: 'Shopping', amount: 850.00, date: 'Yesterday', iconName: 'ShoppingCart', colorClass: 'bg-[#F2C94C]/20 text-[#D4A017]' },
+  { id: '3', title: 'Rent', category: 'Housing', amount: 4500.00, date: '1 Oct', iconName: 'HomeIcon', colorClass: 'bg-[#56CC9D]/20 text-[#2B9A6F]' },
+];
+
+const initialMockPockets = [
+  { id: '1', name: 'Housing', spent: 4500, goal: 5000, iconName: 'HomeIcon', colorClass: 'bg-[#56CC9D]/20 text-[#2B9A6F]' },
+  { id: '2', name: 'Shopping', spent: 850, goal: 3000, iconName: 'ShoppingCart', colorClass: 'bg-[#F2C94C]/20 text-[#D4A017]' },
+  { id: '3', name: 'Food', spent: 1200, goal: 4000, iconName: 'Coffee', colorClass: 'bg-[#2F80ED]/10 text-[#2F80ED]' },
+];
+
+// --- คอมโพเนนต์หลักของแอป ---
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [currentScreen, setCurrentScreen] = useState('SIGN_IN');
+  const [activeTab, setActiveTab] = useState('HOME');
+  const [loginError, setLoginError] = useState(''); // เพิ่ม State สำหรับเก็บข้อความ Error ของการ Login
+  
+  // Global States
+  const [language, setLanguage] = useState('TH');
+  const [reduceMotion, setReduceMotion] = useState(false);
+  
+  // App Data State
+  const [transactions, setTransactions] = useState(initialMockTransactions);
+  const [pockets, setPockets] = useState(initialMockPockets);
+
+  const t = (key) => dict[language][key] || key;
+  // CSS helper สำหรับ Reduce Motion
+  const transitionClass = reduceMotion ? 'transition-none' : 'transition-all duration-300 ease-in-out';
+
+  // ย้ายฟังก์ชัน navigate ขึ้นมาไว้ด้านบนเพื่อให้ useEffect เรียกใช้งานได้
+  const navigate = (screen, tab = null) => {
+    setCurrentScreen(screen);
+    if (tab) setActiveTab(tab);
+  };
+
+  // Firebase Auth Init (อัปเดตใหม่)
+  useEffect(() => {
+    if (!auth) return;
+
+    // คอยดักฟังว่ามี User ล็อกอินเข้ามาหรือยัง
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      
+      // ถ้าระบบพบว่ามีคนล็อกอินอยู่ (และไม่ใช่ Anonymous) ให้เด้งไปหน้า HOME เลย
+      if (currentUser && currentUser.isAnonymous === false) {
+         navigate('MAIN', 'HOME');
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // ฟังก์ชันเข้าสู่ระบบด้วย Google (อัปเดตใหม่)
+  const handleGoogleLogin = async () => {
+    if (!auth) return;
+    try {
+      setLoginError(''); // เคลียร์ Error ก่อนเริ่ม
+      const provider = new GoogleAuthProvider();
+      // บังคับให้เลือกบัญชีทุกครั้งที่มีการล็อกอิน
+      provider.setCustomParameters({ prompt: 'select_account' }); 
+      
+      // รอให้ Pop-up ทำงานเสร็จ
+      const result = await signInWithPopup(auth, provider);
+      
+      console.log("Logged in successfully as:", result.user.displayName);
+      // เมื่อล็อกอินเสร็จ useEffect ด้านบนจะทำงานและพาไปหน้า HOME อัตโนมัติครับ
+      
+    } catch (error) {
+      console.error("Google Login Error:", error.code, error.message);
+      // ใช้ State เพื่อแสดงข้อความ Error บนหน้า UI แทนคำสั่ง alert()
+      setLoginError(`ไม่สามารถเข้าสู่ระบบได้: ${error.message}`);
+    }
+  };
+
+  // Firebase Data Fetching
+  useEffect(() => {
+    if (!user || !db) return;
+
+    // Fetch Transactions
+    const txRef = collection(db, 'artifacts', appId, 'users', user.uid, 'transactions');
+    const unsubTx = onSnapshot(txRef, (snapshot) => {
+      if (!snapshot.empty) {
+        const txs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setTransactions(txs.sort((a,b) => b.timestamp - a.timestamp));
+      }
+    }, (err) => console.error("Tx Fetch Error", err));
+
+    // Fetch Pockets
+    const pocketRef = collection(db, 'artifacts', appId, 'users', user.uid, 'pockets');
+    const unsubPocket = onSnapshot(pocketRef, (snapshot) => {
+      if (!snapshot.empty) {
+        const pkts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPockets(pkts);
+      }
+    }, (err) => console.error("Pocket Fetch Error", err));
+
+    return () => { unsubTx(); unsubPocket(); };
+  }, [user]);
+
+  // ฟังก์ชันเพิ่ม Transaction แบบป้องกัน Event Object หลุดเข้ามา
+  const handleSaveTransaction = async (newTx) => {
+    if (newTx && newTx.nativeEvent) {
+      console.warn("Invalid data: Event passed instead of object");
+      return; 
+    }
+
+    if (user && db) {
+      try {
+        const txRef = collection(db, 'artifacts', appId, 'users', user.uid, 'transactions');
+        await addDoc(txRef, { ...newTx, timestamp: Date.now() });
+      } catch (err) {
+        console.error("Error adding doc", err);
+      }
+    } else {
+      setTransactions([{ id: Date.now().toString(), ...newTx }, ...transactions]);
+    }
+    navigate('MAIN', 'HISTORY');
+  };
+
+  const handleSavePocket = async (newPocket) => {
+    if (newPocket && newPocket.nativeEvent) return;
+
+    if (user && db) {
+      try {
+         const pRef = collection(db, 'artifacts', appId, 'users', user.uid, 'pockets');
+         await addDoc(pRef, { ...newPocket, timestamp: Date.now() });
+      } catch(err) {}
+    } else {
+      setPockets([...pockets, { id: Date.now().toString(), ...newPocket }]);
+    }
+    navigate('MAIN', 'POCKETS');
+  };
+
+  const handleLogout = async () => {
+    if (auth) await signOut(auth);
+    navigate('SIGN_IN');
+  };
+
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case 'SIGN_IN': return <SignInScreen t={t} transitionClass={transitionClass} onLogin={() => navigate('MAIN', 'HOME')} onGoogleLogin={handleGoogleLogin} onGoToSignUp={() => navigate('SIGN_UP')} onGoToForgot={() => navigate('FORGOT_PASSWORD')} loginError={loginError} />;
+      case 'SIGN_UP': return <SignUpScreen t={t} transitionClass={transitionClass} onGoToSignIn={() => navigate('SIGN_IN')} />;
+      case 'FORGOT_PASSWORD': return <ForgotPasswordScreen t={t} transitionClass={transitionClass} onBack={() => navigate('SIGN_IN')} />;
+      case 'MAIN': return <MainLayout t={t} activeTab={activeTab} navigate={navigate} transactions={transactions} pockets={pockets} transitionClass={transitionClass} onLogout={handleLogout} />;
+      case 'NOTIFICATIONS': return <NotificationsScreen t={t} onBack={() => navigate('MAIN', 'HOME')} language={language} />;
+      case 'SCAN_RECEIPT': return <ScanReceiptScreen t={t} transitionClass={transitionClass} onBack={() => navigate('MAIN', activeTab)} onNext={() => navigate('REVIEW_RECEIPT')} />;
+      case 'REVIEW_RECEIPT': return <ReviewReceiptScreen t={t} transitionClass={transitionClass} onBack={() => navigate('SCAN_RECEIPT')} onConfirm={() => navigate('ADD_TRANSACTION')} language={language} />;
+      case 'ADD_TRANSACTION': return <AddTransactionScreen t={t} transitionClass={transitionClass} onBack={() => navigate('REVIEW_RECEIPT')} onSave={handleSaveTransaction} />;
+      case 'POCKET_DETAILS': return <PocketDetailsScreen t={t} transitionClass={transitionClass} onBack={() => navigate('MAIN', 'POCKETS')} pocket={pockets[0]} language={language} />;
+      case 'CREATE_POCKET': return <CreatePocketScreen t={t} transitionClass={transitionClass} onBack={() => navigate('MAIN', 'POCKETS')} onSave={handleSavePocket} />;
+      case 'TRANSACTION_DETAIL': return <TransactionDetailScreen t={t} transitionClass={transitionClass} onBack={() => navigate('MAIN', 'HISTORY')} tx={transactions[0]} navigate={navigate} language={language} />;
+      case 'SPLIT_TRANSACTION': return <SplitTransactionScreen t={t} transitionClass={transitionClass} onBack={() => navigate('TRANSACTION_DETAIL')} tx={transactions[0]} language={language} />;
+      case 'RECEIPT_DETAIL': return <ReceiptDetailScreen onBack={() => navigate('TRANSACTION_DETAIL')} />;
+      case 'EDIT_PROFILE': return <EditProfileScreen t={t} transitionClass={transitionClass} onBack={() => navigate('MAIN', 'PROFILE')} />;
+      case 'LANGUAGE_SETTINGS': return <LanguageSettingsScreen t={t} transitionClass={transitionClass} onBack={() => navigate('MAIN', 'PROFILE')} language={language} setLanguage={setLanguage} />;
+      case 'SECURITY_SETTINGS': return <SecuritySettingsScreen t={t} transitionClass={transitionClass} onBack={() => navigate('MAIN', 'PROFILE')} language={language} />;
+      case 'NOTIFICATION_SETTINGS': return <NotificationSettingsScreen t={t} transitionClass={transitionClass} onBack={() => navigate('MAIN', 'PROFILE')} language={language} />;
+      case 'THEME_SETTINGS': return <ThemeSettingsScreen t={t} transitionClass={transitionClass} onBack={() => navigate('MAIN', 'PROFILE')} language={language} reduceMotion={reduceMotion} setReduceMotion={setReduceMotion} />;
+      default: return <SignInScreen t={t} transitionClass={transitionClass} onLogin={() => navigate('MAIN', 'HOME')} onGoToSignUp={() => navigate('SIGN_UP')} onGoToForgot={() => navigate('FORGOT_PASSWORD')} />;
+    }
+  };
+
+  return (
+    <>
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+          * { font-family: 'Prompt', sans-serif; }
+          .no-scrollbar::-webkit-scrollbar { display: none; }
+          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        `}
+      </style>
+      <div className="flex justify-center items-center min-h-screen bg-slate-900 p-4 font-sans text-slate-800">
+        <div className="w-full max-w-md h-[850px] bg-[#F7F9FC] rounded-[40px] shadow-2xl overflow-hidden relative flex flex-col border-8 border-slate-800">
+          {renderScreen()}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// --- Layout หลักที่มี Bottom Navigation ---
+function MainLayout({ activeTab, navigate, transactions, pockets, t, transitionClass, onLogout }) {
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'HOME': return <HomeScreen t={t} navigate={navigate} transactions={transactions} pockets={pockets} transitionClass={transitionClass} />;
+      case 'POCKETS': return <PocketsScreen t={t} navigate={navigate} pockets={pockets} transitionClass={transitionClass} />;
+      case 'HISTORY': return <HistoryScreen t={t} transactions={transactions} navigate={navigate} transitionClass={transitionClass} />;
+      case 'PROFILE': return <ProfileScreen t={t} onLogout={onLogout} navigate={navigate} transitionClass={transitionClass} />;
+      default: return <HomeScreen t={t} navigate={navigate} transactions={transactions} pockets={pockets} transitionClass={transitionClass} />;
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-[#F7F9FC]">
+      <div className="flex-1 overflow-y-auto pb-28 no-scrollbar">
+        {renderContent()}
+      </div>
+      
+      {/* Bottom Navigation (FAB Prominent) */}
+      <div className="absolute bottom-0 w-full bg-white/95 backdrop-blur-md border-t border-slate-100 px-6 py-5 flex justify-between items-center rounded-b-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.04)] z-50">
+        <NavButton icon={Home} label={t('home')} isActive={activeTab === 'HOME'} onClick={() => navigate('MAIN', 'HOME')} />
+        <NavButton icon={Wallet} label={t('wallet')} isActive={activeTab === 'POCKETS'} onClick={() => navigate('MAIN', 'POCKETS')} />
+        
+        {/* FAB (Floating Action Button) - Prominent to reduce friction */}
+        <div className="relative -top-8">
+          <button 
+            onClick={() => navigate('SCAN_RECEIPT')}
+            className={`bg-[#2F80ED] text-white p-4 rounded-full shadow-[0_8px_20px_rgba(47,128,237,0.3)] hover:scale-105 active:scale-95 flex items-center justify-center border-4 border-[#F7F9FC] ${transitionClass}`}
+          >
+            <ScanLine size={28} />
+          </button>
+        </div>
+
+        <NavButton icon={Clock} label={t('history')} isActive={activeTab === 'HISTORY'} onClick={() => navigate('MAIN', 'HISTORY')} />
+        <NavButton icon={User} label={t('profile')} isActive={activeTab === 'PROFILE'} onClick={() => navigate('MAIN', 'PROFILE')} />
+      </div>
+    </div>
+  );
+}
+
+function NavButton({ icon: Icon, label, isActive, onClick }) {
+  return (
+    <button onClick={onClick} className={`flex flex-col items-center gap-1 ${isActive ? 'text-[#2F80ED]' : 'text-slate-400 hover:text-slate-500'}`}>
+      <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+      <span className="text-[10px] font-semibold">{label}</span>
+    </button>
+  );
+}
+
+// --- หน้าจอ Authentication ---
+function SignInScreen({ t, transitionClass, onLogin, onGoogleLogin, onGoToSignUp, onGoToForgot, loginError }) {
+  return (
+    <div className="flex-1 bg-[#F7F9FC] flex flex-col p-8 overflow-y-auto">
+      <div className="flex justify-end mb-6">
+        <div className="w-12 h-12 bg-[#2F80ED]/10 rounded-full flex items-center justify-center text-[#2F80ED]">
+          <Shield size={24} />
+        </div>
+      </div>
+      <div className="mt-4 mb-10">
+        <h1 className="text-4xl font-bold text-slate-800 mb-2 tracking-tight">{t('welcome')}</h1>
+        <p className="text-slate-500 text-sm">{t('subWelcome')}</p>
+      </div>
+
+      <form className="flex flex-col gap-4" onSubmit={(e) => { e.preventDefault(); onLogin(); }}>
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block ml-1">{t('email')}</label>
+          <div className={`bg-white border border-slate-200 rounded-2xl p-4 flex items-center shadow-sm focus-within:border-[#2F80ED] ${transitionClass}`}>
+            <User size={18} className="text-slate-400 mr-3" />
+            <input type="email" required placeholder="user@example.com" className="bg-transparent outline-none w-full text-sm" />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-600 mb-1 block ml-1">{t('password')}</label>
+          <div className={`bg-white border border-slate-200 rounded-2xl p-4 flex items-center shadow-sm focus-within:border-[#2F80ED] ${transitionClass}`}>
+            <Lock size={18} className="text-slate-400 mr-3" />
+            <input type="password" required placeholder="••••••••" className="bg-transparent outline-none w-full text-sm" />
+          </div>
+        </div>
+        
+        <div className="text-right">
+          <button type="button" onClick={onGoToForgot} className={`text-xs text-[#2F80ED] hover:text-blue-700 font-medium ${transitionClass}`}>{t('forgotPassword')}</button>
+        </div>
+
+        <button type="submit" className={`w-full bg-[#2F80ED] text-white font-bold py-4 rounded-full mt-2 hover:bg-blue-600 flex items-center justify-center gap-2 shadow-[0_4px_15px_rgba(47,128,237,0.2)] ${transitionClass}`}>
+          {t('signIn')} <ChevronRight size={18} />
+        </button>
+
+        {loginError && (
+          <div className="mt-2 p-3 bg-red-50 border border-red-100 text-red-500 text-xs font-bold rounded-2xl text-center">
+            {loginError}
+          </div>
+        )}
+
+        <div className="relative flex items-center py-4">
+          <div className="flex-grow border-t border-slate-200"></div>
+          <span className="flex-shrink-0 mx-4 text-slate-400 text-xs">OR</span>
+          <div className="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        <button type="button" onClick={onGoogleLogin} className={`w-full bg-white border border-slate-200 text-slate-700 font-bold py-3.5 rounded-full hover:bg-slate-50 flex items-center justify-center gap-3 shadow-sm ${transitionClass}`}>
+          <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          {t('loginGoogle')}
+        </button>
+      </form>
+
+      <div className="mt-auto pt-6 text-center text-sm text-slate-500">
+        Don't have an account? <button onClick={onGoToSignUp} className="text-[#2F80ED] font-bold hover:underline">{t('signUp')}</button>
+      </div>
+    </div>
+  );
+}
+
+function SignUpScreen({ t, transitionClass, onGoToSignIn }) {
+  const [pass, setPass] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [err, setErr] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (pass !== confirm) {
+      setErr(t('passMismatch'));
+      return;
+    }
+    setErr('');
+    onGoToSignIn(); // success logic
+  };
+
+  return (
+    <div className="flex-1 bg-[#F7F9FC] flex flex-col p-8 overflow-y-auto">
+      <div className="flex items-center mb-8">
+        <button onClick={onGoToSignIn}><ChevronLeft size={24} className="text-slate-600" /></button>
+        <div className="mx-auto font-bold text-slate-800">Cozy Finance</div>
+      </div>
+      
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">{t('joinCommunity')}</h1>
+        <p className="text-slate-500 text-sm">{t('subJoin')}</p>
+      </div>
+
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+         <div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center shadow-sm">
+            <User size={18} className="text-slate-400 mr-3" />
+            <input type="text" required placeholder={t('fullName')} className="bg-transparent outline-none w-full text-sm" />
+          </div>
+        </div>
+        <div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center shadow-sm">
+            <Mail size={18} className="text-slate-400 mr-3" />
+            <input type="email" required placeholder={t('email')} className="bg-transparent outline-none w-full text-sm" />
+          </div>
+        </div>
+        <div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center shadow-sm">
+            <Lock size={18} className="text-slate-400 mr-3" />
+            <input type="password" required value={pass} onChange={e=>setPass(e.target.value)} placeholder={t('password')} className="bg-transparent outline-none w-full text-sm" />
+          </div>
+        </div>
+        <div>
+          <div className={`bg-white border ${err ? 'border-red-400' : 'border-slate-200'} rounded-2xl p-4 flex items-center shadow-sm`}>
+            <Lock size={18} className={err ? 'text-red-400 mr-3' : 'text-slate-400 mr-3'} />
+            <input type="password" required value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder={t('confirmPassword')} className="bg-transparent outline-none w-full text-sm" />
+          </div>
+          {err && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{err}</p>}
+        </div>
+        
+        <button type="submit" className={`w-full bg-[#2F80ED] text-white font-bold py-4 rounded-full mt-4 hover:bg-blue-600 shadow-md ${transitionClass}`}>
+          {t('createAccount')}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function ForgotPasswordScreen({ t, transitionClass, onBack }) {
+  const [isSent, setIsSent] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsSent(true);
+    setTimeout(() => {
+      onBack(); // Logic: Route back to Sign in after success message
+    }, 2000);
+  };
+
+  return (
+    <div className="flex-1 bg-[#F7F9FC] flex flex-col p-8 overflow-y-auto">
+      <div className="flex items-center mb-8">
+        <button onClick={onBack}><ChevronLeft size={24} className="text-slate-600" /></button>
+        <div className="mx-auto font-bold text-slate-800">{t('forgotPassword')}</div>
+      </div>
+      
+      <div className="flex justify-center mb-6">
+        <div className="w-16 h-16 bg-[#2F80ED]/10 rounded-full flex items-center justify-center text-[#2F80ED]">
+          <Key size={32} />
+        </div>
+      </div>
+
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">{t('recoverPass')}</h1>
+        <p className="text-slate-500 text-sm">{t('subRecover')}</p>
+      </div>
+
+      {isSent ? (
+        <div className="bg-green-100 text-green-700 p-4 rounded-2xl text-center font-bold flex items-center justify-center gap-2 animate-pulse">
+          <CheckCircle2 size={20} /> {t('emailSent')}
+        </div>
+      ) : (
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <div>
+            <label className="text-xs font-semibold text-slate-600 mb-1 block ml-1">{t('email')}</label>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center shadow-sm">
+              <Mail size={18} className="text-slate-400 mr-3" />
+              <input type="email" required placeholder="user@example.com" className="bg-transparent outline-none w-full text-sm" />
+            </div>
+          </div>
+          
+          <button type="submit" className={`w-full bg-[#2F80ED] text-white font-bold py-4 rounded-full mt-4 hover:bg-blue-600 flex items-center justify-center gap-2 shadow-md ${transitionClass}`}>
+            {t('sendResetLink')} <ChevronRight size={18} />
+          </button>
+        </form>
+      )}
+
+      <div className="mt-8 text-center text-sm text-slate-500">
+        <button onClick={onBack} className="text-slate-500 font-bold hover:underline flex items-center justify-center gap-2 mx-auto">
+          <ChevronLeft size={16} /> {t('backToSignIn')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// --- หน้า Dashboard หลัก (Zero-based budgeting logic) ---
+function HomeScreen({ t, navigate, transactions, pockets, transitionClass }) {
+  // Logic: Calculate total spend from mock (Treating all transactions as expenses)
+  const totalSpend = transactions.reduce((acc, curr) => acc + Math.abs(curr.amount), 0);
+  const totalIncome = 35000; // Mock base income
+  const totalPocketGoals = pockets.reduce((acc, curr) => acc + curr.goal, 0);
+  
+  // Logic: Zero-Based Budgeting (Safe to spend = Income - Spend - Pocket Allocations)
+  const safeToSpend = totalIncome - totalSpend - totalPocketGoals;
+
+  return (
+    <div className="p-6 pt-12">
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-3">
+          <img src={mockUser.avatar} alt="User" className="w-12 h-12 rounded-full border-2 border-white shadow-sm" />
+          <div>
+            <p className="text-xs text-slate-500 font-medium">{t('welcome')},</p>
+            <h2 className="text-lg font-bold text-slate-800">{mockUser.name}</h2>
+          </div>
+        </div>
+        <button onClick={() => navigate('NOTIFICATIONS')} className={`relative p-2 text-[#2F80ED] bg-[#2F80ED]/10 rounded-full hover:bg-[#2F80ED]/20 ${transitionClass}`}>
+          <Bell size={20} />
+          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#F2C94C] rounded-full border-2 border-white"></span>
+        </button>
+      </div>
+
+      {/* Main Balance Card */}
+      <div className="bg-[#2F80ED] rounded-[32px] p-7 shadow-[0_12px_30px_rgba(47,128,237,0.25)] mb-8 relative overflow-hidden text-white">
+        <div className="absolute -right-10 -top-10 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-[#56CC9D]/20 rounded-full blur-xl"></div>
+        
+        <div className="relative z-10">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <p className="text-xs font-semibold text-blue-100 tracking-wider mb-1">{t('totalSpend')}</p>
+              <h1 className="text-3xl font-bold">฿{totalSpend.toLocaleString('th-TH', {minimumFractionDigits: 2})}</h1>
+            </div>
+            <div className="bg-white/20 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 border border-white/10">
+               ↗ On track
+            </div>
+          </div>
+          
+          <div>
+            <p className="text-xs font-semibold text-blue-100 tracking-wider mb-1">{t('safeToSpend')}</p>
+            <h2 className="text-4xl font-black mb-4">฿{Math.max(safeToSpend, 0).toLocaleString('th-TH', {minimumFractionDigits: 2})}</h2>
+            
+            <div className="h-3 w-full bg-black/20 rounded-full overflow-hidden flex">
+              <div className="h-full bg-[#56CC9D] w-[40%] rounded-full shadow-[0_0_10px_rgba(86,204,157,0.8)]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Pockets Summary */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-slate-800">{t('pockets')}</h3>
+          <button className="text-slate-400 hover:text-slate-600"><MoreHorizontal size={20} /></button>
+        </div>
+        <div className={`bg-white rounded-3xl p-5 shadow-sm flex items-center gap-6 cursor-pointer border border-slate-100 hover:shadow-md ${transitionClass}`} onClick={() => navigate('MAIN', 'POCKETS')}>
+          {/* Donut Chart Mock */}
+          <div className="relative w-16 h-16 flex items-center justify-center rounded-full border-4 border-slate-50 border-t-[#56CC9D] border-r-[#F2C94C] border-l-[#2F80ED]">
+             <div className="text-center leading-tight">
+               <span className="text-[10px] text-slate-400 block font-semibold">Used</span>
+               <span className="text-sm font-bold text-slate-800">85%</span>
+             </div>
+          </div>
+          <div className="flex-1 grid grid-cols-2 gap-y-3 gap-x-2">
+             <div className="flex items-center gap-2">
+               <div className="w-2.5 h-2.5 rounded-full bg-[#56CC9D]"></div>
+               <span className="text-sm text-slate-600 font-medium">{t('food')}</span>
+             </div>
+             <div className="text-sm font-bold text-slate-800 text-right">฿1,200</div>
+             <div className="flex items-center gap-2">
+               <div className="w-2.5 h-2.5 rounded-full bg-[#F2C94C]"></div>
+               <span className="text-sm text-slate-600 font-medium">{t('travel')}</span>
+             </div>
+             <div className="text-sm font-bold text-slate-800 text-right">฿850</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-slate-800">{t('recentActivity')}</h3>
+          <button onClick={() => navigate('MAIN', 'HISTORY')} className="text-sm text-[#2F80ED] font-bold hover:underline">{t('seeAll')}</button>
+        </div>
+        <div className="flex flex-col gap-3">
+          {transactions.slice(0, 3).map(tx => (
+             <TransactionItem key={tx.id} tx={tx} transitionClass={transitionClass} onClick={() => navigate('TRANSACTION_DETAIL')} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HistoryScreen({ t, transactions, navigate, transitionClass }) {
+  return (
+    <div className="p-6 pt-12">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-slate-800">{t('history')}</h2>
+      </div>
+
+      <div className={`bg-white border border-slate-100 rounded-2xl p-3 flex items-center shadow-sm mb-6 focus-within:border-[#2F80ED] ${transitionClass}`}>
+        <Search size={18} className="text-slate-400 mx-2" />
+        <input type="text" placeholder={t('search')} className="bg-transparent outline-none w-full text-sm font-medium" />
+      </div>
+
+      {/* Remove Income/Expense, Replace with pure expense categories */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar mb-8 pb-1">
+        <button className="bg-[#2F80ED] text-white px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap shadow-sm">{t('all')}</button>
+        <button className="bg-white border border-slate-200 text-slate-600 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-slate-50">{t('food')}</button>
+        <button className="bg-white border border-slate-200 text-slate-600 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-slate-50">{t('travel')}</button>
+        <button className="bg-white border border-slate-200 text-slate-600 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-slate-50">{t('shopping')}</button>
+      </div>
+
+      <div className="flex flex-col gap-6">
+        <div>
+          <h4 className="text-xs font-bold text-slate-400 mb-3 ml-2 uppercase tracking-wider">{t('today')}</h4>
+          <div className="flex flex-col gap-3">
+             {transactions.slice(0, 2).map(tx => <TransactionItem key={tx.id} tx={tx} transitionClass={transitionClass} onClick={() => navigate('TRANSACTION_DETAIL')} />)}
+          </div>
+        </div>
+        <div>
+          <h4 className="text-xs font-bold text-slate-400 mb-3 ml-2 uppercase tracking-wider">{t('yesterday')}</h4>
+          <div className="flex flex-col gap-3">
+             {transactions.slice(2).map(tx => <TransactionItem key={tx.id} tx={tx} transitionClass={transitionClass} onClick={() => navigate('TRANSACTION_DETAIL')} />)}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PocketsScreen({ t, navigate, pockets, transitionClass }) {
+  return (
+    <div className="p-6 pt-12">
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-2xl font-bold text-slate-800">{t('wallet')}</h2>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        {pockets.map(pocket => {
+          const Icon = IconMap[pocket.iconName] || Wallet;
+          return (
+            <div key={pocket.id} onClick={() => navigate('POCKET_DETAILS')} className={`bg-white p-5 rounded-3xl shadow-sm border border-slate-100 cursor-pointer hover:shadow-md active:scale-95 ${transitionClass}`}>
+              <div className={`w-12 h-12 rounded-2xl ${pocket.colorClass} flex items-center justify-center mb-4`}>
+                <Icon size={20} />
+              </div>
+              <h4 className="font-bold text-slate-800 mb-1">{pocket.name}</h4>
+              <div className="flex items-end gap-1 mb-3">
+                 <span className="text-lg font-black text-slate-800">฿{pocket.spent.toLocaleString()}</span>
+              </div>
+              
+              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                 <div className={`h-full ${pocket.colorClass.split(' ')[0].replace('/20','').replace('/10','')} rounded-full`} style={{ width: `${Math.min((pocket.spent/pocket.goal)*100, 100)}%`}}></div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      <button onClick={() => navigate('CREATE_POCKET')} className={`w-full bg-white border-2 border-dashed border-[#2F80ED]/30 text-[#2F80ED] font-bold py-4 rounded-[24px] flex items-center justify-center gap-2 hover:bg-blue-50 ${transitionClass}`}>
+        <Plus size={18} /> {t('createNewPocket')}
+      </button>
+    </div>
+  )
+}
+
+// Logic: Micro-budgeting (Archive vs Delete)
+function PocketDetailsScreen({ t, onBack, pocket, transitionClass }) {
+  if (!pocket) return null;
+  const Icon = IconMap[pocket.iconName] || Wallet;
+  return (
+    <div className="p-6 pt-12 flex-1 bg-white overflow-y-auto pb-24">
+      <div className="flex items-center justify-between mb-8">
+        <button onClick={onBack} className="p-2 bg-slate-50 rounded-full text-slate-600"><ChevronLeft size={20} /></button>
+        <h2 className="font-bold text-slate-800">{t('pockets')}</h2>
+        <button className="p-2 text-slate-600"><MoreHorizontal size={20} /></button>
+      </div>
+
+      <div className="flex flex-col items-center text-center mb-8">
+        <div className={`w-16 h-16 rounded-3xl ${pocket.colorClass} flex items-center justify-center mb-4 shadow-sm`}>
+          <Icon size={28} />
+        </div>
+        <h1 className="text-2xl font-bold text-slate-800">{pocket.name}</h1>
+
+        <div className="w-full bg-[#F7F9FC] rounded-3xl p-6 relative overflow-hidden border border-slate-100 mt-4">
+           <h2 className="text-4xl font-black text-slate-800 mb-2">฿{pocket.spent.toLocaleString()}</h2>
+           <p className="text-sm text-slate-400 font-medium mb-6">Target: ฿{pocket.goal.toLocaleString()}</p>
+           
+           <div className="flex justify-between text-xs font-bold mb-2">
+             <span className="text-[#56CC9D]">
+               {Math.round((pocket.spent/pocket.goal)*100)}%
+             </span>
+             <span className="text-slate-400">
+               ฿{(pocket.goal - pocket.spent).toLocaleString()} left
+             </span>
+           </div>
+           <div className="h-2 w-full bg-white rounded-full overflow-hidden border border-slate-200">
+             <div className={`h-full ${transitionClass} bg-[#56CC9D] rounded-full`} style={{ width: `${Math.min((pocket.spent/pocket.goal)*100, 100)}%`}}></div>
+           </div>
+        </div>
+      </div>
+
+      <h3 className="font-bold text-slate-800 mb-4 px-2">Settings</h3>
+      <div className="flex flex-col gap-3">
+         <button className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl text-slate-700 font-bold hover:bg-slate-100">
+            <div className="flex items-center gap-3"><Archive size={18}/> {t('archivePocket')}</div>
+            <ChevronRight size={18} className="text-slate-400"/>
+         </button>
+         <button className="flex items-center justify-between bg-red-50 p-4 rounded-2xl text-red-600 font-bold hover:bg-red-100">
+            <div className="flex items-center gap-3"><Trash2 size={18}/> {t('deletePocket')}</div>
+            <span className="text-[10px] bg-red-100 px-2 py-1 rounded text-red-500">{t('cannotUndone')}</span>
+         </button>
+      </div>
+    </div>
+  )
+}
+
+function CreatePocketScreen({ t, transitionClass, onBack, onSave }) {
+  const handleSave = () => {
+    onSave({
+      name: 'New Pocket',
+      spent: 0,
+      goal: 1000,
+      iconName: 'Coffee',
+      colorClass: 'bg-[#56CC9D]/20 text-[#2B9A6F]'
+    });
+  }
+
+  return (
+    <div className="p-6 pt-12 flex-1 bg-[#F7F9FC] overflow-y-auto pb-24">
+       <div className="flex items-center mb-8">
+        <button onClick={onBack} className="p-2 bg-white rounded-full shadow-sm text-slate-600"><ChevronLeft size={20} /></button>
+        <h2 className="font-bold text-slate-800 ml-4 flex-1 text-center pr-10">{t('createNewPocket')}</h2>
+      </div>
+
+      <div className="bg-white rounded-3xl p-6 shadow-sm mb-4 border border-slate-100">
+        <label className="text-xs font-bold text-slate-400 mb-2 block">{t('pocketName')}</label>
+        <div className="bg-[#F7F9FC] rounded-2xl p-4 flex items-center">
+          <input type="text" placeholder="e.g. Travel Fund" className="bg-transparent outline-none w-full text-sm font-bold text-slate-800" />
+        </div>
+      </div>
+
+      <div className="bg-white rounded-3xl p-6 shadow-sm mb-4 border border-slate-100">
+        <label className="text-xs font-bold text-slate-400 mb-2 block">{t('initialAmount')}</label>
+        <div className="bg-[#F7F9FC] rounded-2xl p-4 flex items-center">
+          <span className="font-bold text-slate-400 mr-2">฿</span>
+          <input type="number" placeholder="0.00" className="bg-transparent outline-none w-full text-sm font-bold text-slate-800" />
+        </div>
+      </div>
+
+      <div className="bg-white rounded-3xl p-6 shadow-sm mb-4 text-center border border-slate-100">
+        <label className="text-xs font-bold text-slate-400 mb-2 block text-left">{t('monthlyTarget')}</label>
+        <div className="flex justify-center items-center gap-1 my-4">
+          <span className="text-2xl font-bold text-slate-400">฿</span>
+          <input type="number" placeholder="1000" className="text-5xl font-black text-[#2F80ED] outline-none w-48 text-center bg-transparent" />
+        </div>
+      </div>
+
+      <button onClick={(e) => { e.preventDefault(); handleSave(); }} className={`w-full bg-[#2F80ED] text-white font-bold py-5 rounded-[24px] mt-4 hover:bg-blue-600 shadow-md ${transitionClass}`}>
+        {t('save')}
+      </button>
+    </div>
+  );
+}
+
+// --- Data Pipeline Logic (Scan & Review) ---
+function ScanReceiptScreen({ t, transitionClass, onBack, onNext }) {
+  return (
+    <div className="flex-1 bg-slate-900 flex flex-col relative">
+      <div className="absolute top-12 left-6 right-6 flex justify-between z-10">
+        <button onClick={onBack} className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 hover:bg-white/30">
+          <ChevronLeft size={24} />
+        </button>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?q=80&w=600&auto=format&fit=crop')] bg-cover bg-center opacity-40"></div>
+        <div className="w-[80%] h-[60%] border-2 border-[#56CC9D] rounded-[40px] relative z-10 flex flex-col items-center justify-center bg-black/30 backdrop-blur-sm">
+           <ScanLine size={48} className="text-[#56CC9D] mb-4 animate-pulse" />
+        </div>
+      </div>
+
+      <div className="bg-white rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
+         <div className="w-12 h-1.5 bg-slate-200 rounded-full mb-6"></div>
+         <h2 className="text-xl font-bold text-slate-800 mb-1">{t('scanReceipt')}</h2>
+         <p className="text-xs text-slate-400 mb-6 font-semibold">{t('uploadConstraint')}</p> {/* File constraint logic */}
+
+         <div className="flex justify-between w-full px-8 items-center">
+            <button className="flex flex-col items-center gap-2 group">
+              <div className="w-14 h-14 bg-[#F7F9FC] rounded-full flex items-center justify-center text-slate-600 border border-slate-100">
+                <ImageIcon size={22} />
+              </div>
+              <span className="text-xs font-bold text-slate-500">{t('gallery')}</span>
+            </button>
+            <button onClick={onNext} className={`w-20 h-20 rounded-full border-4 border-[#2F80ED]/20 flex items-center justify-center bg-white shadow-lg hover:scale-105 ${transitionClass}`}>
+               <div className="w-16 h-16 bg-[#2F80ED] rounded-full flex items-center justify-center text-white"><Camera size={28}/></div>
+            </button>
+            <button onClick={onNext} className="flex flex-col items-center gap-2 group">
+              <div className="w-14 h-14 bg-[#F7F9FC] rounded-full flex items-center justify-center text-slate-600 border border-slate-100">
+                <FileText size={22} />
+              </div>
+              <span className="text-xs font-bold text-slate-500">{t('manual')}</span>
+            </button>
+         </div>
+      </div>
+    </div>
+  )
+}
+
+function ReviewReceiptScreen({ t, transitionClass, onBack, onConfirm }) {
+  return (
+    <div className="p-6 pt-12 flex-1 bg-[#F7F9FC] overflow-y-auto pb-24">
+       <div className="flex items-center mb-6">
+        <button onClick={onBack} className="p-2 bg-white rounded-full shadow-sm text-slate-600"><ChevronLeft size={20} /></button>
+        <h2 className="font-bold text-slate-800 ml-4 flex-1 text-center pr-2">{t('reviewDetails')}</h2>
+      </div>
+
+      <div className="bg-white rounded-3xl p-6 shadow-sm mb-4 border border-[#56CC9D]/30">
+        <div className="flex justify-between items-start">
+           <div>
+              <p className="text-xs font-bold text-[#56CC9D] mb-1 flex items-center gap-1"><CheckCircle2 size={12}/> Success</p>
+              <h1 className="text-4xl font-black text-slate-800">฿150.00</h1>
+           </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-3xl p-6 shadow-sm mb-4 border border-slate-100">
+         <label className="text-xs font-bold text-slate-400 mb-2 block">{t('merchant')}</label>
+         <div className="bg-[#2F80ED]/10 text-[#2F80ED] rounded-xl p-3 flex items-center font-bold text-sm">
+            <User size={16} className="mr-2" /> Starbucks
+         </div>
+         <div className="grid grid-cols-2 gap-4 mt-4">
+            <div>
+               <label className="text-xs font-bold text-slate-400 mb-2 block">{t('pocketDeducted')}</label>
+               <div className="bg-[#F7F9FC] text-slate-700 rounded-xl p-3 flex items-center font-bold text-sm border border-slate-100 cursor-pointer">
+                  <Wallet size={16} className="mr-2" /> Food <ChevronRight size={14} className="ml-auto" />
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <div className="bg-white rounded-3xl p-6 shadow-sm mb-6 border border-slate-100">
+         <div className="flex justify-between items-center mb-3">
+            <label className="text-xs font-bold text-slate-400">{t('category')}</label>
+            {/* Logic: Ability to edit ALL categories if AI fails */}
+            <button className="text-[10px] font-bold text-[#2F80ED] uppercase bg-[#2F80ED]/10 px-2 py-1 rounded">EDIT ALL</button>
+         </div>
+         <div className="flex flex-wrap gap-2">
+            <span className="bg-[#56CC9D]/20 text-[#2B9A6F] px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1"><Coffee size={14}/> Food & Drink</span>
+         </div>
+      </div>
+
+      <button onClick={onConfirm} className={`w-full bg-[#2F80ED] text-white font-bold py-5 rounded-[24px] shadow-[0_4px_15px_rgba(47,128,237,0.2)] flex items-center justify-center gap-2 ${transitionClass}`}>
+        {t('confirmDetails')} <CheckCircle2 size={20} />
+      </button>
+    </div>
+  );
+}
+
+function AddTransactionScreen({ t, transitionClass, onBack, onSave }) {
+  const handleSaveClick = () => {
+    onSave({
+      title: 'โอนเงิน - ร้านคาเฟ่',
+      category: 'Food & Drink',
+      amount: 150.00, // Make it absolute as it's purely expense tracker
+      date: 'Today',
+      iconName: 'Coffee',
+      colorClass: 'bg-[#2F80ED]/10 text-[#2F80ED]'
+    });
+  };
+
+  return (
+    <div className="p-6 pt-12 flex-1 bg-[#F7F9FC] overflow-y-auto pb-24">
+       <div className="flex items-center mb-8">
+        <button onClick={onBack} className="p-2 bg-white rounded-full shadow-sm text-slate-600"><ChevronLeft size={20} /></button>
+        <h2 className="font-bold text-slate-800 ml-4 flex-1 text-center pr-10">{t('addTransaction')}</h2>
+      </div>
+
+      <div className="bg-white rounded-3xl p-8 mb-6 text-center shadow-sm relative overflow-hidden border border-[#56CC9D]/30">
+        <p className="text-xs font-bold text-[#56CC9D] mb-2 flex items-center justify-center gap-1"><CheckCircle2 size={14}/> ตรวจสอบยอดเงินสำเร็จ</p>
+        <div className="flex justify-center items-center gap-1">
+          <span className="text-2xl font-bold text-slate-400">฿</span>
+          <h1 className="text-5xl font-black text-slate-800">150.00</h1>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-3xl p-6 shadow-sm flex flex-col gap-5 border border-slate-100">
+         <div>
+           <label className="text-xs font-bold text-slate-400 mb-3 block">{t('category')} (Auto)</label>
+           <div className="flex flex-wrap gap-2">
+             <span className="bg-[#2F80ED]/10 text-[#2F80ED] px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
+                <Coffee size={14}/> {t('food')}
+             </span>
+             <span className="bg-slate-50 text-slate-500 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-100 cursor-pointer">{t('shopping')}</span>
+           </div>
+         </div>
+
+         <div>
+           <label className="text-xs font-bold text-slate-400 mb-2 block">{t('date')}</label>
+           <div className="bg-[#F7F9FC] rounded-2xl p-4 flex items-center text-sm font-bold text-slate-700">
+             <Clock size={16} className="mr-3 text-slate-400" /> วันนี้, 12:30 น.
+           </div>
+         </div>
+
+         <div>
+           <label className="text-xs font-bold text-slate-400 mb-2 block">{t('memo')}</label>
+           <textarea 
+             className="bg-[#F7F9FC] rounded-2xl p-4 w-full h-24 text-sm resize-none outline-none text-slate-700 placeholder:text-slate-400 border border-transparent focus:border-[#2F80ED]/30"
+             defaultValue="คาเฟ่ ร้าน Sweet Butter"
+           ></textarea>
+         </div>
+      </div>
+
+      <button onClick={(e) => { e.preventDefault(); handleSaveClick(); }} className={`w-full bg-[#2F80ED] text-white font-bold py-5 rounded-[24px] mt-8 hover:bg-blue-600 transition-colors shadow-md ${transitionClass}`}>
+        {t('save')}
+      </button>
+    </div>
+  )
+}
+
+// --- Post-Transaction Logic (Split Bill & Dispute) ---
+function TransactionDetailScreen({ t, transitionClass, onBack, tx, navigate }) {
+  if (!tx) return null;
+  const Icon = IconMap[tx.iconName] || Coffee;
+  return (
+    <div className="p-6 pt-12 flex-1 bg-[#F7F9FC] overflow-y-auto pb-24">
+       <div className="flex items-center mb-8">
+        <button onClick={onBack} className="p-2 bg-white rounded-full shadow-sm text-slate-600"><ChevronLeft size={20} /></button>
+      </div>
+
+      <div className="flex flex-col items-center mb-8">
+         <div className={`w-16 h-16 rounded-full ${tx.colorClass} flex items-center justify-center shadow-sm mb-4`}>
+            <Icon size={28} />
+         </div>
+         <h1 className="text-4xl font-black text-slate-800 mb-1">฿{Math.abs(tx.amount).toLocaleString('th-TH', {minimumFractionDigits: 2})}</h1>
+         <p className="text-slate-500 font-medium">{tx.title}</p>
+      </div>
+
+      <div className="flex flex-col gap-3">
+         <button onClick={() => navigate('SPLIT_TRANSACTION')} className={`w-full bg-[#2F80ED] text-white font-bold py-4 rounded-[24px] shadow-[0_4px_15px_rgba(47,128,237,0.2)] flex items-center justify-center gap-2 ${transitionClass}`}>
+            <Users size={18} /> {t('splitBill')}
+         </button>
+         <div className="flex gap-3">
+            {/* Logic: Dispute button representing Open Banking connection sync */}
+            <button className="flex-1 bg-white border border-slate-200 text-slate-600 font-bold py-4 rounded-[24px] shadow-sm flex items-center justify-center gap-2">
+               <AlertTriangle size={16} /> {t('dispute')}
+            </button>
+            <button onClick={() => navigate('RECEIPT_DETAIL')} className="flex-1 bg-white border border-slate-200 text-[#2F80ED] font-bold py-4 rounded-[24px] shadow-sm flex items-center justify-center gap-2">
+               <Receipt size={16} /> {t('viewReceipt')}
+            </button>
+         </div>
+      </div>
+    </div>
+  );
+}
+
+function SplitTransactionScreen({ t, transitionClass, onBack, tx }) {
+  // Logic: Split Bill Calculator & Validation
+  const totalAmount = Math.abs(tx?.amount || 150.00);
+  const [friends, setFriends] = useState([
+    { id: 1, name: 'Alex J.', amount: totalAmount / 2 },
+    { id: 2, name: 'Sam S.', amount: totalAmount / 2 }
+  ]);
+
+  const currentSum = friends.reduce((acc, curr) => acc + curr.amount, 0);
+  // Allow a small floating point margin of error
+  const isValid = Math.abs(currentSum - totalAmount) < 0.01;
+
+  const removeFriend = (id) => {
+    setFriends(friends.filter(f => f.id !== id));
+  };
+
+  const addFriend = () => {
+    const newId = Date.now();
+    setFriends([...friends, { id: newId, name: `Friend ${friends.length + 1}`, amount: 0 }]);
+  };
+
+  const handleAmountChange = (id, newAmount) => {
+    setFriends(friends.map(f => 
+      f.id === id ? { ...f, amount: Number(newAmount) || 0 } : f
+    ));
+  };
+
+  return (
+    <div className="p-6 pt-12 flex-1 bg-[#F7F9FC] overflow-y-auto pb-24">
+      <div className="flex items-center mb-8">
+        <button onClick={onBack} className="p-2 bg-white rounded-full shadow-sm text-slate-600"><ChevronLeft size={20} /></button>
+        <h2 className="font-bold text-slate-800 ml-4 flex-1 text-center pr-10">{t('splitBill')}</h2>
+      </div>
+
+      <div className="bg-white rounded-3xl p-6 shadow-sm mb-6 flex flex-col items-center border border-slate-100">
+        <p className="text-xs font-bold text-slate-400 mb-2">{t('totalAmount')}</p>
+        <h1 className="text-4xl font-black text-slate-800 mb-4">฿{totalAmount.toFixed(2)}</h1>
+        <div className="w-full h-px bg-slate-100 mb-4"></div>
+        {/* Dynamic Math UI */}
+        <div className="flex justify-between w-full">
+           <span className="text-xs font-bold text-slate-500">Allocated: ฿{currentSum.toFixed(2)}</span>
+           <span className={`text-xs font-bold ${isValid ? 'text-[#56CC9D]' : 'text-red-500'}`}>
+             Left: ฿{Math.max(totalAmount - currentSum, 0).toFixed(2)}
+           </span>
+        </div>
+      </div>
+
+      <h3 className="font-bold text-slate-800 mb-4 ml-2">{t('selectFriends')}</h3>
+      <div className="bg-white rounded-3xl p-2 shadow-sm mb-8 flex flex-col border border-slate-100">
+        {friends.map(f => (
+          <div key={f.id} className="flex items-center p-3 border-b border-slate-50">
+             <div className="w-10 h-10 bg-slate-100 rounded-full mr-3 flex items-center justify-center font-bold text-slate-400">{f.name[0]}</div>
+             <div className="flex-1"><h4 className="font-bold text-slate-800 text-sm">{f.name}</h4></div>
+             <div className="flex items-center gap-2 bg-[#F7F9FC] px-3 py-1.5 rounded-xl border border-slate-100 focus-within:border-[#2F80ED] transition-colors">
+                <span className="font-bold text-slate-400">฿</span>
+                <input 
+                  type="number" 
+                  value={f.amount === 0 ? '' : f.amount} 
+                  onChange={(e) => handleAmountChange(f.id, e.target.value)}
+                  placeholder="0.00"
+                  className="w-14 bg-transparent font-bold text-[#2F80ED] outline-none text-right placeholder:text-slate-300" 
+                />
+             </div>
+             <button onClick={() => removeFriend(f.id)} className="ml-2 p-1.5 text-slate-300 hover:bg-red-50 hover:text-red-500 rounded-full transition-colors"><X size={16}/></button>
+          </div>
+        ))}
+         <div onClick={addFriend} className="flex items-center p-3 cursor-pointer hover:bg-slate-50 rounded-xl transition-colors">
+           <div className="w-10 h-10 rounded-full bg-[#F7F9FC] flex items-center justify-center mr-3 text-slate-500 border border-slate-100"><Plus size={20}/></div>
+           <div className="flex-1"><h4 className="font-bold text-[#2F80ED] text-sm">{t('addNewContact')}</h4></div>
+        </div>
+      </div>
+      
+      {/* Logic: Button disabled if math is wrong */}
+      <button 
+        onClick={onBack} 
+        disabled={!isValid}
+        className={`w-full ${isValid ? 'bg-[#2F80ED] hover:bg-blue-600 shadow-[0_4px_15px_rgba(47,128,237,0.2)]' : 'bg-slate-300'} text-white font-bold py-5 rounded-[24px] ${transitionClass}`}
+      >
+        {t('sendRequests')}
+      </button>
+    </div>
+  );
+}
+
+function ReceiptDetailScreen({ onBack }) {
+  return (
+    <div className="flex-1 bg-slate-900 flex flex-col relative overflow-hidden">
+       <div className="absolute top-12 left-6 right-6 flex justify-between z-10">
+          <button onClick={onBack} className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white"><ChevronLeft size={24} /></button>
+       </div>
+       <div className="flex-1 flex items-center justify-center p-6 mt-16 pb-12">
+          <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?q=80&w=600&auto=format&fit=crop')] bg-contain bg-center bg-no-repeat rounded-xl"></div>
+       </div>
+    </div>
+  );
+}
+
+// --- หน้า Profile & Settings ---
+function ProfileScreen({ t, onLogout, navigate, transitionClass }) {
+  return (
+    <div className="p-6 pt-12">
+      <h2 className="text-2xl font-bold text-slate-800 mb-8">{t('profile')}</h2>
+      <div className="flex flex-col items-center mb-10 relative">
+        <img src={mockUser.avatar} alt="Profile" className="w-28 h-28 rounded-full border-[6px] border-white shadow-md mb-4" />
+        <h1 className="text-2xl font-bold text-slate-800">{mockUser.name}</h1>
+      </div>
+      <div className="flex flex-col gap-6 mb-8">
+        <div>
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-2">{t('account')}</h4>
+          <div className="bg-white rounded-3xl p-2 shadow-sm border border-slate-100">
+            <ProfileMenuItem icon={User} label={t('editProfile')} onClick={() => navigate('EDIT_PROFILE')} />
+            <div className="h-px w-[85%] bg-slate-50 ml-auto"></div>
+            <ProfileMenuItem icon={Shield} label={t('security')} onClick={() => navigate('SECURITY_SETTINGS')} />
+          </div>
+        </div>
+        <div>
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-2">{t('appSettings')}</h4>
+          <div className="bg-white rounded-3xl p-2 shadow-sm border border-slate-100">
+            <ProfileMenuItem icon={Bell} label={t('notifications')} onClick={() => navigate('NOTIFICATION_SETTINGS')} />
+            <div className="h-px w-[85%] bg-slate-50 ml-auto"></div>
+            <ProfileMenuItem icon={Globe} label={t('language')} onClick={() => navigate('LANGUAGE_SETTINGS')} />
+            <div className="h-px w-[85%] bg-slate-50 ml-auto"></div>
+            <ProfileMenuItem icon={Palette} label={t('theme')} onClick={() => navigate('THEME_SETTINGS')} />
+          </div>
+        </div>
+      </div>
+      <button onClick={onLogout} className={`w-full bg-white border-2 border-red-100 text-red-500 font-bold py-4 rounded-[24px] flex items-center justify-center gap-2 hover:bg-red-50 shadow-sm ${transitionClass}`}>
+        <LogOut size={18} /> {t('logout')}
+      </button>
+    </div>
+  )
+}
+
+function ProfileMenuItem({ icon: Icon, label, onClick }) {
+  return (
+    <div onClick={onClick} className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 rounded-2xl transition-colors">
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-full bg-[#F7F9FC] flex items-center justify-center text-slate-600"><Icon size={18} /></div>
+        <span className="font-bold text-slate-700 text-sm">{label}</span>
+      </div>
+      <ChevronRight size={18} className="text-slate-300" />
+    </div>
+  )
+}
+
+function EditProfileScreen({ t, transitionClass, onBack }) {
+  return (
+    <div className="p-6 pt-12 flex-1 bg-[#F7F9FC] overflow-y-auto pb-24">
+      <div className="flex items-center mb-10">
+        <button onClick={onBack} className="text-slate-600 p-2 bg-white rounded-full shadow-sm"><ChevronLeft size={20} /></button>
+        <h2 className="font-bold text-slate-800 ml-4 flex-1 text-center pr-10">{t('editProfile')}</h2>
+      </div>
+
+      <div className="flex justify-center mb-8 relative">
+        <div className="relative">
+          <img src={mockUser.avatar} className="w-28 h-28 rounded-full border-[6px] border-white shadow-sm object-cover" alt="Profile" />
+          <div className="absolute bottom-1 right-1 w-8 h-8 bg-[#2F80ED] rounded-full flex items-center justify-center text-white border-2 border-white shadow-sm cursor-pointer hover:bg-blue-600">
+            <Edit2 size={14} fill="currentColor" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-5 mb-8">
+        <div>
+          <label className="text-xs font-bold text-slate-500 mb-2 block px-1">{t('fullName')}</label>
+          <div className="bg-white rounded-[20px] p-4 flex items-center shadow-sm border border-slate-100 focus-within:border-[#2F80ED] transition-colors">
+            <User size={18} className="text-slate-400 mr-3" />
+            <input type="text" defaultValue={mockUser.name} className="bg-transparent w-full outline-none text-sm font-bold text-slate-800" />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs font-bold text-slate-500 mb-2 block px-1">{t('email')}</label>
+          <div className="bg-white rounded-[20px] p-4 flex items-center shadow-sm border border-slate-100 focus-within:border-[#2F80ED] transition-colors">
+            <Mail size={18} className="text-slate-400 mr-3" />
+            <input type="email" defaultValue={mockUser.email} className="bg-transparent w-full outline-none text-sm font-bold text-slate-800" />
+          </div>
+        </div>
+      </div>
+
+      <button onClick={onBack} className={`w-full bg-[#2F80ED] text-white font-bold py-5 rounded-[24px] shadow-md hover:bg-blue-600 ${transitionClass}`}>{t('save')}</button>
+    </div>
+  );
+}
+
+function LanguageSettingsScreen({ t, transitionClass, onBack, language, setLanguage }) {
+  return (
+    <div className="p-6 pt-12 flex-1 bg-[#F7F9FC] overflow-y-auto pb-24">
+      <div className="flex items-center mb-10">
+        <button onClick={onBack} className="text-slate-600 p-2 bg-white rounded-full shadow-sm"><ChevronLeft size={20} /></button>
+        <h2 className="font-bold text-slate-800 ml-4 flex-1 text-center pr-10">{t('language')}</h2>
+      </div>
+
+      <h3 className="font-bold text-slate-800 text-lg mb-4 mt-8">{t('language')}</h3>
+      <div className="bg-white rounded-3xl p-2 shadow-sm mb-8 border border-slate-100">
+         <div onClick={() => setLanguage('TH')} className="flex justify-between items-center p-4 border-b border-slate-50 cursor-pointer hover:bg-slate-50">
+           <span className="font-bold text-slate-800 text-sm">ภาษาไทย (TH)</span>
+           {language === 'TH' && <CheckCircle2 size={20} className="text-[#2F80ED]" />}
+         </div>
+         <div onClick={() => setLanguage('EN')} className="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50">
+           <span className="font-bold text-slate-800 text-sm">English (EN)</span>
+           {language === 'EN' && <CheckCircle2 size={20} className="text-[#2F80ED]" />}
+         </div>
+      </div>
+
+      <h3 className="font-bold text-slate-800 text-lg mb-4">สกุลเงิน (Currency)</h3>
+      <div className="bg-white rounded-3xl p-4 shadow-sm mb-8 border border-slate-100 flex items-center justify-between">
+         <div className="flex items-center gap-3">
+            <Coins size={20} className="text-[#F2C94C]" />
+            <span className="font-bold text-slate-800 text-sm">Thai Baht (฿)</span>
+         </div>
+         <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-md">ค่าเริ่มต้น</span>
+      </div>
+    </div>
+  );
+}
+
+// Logic: A11y & Security Toggle States
+function CustomToggle({ isOn, onToggle, colorClass = "bg-[#2F80ED]", reduceMotion }) {
+  const transClass = reduceMotion ? 'transition-none' : 'transition-all duration-300';
+  return (
+    <div onClick={onToggle} className={`w-12 h-7 rounded-full flex items-center p-1 cursor-pointer ${isOn ? colorClass : 'bg-slate-200'} ${transClass}`}>
+      <div className={`w-5 h-5 rounded-full bg-white shadow-sm transform ${isOn ? 'translate-x-5' : 'translate-x-0'} ${transClass}`}></div>
+    </div>
+  );
+}
+
+function SecuritySettingsScreen({ t, transitionClass, onBack, language }) {
+  const [bio, setBio] = useState(true);
+  const [hasPin, setHasPin] = useState(false);
+
+  return (
+    <div className="p-6 pt-12 flex-1 bg-[#F7F9FC] overflow-y-auto pb-24">
+      <div className="flex items-center mb-8">
+        <button onClick={onBack} className="p-2 bg-white rounded-full shadow-sm text-slate-600"><ChevronLeft size={20} /></button>
+        <h2 className="font-bold text-slate-800 ml-4 flex-1 text-center pr-10">{t('security')}</h2>
+      </div>
+
+      <h3 className="font-bold text-slate-800 text-lg mb-4">{language === 'TH' ? 'ความปลอดภัยของบัญชี' : 'Account Security'}</h3>
+      <div className="bg-white rounded-3xl p-2 shadow-sm mb-8 border border-slate-100">
+         <div className="flex justify-between items-center p-3 border-b border-slate-50 cursor-pointer hover:bg-slate-50 rounded-t-2xl">
+           <div className="flex items-center gap-4">
+             <div className="w-10 h-10 rounded-full bg-[#2F80ED]/10 flex items-center justify-center text-[#2F80ED] border border-[#2F80ED]/20">
+               <Lock size={18} />
+             </div>
+             <div>
+               <h4 className="font-bold text-slate-800 text-sm">{t('changePass')}</h4>
+               <p className="text-xs text-slate-400 mt-0.5">{t('lastUpdated')}</p> {/* Security Logic: Audit Trail */}
+             </div>
+           </div>
+           <span className="bg-[#2F80ED]/10 text-[#2F80ED] text-[10px] font-bold px-2 py-1 rounded-md">{language === 'TH' ? 'อัปเดต' : 'Update'}</span>
+         </div>
+         
+         {/* เมนูการตั้งค่า รหัส PIN (6 หลัก) */}
+         <div className="flex justify-between items-center p-3 border-b border-slate-50 cursor-pointer hover:bg-slate-50 transition-colors">
+           <div className="flex items-center gap-4">
+             <div className="w-10 h-10 rounded-full bg-[#F2C94C]/10 flex items-center justify-center text-[#D4A017] border border-[#F2C94C]/20">
+               <LayoutGrid size={18} />
+             </div>
+             <div>
+               <h4 className="font-bold text-slate-800 text-sm">{t('pinCode')}</h4>
+               <p className="text-xs text-slate-400 mt-0.5">{hasPin ? t('pinStatusSet') : t('pinStatusNotSet')}</p>
+             </div>
+           </div>
+           <button
+             onClick={() => setHasPin(true)}
+             className={`text-[10px] font-bold px-3 py-1.5 rounded-md transition-colors ${hasPin ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-[#2F80ED]/10 text-[#2F80ED] hover:bg-[#2F80ED]/20'}`}
+           >
+             {hasPin ? t('changePin') : t('setPin')}
+           </button>
+         </div>
+
+         <div className="flex justify-between items-center p-3 border-b border-slate-50">
+           <div className="flex items-center gap-4">
+             <div className="w-10 h-10 rounded-full bg-[#F2C94C]/10 flex items-center justify-center text-[#D4A017] border border-[#F2C94C]/20">
+               <Shield size={18} />
+             </div>
+             <div>
+               <h4 className="font-bold text-slate-800 text-sm">{t('twoFactor')}</h4>
+               <p className="text-xs text-slate-400 mt-0.5">{language === 'TH' ? 'แนะนำให้เปิดใช้งาน' : 'Recommended'}</p>
+             </div>
+           </div>
+           <CustomToggle isOn={true} onToggle={() => {}} colorClass="bg-[#56CC9D]" />
+         </div>
+
+         <div className="flex justify-between items-center p-3">
+           <div className="flex items-center gap-4">
+             <div className="w-10 h-10 rounded-full bg-[#2F80ED]/10 flex items-center justify-center text-[#2F80ED] border border-[#2F80ED]/20">
+               <Fingerprint size={18} />
+             </div>
+             <div>
+               <h4 className="font-bold text-slate-800 text-sm">{t('biometric')}</h4>
+               <p className="text-xs text-slate-400 mt-0.5">Face ID / Touch ID</p>
+             </div>
+           </div>
+           <CustomToggle isOn={bio} onToggle={() => setBio(!bio)} colorClass="bg-[#56CC9D]" />
+         </div>
+      </div>
+
+      <h3 className="font-bold text-slate-800 text-lg mb-4">{t('yourDevices')}</h3>
+      <div className="bg-white rounded-3xl p-2 shadow-sm border border-slate-100">
+         <div className="flex justify-between items-center p-3 border-b border-slate-50">
+           <div className="flex items-center gap-4">
+             <div className="w-10 h-10 rounded-full bg-[#56CC9D]/20 flex items-center justify-center text-[#2B9A6F] border border-[#56CC9D]/30">
+               <Smartphone size={18} />
+             </div>
+             <div>
+               <h4 className="font-bold text-slate-800 text-sm">iPhone 15 Pro</h4>
+               <p className="text-[10px] text-slate-400 mt-0.5">Bangkok, TH • {language === 'TH' ? 'กำลังใช้งาน' : 'Active now'}</p>
+             </div>
+           </div>
+           <span className="bg-[#56CC9D]/20 text-[#2B9A6F] text-[10px] font-bold px-2 py-1 rounded-md">{t('currentDevice')}</span>
+         </div>
+         {/* Logic: Active session control */}
+         <div className="flex justify-between items-center p-3">
+           <div className="flex items-center gap-4">
+             <div className="w-10 h-10 rounded-full bg-[#F7F9FC] flex items-center justify-center text-slate-500 border border-slate-200">
+               <Laptop size={18} />
+             </div>
+             <div>
+               <h4 className="font-bold text-slate-800 text-sm">MacBook Air</h4>
+               <p className="text-[10px] text-slate-400 mt-0.5">Bangkok, TH • {language === 'TH' ? 'ใช้งานล่าสุด 2 ชม. ที่แล้ว' : 'Last active 2h ago'}</p>
+             </div>
+           </div>
+           <span className="text-red-500 text-xs font-bold cursor-pointer hover:underline">{t('signOutDevice')}</span>
+         </div>
+      </div>
+    </div>
+  );
+}
+
+function ThemeSettingsScreen({ t, transitionClass, onBack, language, reduceMotion, setReduceMotion }) {
+  return (
+    <div className="p-6 pt-12 flex-1 bg-[#F7F9FC] overflow-y-auto pb-24">
+      <div className="flex items-center mb-8">
+        <button onClick={onBack} className="p-2 bg-white rounded-full shadow-sm text-slate-600"><ChevronLeft size={20} /></button>
+        <h2 className="font-bold text-slate-800 ml-4 flex-1 text-center pr-10">{t('theme')}</h2>
+      </div>
+
+      <div className="flex items-center gap-2 mb-4">
+         <div className="w-6 h-6 rounded-full bg-[#2F80ED]/10 text-[#2F80ED] flex items-center justify-center"><Sun size={12}/></div>
+         <h3 className="font-bold text-slate-800 text-sm">{language === 'TH' ? 'โหมดหน้าจอ' : 'Theme Mode'}</h3>
+      </div>
+      <div className="flex justify-between gap-3 mb-8">
+         <div className="flex-1 flex flex-col items-center gap-2">
+            <div className="w-full aspect-[3/4] bg-[#F7F9FC] border-2 border-[#2F80ED] rounded-2xl flex items-center justify-center p-2">
+               <div className="w-full h-full bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col p-2">
+                  <div className="w-1/2 h-2 bg-[#2F80ED]/30 rounded-sm mb-2"></div>
+                  <div className="w-full h-full bg-[#F7F9FC] rounded-md"></div>
+               </div>
+            </div>
+            <span className="text-xs font-bold text-[#2F80ED]">{t('light')}</span>
+         </div>
+         
+         <div className="flex-1 flex flex-col items-center gap-2 opacity-60 hover:opacity-100 cursor-pointer transition-opacity">
+            <div className="w-full aspect-[3/4] bg-white border border-slate-200 rounded-2xl flex items-center justify-center p-2 shadow-sm">
+               <div className="w-full h-full bg-slate-900 rounded-xl shadow-inner border border-slate-700 flex flex-col p-2">
+                  <div className="w-1/2 h-2 bg-slate-700 rounded-sm mb-2"></div>
+                  <div className="w-full h-full bg-slate-800 rounded-md"></div>
+               </div>
+            </div>
+            <span className="text-xs font-bold text-slate-500">{t('dark')}</span>
+         </div>
+
+         <div className="flex-1 flex flex-col items-center gap-2 opacity-60 hover:opacity-100 cursor-pointer transition-opacity">
+            <div className="w-full aspect-[3/4] bg-white border border-slate-200 rounded-2xl flex items-center justify-center p-2 shadow-sm">
+               <div className="w-full h-full rounded-xl overflow-hidden flex border border-slate-200">
+                  <div className="flex-1 h-full bg-white flex flex-col p-2">
+                     <div className="w-full h-1.5 bg-slate-200 rounded-sm mb-2"></div>
+                  </div>
+                  <div className="flex-1 h-full bg-slate-900 flex flex-col p-2 border-l border-slate-700">
+                     <div className="w-full h-1.5 bg-slate-700 rounded-sm mb-2"></div>
+                  </div>
+               </div>
+            </div>
+            <span className="text-xs font-bold text-slate-500">{t('system')}</span>
+         </div>
+      </div>
+
+      <div className="flex items-center gap-2 mb-4">
+         <div className="w-6 h-6 rounded-full bg-[#F2C94C]/20 text-[#D4A017] flex items-center justify-center"><Palette size={12}/></div>
+         <h3 className="font-bold text-slate-800 text-sm">{t('accentColor')}</h3>
+      </div>
+      <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-8 flex justify-between items-center">
+         <div className="w-8 h-8 rounded-full bg-[#56CC9D] border-2 border-transparent cursor-pointer"></div>
+         <div className="w-8 h-8 rounded-full bg-[#F2C94C] border-2 border-transparent cursor-pointer"></div>
+         <div className="w-8 h-8 rounded-full bg-[#2F80ED] border-2 border-white ring-2 ring-[#2F80ED]/30 flex items-center justify-center text-white cursor-pointer">
+            <Check size={16} strokeWidth={3} />
+         </div>
+         <div className="w-8 h-8 rounded-full bg-pink-400 border-2 border-transparent cursor-pointer"></div>
+         <div className="w-8 h-8 rounded-full bg-purple-400 border-2 border-transparent cursor-pointer"></div>
+      </div>
+
+      {/* Logic: A11y Reduce Motion Hooked to global state */}
+      <div className="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 flex flex-col gap-4 mt-8">
+         <div className="flex justify-between items-center pr-2">
+            <div className="flex items-center gap-3">
+               <div className="text-slate-400"><Sparkles size={18}/></div>
+               <h4 className="font-bold text-slate-800 text-sm">{t('reduceMotion')}</h4>
+            </div>
+            <CustomToggle isOn={reduceMotion} onToggle={() => setReduceMotion(!reduceMotion)} reduceMotion={reduceMotion} />
+         </div>
+      </div>
+    </div>
+  );
+}
+
+function NotificationsScreen({ t, onBack }) { 
+  return (
+    <div className="p-8">
+      <button onClick={onBack}>Back</button>
+    </div>
+  ); 
+}
+
+function NotificationSettingsScreen({ t, transitionClass, onBack, language }) { 
+  return (
+    <div className="p-6 pt-12 flex-1 bg-[#F7F9FC] overflow-y-auto pb-24">
+      <div className="flex items-center mb-8">
+        <button onClick={onBack} className="p-2 bg-white rounded-full shadow-sm text-slate-600"><ChevronLeft size={20} /></button>
+        <h2 className="font-bold text-slate-800 ml-4 flex-1 text-center pr-10">{t('notifications')}</h2>
+      </div>
+      <div className="flex flex-col gap-4 bg-white rounded-3xl p-4 shadow-sm border border-slate-100">
+        <div className="flex justify-between items-center pr-2">
+          <div className="flex items-center gap-3">
+             <div className="text-slate-400"><BellRing size={18}/></div>
+             <h4 className="font-bold text-slate-800 text-sm">Push Notifications</h4>
+          </div>
+          <CustomToggle isOn={true} onToggle={() => {}} />
+        </div>
+      </div>
+    </div>
+  ); 
+}
+
+function TransactionItem({ tx, transitionClass, onClick }) {
+  const Icon = IconMap[tx.iconName] || Coffee;
+  return (
+    <div onClick={onClick} className={`bg-white p-4 rounded-3xl shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md hover:-translate-y-0.5 border border-slate-100 ${transitionClass}`}>
+      <div className="flex items-center gap-4">
+        <div className={`w-12 h-12 rounded-2xl ${tx.colorClass} flex items-center justify-center shrink-0`}>
+          <Icon size={20} />
+        </div>
+        <div>
+          <h4 className="font-bold text-slate-800 text-sm">{tx.title}</h4>
+          <p className="text-xs text-slate-400 mt-0.5 font-medium">{tx.category} • {tx.date}</p>
+        </div>
+      </div>
+      <div className="font-black text-slate-800">
+        ฿{Math.abs(tx.amount).toLocaleString('th-TH', {minimumFractionDigits: 2})}
+      </div>
+    </div>
+  );
+}
