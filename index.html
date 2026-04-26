@@ -70,17 +70,16 @@
         const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
         // ==========================================
-        // 1. FIREBASE INIT
+        // 1. FIREBASE INIT (ใส่ API Key ของจริงให้แล้วครับ)
         // ==========================================
         const fbConfig = {
-            apiKey: "YOUR_API_KEY", // <--- ใส่ API Key ของแม่ตรงนี้
+            apiKey: "AIzaSyCv1D7XjSuSYWJxpFxT7umaCAb9o8fY2o8",
             authDomain: "qr-scanner-a29e3.firebaseapp.com",
             projectId: "qr-scanner-a29e3",
             storageBucket: "qr-scanner-a29e3.firebasestorage.app",
             messagingSenderId: "1070573788877",
             appId: "1:1070573788877:web:cd65246772c629f380d384"
         };
-        
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -91,13 +90,14 @@
         const formatMoney = (num) => Number(num || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         
         const translateAuthError = (code) => {
-            if(code.includes('operation-not-supported') || code.includes('operation-not-allowed')) return 'กรุณาเปิดใช้งาน Email Auth ใน Firebase Console';
+            if(code.includes('api-key-not-valid')) return 'API Key ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่า Firebase';
+            if(code.includes('operation-not-supported') || code.includes('operation-not-allowed')) return 'กรุณาเปิดการใช้งาน Email/Password Auth ใน Firebase Console';
             switch(code) {
                 case 'auth/invalid-credential':
                 case 'auth/user-not-found':
                 case 'auth/wrong-password': return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
                 case 'auth/email-already-in-use': return 'อีเมลนี้ถูกใช้งานแล้ว กรุณาล็อกอิน';
-                case 'auth/weak-password': return 'รหัสผ่านขั้นต่ำ 6 ตัวอักษร';
+                case 'auth/weak-password': return 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
                 case 'auth/invalid-email': return 'รูปแบบอีเมลไม่ถูกต้อง';
                 default: return `เกิดข้อผิดพลาด: ${code}`;
             }
@@ -130,8 +130,9 @@
                     welcome: 'ยินดีต้อนรับ', subWelcome: 'จัดการเงินง่ายๆ สไตล์คุณ', email: 'อีเมล', password: 'รหัสผ่าน',
                     forgotPass: 'ลืมรหัสผ่าน?', login: 'เข้าสู่ระบบ', loginGoogle: 'เข้าสู่ระบบด้วย Google',
                     noAccount: 'ยังไม่มีบัญชี?', signUp: 'สมัครเลย', createAccount: 'สร้างบัญชี', name: 'ชื่อ-นามสกุล',
-                    confirmPass: 'ยืนยันรหัสผ่าน', sendLink: 'ส่งลิงก์', home: 'หน้าหลัก', wallet: 'กระเป๋าเงิน', scan: 'สแกน', history: 'ประวัติ', profile: 'โปรไฟล์',
-                    totalSpend: 'ยอดใช้จ่ายรวม', safeSpend: 'ยอดเงินคงเหลือ', recent: 'รายการล่าสุด', seeAll: 'ดูทั้งหมด',
+                    confirmPass: 'ยืนยันรหัสผ่าน', sendLink: 'ส่งลิงก์',
+                    home: 'หน้าหลัก', wallet: 'กระเป๋าเงิน', scan: 'สแกน', history: 'ประวัติ', profile: 'โปรไฟล์',
+                    totalSpend: 'ยอดใช้จ่ายเดือนนี้', safeSpend: 'ยอดคงเหลือรวม', recent: 'รายการล่าสุด', seeAll: 'ดูทั้งหมด',
                     noData: 'ยังไม่มีรายการ', newPocket: 'สร้างกระเป๋าใหม่', scanReceipt: 'สแกนสลิป', gallery: 'คลังภาพ',
                     manual: 'กรอกเอง', reviewDetails: 'ตรวจสอบข้อมูล', merchant: 'ชื่อร้าน/ผู้รับโอน', date: 'วันที่',
                     confirmSave: 'ยืนยันและบันทึก', addTx: 'กรอกข้อมูลเอง', amount: 'จำนวนเงิน', saveTx: 'บันทึกรายการ',
@@ -149,7 +150,8 @@
                     welcome: 'Welcome', subWelcome: 'Manage your money easily', email: 'Email', password: 'Password',
                     forgotPass: 'Forgot Password?', login: 'Sign In', loginGoogle: 'Sign In with Google',
                     noAccount: 'No account?', signUp: 'Sign Up', createAccount: 'Create Account', name: 'Full Name',
-                    confirmPass: 'Confirm Password', sendLink: 'Send Link', home: 'Home', wallet: 'Wallet', scan: 'Scan', history: 'History', profile: 'Profile',
+                    confirmPass: 'Confirm Password', sendLink: 'Send Link',
+                    home: 'Home', wallet: 'Wallet', scan: 'Scan', history: 'History', profile: 'Profile',
                     totalSpend: 'Total Spent', safeSpend: 'Total Balance', recent: 'Recent', seeAll: 'See All',
                     noData: 'No Data', newPocket: 'New Pocket', scanReceipt: 'Scan Receipt', gallery: 'Gallery',
                     manual: 'Manual', reviewDetails: 'Review Details', merchant: 'Merchant', date: 'Date',
@@ -199,18 +201,15 @@
             const [tab, setTab] = useState('HOME');
             const [screenData, setScreenData] = useState(null);
             
-            // App Preferences
             const [lang, setLang] = useState('TH');
             const [themeMode, setThemeMode] = useState('system'); 
             const [reduceMotion, setReduceMotion] = useState(false);
             
-            // App Lock Logic
             const savedPin = localStorage.getItem('cozy_pin');
             const [pinCode, setPinCode] = useState(savedPin); 
             const [isLocked, setIsLocked] = useState(!!savedPin); 
             const [showPinModal, setShowPinModal] = useState(false);
             
-            // Core Data States
             const [txs, setTxs] = useState([]);
             const [pockets, setPockets] = useState([]);
 
@@ -227,7 +226,6 @@
                 return themeMode;
             }, [themeMode]);
 
-            // Sync User Data & Auth State
             useEffect(() => {
                 const unsub = auth.onAuthStateChanged(u => {
                     setIsAuthReady(true);
@@ -405,22 +403,32 @@
                             localStorage.setItem('cozy_guest', JSON.stringify(guestUser));
                             setUser(guestUser); go('MAIN', 'HOME');
                         }, 1000);
-                    } else { setErr(translateAuthError(e.code)); setLoading(false); }
+                    } else {
+                        setErr(translateAuthError(e.code));
+                        setLoading(false);
+                    }
                 }
             };
+
             const googleLogin = async () => {
                 setLoading(true);
-                try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); } 
-                catch (e) {
+                try {
+                    const p = new firebase.auth.GoogleAuthProvider();
+                    await auth.signInWithPopup(p);
+                } catch (e) {
                     if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
                         setTimeout(() => {
                             const guestGoogle = { uid: 'mock-uid', email: 'guest@google.com', displayName: 'Google User', photoURL: 'https://ui-avatars.com/api/?name=Google&background=DB4437&color=fff' };
                             localStorage.setItem('cozy_guest', JSON.stringify(guestGoogle));
                             setUser(guestGoogle); go('MAIN', 'HOME');
                         }, 1000);
-                    } else { setErr(e.message); setLoading(false); }
+                    } else {
+                        setErr(e.message);
+                        setLoading(false);
+                    }
                 }
             };
+
             const guestLogin = () => {
                 setLoading(true);
                 setTimeout(() => {
@@ -442,7 +450,11 @@
                     </form>
                     {err && <div className="bg-red-50 text-red-500 p-3 rounded-xl text-xs font-bold text-center mt-4 border border-red-100">{err}</div>}
                     <div className="flex items-center gap-4 my-8"><div className="h-px bg-slate-100 flex-1"/><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">OR</span><div className="h-px bg-slate-100 flex-1"/></div>
-                    <button onClick={googleLogin} className="w-full border border-slate-200 py-4 rounded-[20px] flex items-center justify-center gap-3 font-bold text-slate-700 active:scale-95 transition-transform shadow-sm mb-4"><svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>{t('loginGoogle')}</button>
+                    
+                    <button onClick={googleLogin} className="w-full border border-slate-200 py-4 rounded-[20px] flex items-center justify-center gap-3 font-bold text-slate-700 active:scale-95 transition-transform shadow-sm mb-4">
+                        <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                        {t('loginGoogle')}
+                    </button>
                     <button onClick={guestLogin} className="w-full border border-slate-200 py-4 rounded-[20px] flex items-center justify-center gap-3 font-bold text-slate-700 active:scale-95 transition-transform shadow-sm mb-4"><Icon name="user" size={20} className="text-slate-500" /> {t('guestLogin')}</button>
                     <button onClick={()=>go('SIGN_UP')} className="mt-8 text-sm font-bold text-slate-500 text-center w-full">{t('noAccount')} <span className="text-[#2F80ED] underline">{t('signUp')}</span></button>
                 </div>
@@ -468,8 +480,11 @@
                             const guestUser = { uid: 'mock-uid', email: email, displayName: name, photoURL: 'https://ui-avatars.com/api/?name='+name+'&background=2F80ED&color=fff' };
                             localStorage.setItem('cozy_guest', JSON.stringify(guestUser));
                             setUser(guestUser); go('MAIN', 'HOME');
-                        }, 1000);
-                    } else { setErr(translateAuthError(error.code)); setLoading(false); }
+                        }, 1500);
+                    } else {
+                        setErr(translateAuthError(error.code));
+                        setLoading(false);
+                    }
                 }
             };
 
@@ -498,10 +513,16 @@
                 e.preventDefault();
                 if(!email) return setErr(t('fillAll'));
                 setLoading(true); setErr('');
-                try { await auth.sendPasswordResetEmail(email); setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); } 
-                catch(error) {
-                    if(error.code.includes('operation-not-supported')) { setTimeout(() => { setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); }, 1000); } 
-                    else { setErr(translateAuthError(error.code)); setLoading(false); }
+                try {
+                    await auth.sendPasswordResetEmail(email);
+                    setSent(true); setTimeout(()=>go('SIGN_IN'), 3000);
+                } catch(error) {
+                    if(error.code.includes('operation-not-supported')) {
+                        setTimeout(() => { setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); }, 1500);
+                    } else {
+                        setErr(translateAuthError(error.code));
+                        setLoading(false);
+                    }
                 }
             };
 
@@ -511,6 +532,7 @@
                     <button onClick={()=>go('SIGN_IN')} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center mb-8 absolute"><Icon name="chevron-left"/></button>
                     <div className="w-24 h-24 bg-blue-50 text-[#2F80ED] rounded-full flex items-center justify-center mx-auto mt-16 mb-8"><Icon name="key" size={40}/></div>
                     <h1 className="text-3xl font-black text-slate-800 mb-2">{t('forgotPass')}</h1>
+                    
                     {sent ? <div className="bg-green-50 text-green-600 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 animate-pulse mt-10"><Icon name="check-circle"/> ส่งลิงก์ไปยังอีเมลแล้ว!</div> : 
                     <form onSubmit={handleReset} className="space-y-6 mt-10">
                         <div className="bg-slate-50 p-4 rounded-2xl flex items-center text-left"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('email')} /></div>
@@ -568,61 +590,65 @@
             </div>
         );
 
-        // 🌟 SMART SEARCH & CATEGORY PILLS IN HISTORY 🌟
+        // 🌟 SMART SEARCH & CATEGORY PILLS 🌟
         const HistoryScreen = ({ txs, go, t, Icon }) => {
             const [searchQuery, setSearchQuery] = useState('');
             const [activeCategory, setActiveCategory] = useState(t('all'));
 
-            // Dynamic categories from transactions + 'All'
+            // ดึงหมวดหมู่ที่ไม่ซ้ำกันจากรายการมาสร้างเป็นปุ่ม (ไม่เอาค่าว่าง)
             const categories = useMemo(() => {
                 const uniqueCats = [...new Set(txs.map(tx => tx.category))].filter(Boolean);
                 return [t('all'), ...uniqueCats];
             }, [txs, t]);
 
-            // Filter Logic
+            // ระบบค้นหาและกรองข้อมูล
             const filteredTxs = useMemo(() => {
                 return txs.filter(tx => {
                     const matchCategory = activeCategory === t('all') || tx.category === activeCategory;
-                    const matchSearch = tx.title.toLowerCase().includes(searchQuery.toLowerCase()) || (tx.merchant && tx.merchant.toLowerCase().includes(searchQuery.toLowerCase()));
+                    const matchSearch = tx.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                        (tx.merchant && tx.merchant.toLowerCase().includes(searchQuery.toLowerCase()));
                     return matchCategory && matchSearch;
                 });
             }, [txs, activeCategory, searchQuery, t]);
 
             return (
                 <div className="p-6 pt-10 fade-in flex flex-col h-full">
-                    <h2 className="text-3xl font-black text-slate-800 mb-6 leading-none shrink-0">{t('history')}</h2>
-                    
-                    {/* Search Bar */}
-                    <div className="bg-white p-4 rounded-[24px] flex items-center shadow-sm border border-slate-100 mb-4 focus-within:ring-2 ring-[#2F80ED] shrink-0 transition-all">
-                        <Icon name="search" size={20} className="text-slate-400 mr-3"/>
-                        <input 
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-transparent w-full font-bold text-sm outline-none text-slate-800" 
-                            placeholder={t('searchPlaceholder')} 
-                        />
-                        {searchQuery && (
-                            <button onClick={() => setSearchQuery('')} className="text-slate-400 p-1 active:scale-90">
-                                <Icon name="x-circle" size={16} />
-                            </button>
-                        )}
+                    {/* Header แบบ Sticky */}
+                    <div className="shrink-0 mb-6 bg-[#FCFBFA] z-10 pb-2">
+                        <h2 className="text-3xl font-black text-slate-800 mb-6 leading-none">{t('history')}</h2>
+                        
+                        {/* Search Bar */}
+                        <div className="bg-white p-4 rounded-[24px] flex items-center shadow-sm border border-slate-100 mb-4 focus-within:ring-2 ring-[#2F80ED] transition-all">
+                            <Icon name="search" size={20} className="text-slate-400 mr-3"/>
+                            <input 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="bg-transparent w-full font-bold text-sm outline-none text-slate-800" 
+                                placeholder={t('searchPlaceholder')} 
+                            />
+                            {searchQuery && (
+                                <button onClick={() => setSearchQuery('')} className="text-slate-400 p-1 active:scale-90">
+                                    <Icon name="x-circle" size={16} />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Category Pills (เลื่อนแนวนอนได้) */}
+                        <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
+                            {categories.map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setActiveCategory(cat)}
+                                    className={`whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-black transition-all border ${activeCategory === cat ? 'bg-[#2F80ED] text-white border-[#2F80ED] shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Horizontal Scrollable Category Pills */}
-                    <div className="flex overflow-x-auto no-scrollbar gap-2 mb-6 pb-2 shrink-0">
-                        {categories.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => setActiveCategory(cat)}
-                                className={`whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-black transition-colors border ${activeCategory === cat ? 'bg-[#2F80ED] text-white border-[#2F80ED] shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Filtered Transaction List */}
-                    <div className="space-y-3 pb-24 overflow-y-auto flex-1 no-scrollbar">
+                    {/* Transaction List */}
+                    <div className="space-y-3 pb-24 overflow-y-auto flex-1 no-scrollbar -mx-6 px-6">
                         {filteredTxs.length === 0 ? (
                             <div className="text-center text-slate-400 font-bold p-8 border border-dashed border-slate-200 rounded-3xl mt-4">
                                 {searchQuery ? t('notFound') : t('noData')}
