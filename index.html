@@ -1,39 +1,35 @@
-```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>QR Scanner</title>
-    <!-- Tailwind CSS -->
+    
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- React & ReactDOM -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/lazywasabi/thai-web-fonts@7/fonts/CSPrajad/CS-Prajad.css" rel="stylesheet" />
+    
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <!-- Tesseract.js (OCR) -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
     <style>
-        * { font-family: 'Prompt', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { font-family: 'Plus Jakarta Sans', 'CS Prajad', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
         body, html, #root { width: 100%; height: 100%; margin: 0; background-color: #0f172a; overflow: hidden; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        .app-container {
-            width: 100%; max-width: 480px; height: 100%; margin: 0 auto; 
-            background: #FCFBFA; position: relative; display: flex; flex-direction: column;
-            box-shadow: 0 0 50px rgba(0,0,0,0.1);
-        }
+        .app-container { width: 100%; max-width: 480px; height: 100%; margin: 0 auto; background: #FCFBFA; position: relative; display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.1); overflow: hidden; }
         @media (max-width: 480px) { .app-container { max-width: 100%; box-shadow: none; } }
 
         video { object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; pointer-events: none; }
@@ -43,7 +39,6 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
         .no-motion * { transition: none !important; animation: none !important; }
         
-        /* Dark Theme Settings */
         .theme-dark { background-color: #0f172a !important; color: #f1f5f9 !important; }
         .theme-dark .bg-white { background-color: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; }
         .theme-dark .text-slate-800, .theme-dark .text-slate-700 { color: #f1f5f9 !important; }
@@ -52,15 +47,21 @@
         .theme-dark .bg-slate-50 { background-color: #0f172a !important; border: 1px solid #334155; color: #f1f5f9 !important;}
         .theme-dark input, .theme-dark select, .theme-dark textarea { color: #f1f5f9 !important; }
         
-        /* Scan Overlay */
-        .scan-frame { position: absolute; inset: 15%; border-radius: 40px; box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.9); z-index: 10; }
-        .scan-corner { position: absolute; width: 40px; height: 40px; border-color: #2F80ED; border-width: 0; }
-        .tl { top: -2px; left: -2px; border-top-width: 6px; border-left-width: 6px; border-top-left-radius: 40px; }
-        .tr { top: -2px; right: -2px; border-top-width: 6px; border-right-width: 6px; border-top-right-radius: 40px; }
-        .bl { bottom: -2px; left: -2px; border-bottom-width: 6px; border-left-width: 6px; border-bottom-left-radius: 40px; }
-        .br { bottom: -2px; right: -2px; border-bottom-width: 6px; border-right-width: 6px; border-bottom-right-radius: 40px; }
+        .scan-frame { position: absolute; inset: 20%; border-radius: 24px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); z-index: 10; border: 2px solid rgba(255,255,255,0.5); }
+        .scan-corner { position: absolute; width: 40px; height: 40px; border-color: #F472B6; border-width: 0; }
+        .tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 24px; }
+        .tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-top-right-radius: 24px; }
+        .bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 24px; }
+        .br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 24px; }
         @keyframes scanLine { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-        .laser { position: absolute; width: 100%; height: 2px; background: #2F80ED; box-shadow: 0 0 15px #2F80ED; animation: scanLine 2.5s linear infinite; z-index: 11; }
+        .laser { position: absolute; width: 100%; height: 2px; background: #F472B6; box-shadow: 0 0 15px #F472B6; animation: scanLine 2.5s linear infinite; z-index: 11; }
+
+        .toggle-checkbox:checked { right: 0; border-color: #68CCA2; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #68CCA2; }
+        
+        input[type="color"] { -webkit-appearance: none; border: none; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; cursor: pointer; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
     </style>
 </head>
 <body>
@@ -69,9 +70,6 @@
     <script type="text/babel">
         const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
-        // ==========================================
-        // 1. FIREBASE INIT (ใส่ API Key ของจริงให้แล้วครับ)
-        // ==========================================
         const fbConfig = {
             apiKey: "AIzaSyCv1D7XjSuSYWJxpFxT7umaCAb9o8fY2o8",
             authDomain: "qr-scanner-a29e3.firebaseapp.com",
@@ -84,19 +82,16 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // ==========================================
-        // 2. HELPERS & SAFE ICONS
-        // ==========================================
-        const formatMoney = (num) => Number(num || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const formatMoney = (num) => Number(num || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         
         const translateAuthError = (code) => {
-            if(code.includes('api-key-not-valid')) return 'API Key ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่า Firebase';
-            if(code.includes('operation-not-supported') || code.includes('operation-not-allowed')) return 'กรุณาเปิดการใช้งาน Email/Password Auth ใน Firebase Console';
+            if(code.includes('api-key-not-valid')) return 'API Key ไม่ถูกต้อง';
+            if(code.includes('operation-not-supported')) return 'ไม่ได้เปิดใช้งาน Email/Password Auth';
             switch(code) {
                 case 'auth/invalid-credential':
                 case 'auth/user-not-found':
                 case 'auth/wrong-password': return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
-                case 'auth/email-already-in-use': return 'อีเมลนี้ถูกใช้งานแล้ว กรุณาล็อกอิน';
+                case 'auth/email-already-in-use': return 'อีเมลนี้ถูกใช้งานแล้ว';
                 case 'auth/weak-password': return 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
                 case 'auth/invalid-email': return 'รูปแบบอีเมลไม่ถูกต้อง';
                 default: return `เกิดข้อผิดพลาด: ${code}`;
@@ -107,8 +102,12 @@
             const spanRef = useRef(null);
             useEffect(() => { 
                 if(spanRef.current && window.lucide) {
-                    spanRef.current.innerHTML = `<i data-lucide="${name}" class="${className}"></i>`;
-                    lucide.createIcons({ root: spanRef.current, attrs: { 'stroke-width': strokeWidth, size: size } }); 
+                    try {
+                        spanRef.current.innerHTML = `<i data-lucide="${name}" class="${className}"></i>`;
+                        lucide.createIcons({ root: spanRef.current, attrs: { 'stroke-width': strokeWidth, size: size } }); 
+                    } catch (e) {
+                        spanRef.current.innerHTML = `<span style="display:inline-block; width:${size}px; height:${size}px; background:#e2e8f0; border-radius:50%;"></span>`;
+                    }
                 }
             }, [name, size, strokeWidth, className]);
             return <span ref={spanRef} style={{display:'inline-flex', alignItems:'center', justifyContent:'center', width: size, height: size}}></span>;
@@ -116,63 +115,176 @@
 
         const LoadingOverlay = ({ text, Icon }) => (
             <div className="absolute inset-0 bg-[#0f172a]/90 backdrop-blur-md z-[100] flex flex-col items-center justify-center text-white fade-in">
-                <Icon name="loader-2" size={48} className="animate-spin text-[#2F80ED] mb-6"/>
+                <Icon name="loader-2" size={48} className="animate-spin text-[#F472B6] mb-6"/>
                 <h2 className="font-black text-lg tracking-widest uppercase">{text}</h2>
             </div>
         );
 
-        // ==========================================
-        // 3. DICTIONARY (i18n)
-        // ==========================================
-        const getT = (lang) => (key) => {
-            const d = {
-                TH: {
-                    welcome: 'ยินดีต้อนรับ', subWelcome: 'จัดการเงินง่ายๆ สไตล์คุณ', email: 'อีเมล', password: 'รหัสผ่าน',
-                    forgotPass: 'ลืมรหัสผ่าน?', login: 'เข้าสู่ระบบ', loginGoogle: 'เข้าสู่ระบบด้วย Google',
-                    noAccount: 'ยังไม่มีบัญชี?', signUp: 'สมัครเลย', createAccount: 'สร้างบัญชี', name: 'ชื่อ-นามสกุล',
-                    confirmPass: 'ยืนยันรหัสผ่าน', sendLink: 'ส่งลิงก์',
-                    home: 'หน้าหลัก', wallet: 'กระเป๋าเงิน', scan: 'สแกน', history: 'ประวัติ', profile: 'โปรไฟล์',
-                    totalSpend: 'ยอดใช้จ่ายเดือนนี้', safeSpend: 'ยอดคงเหลือรวม', recent: 'รายการล่าสุด', seeAll: 'ดูทั้งหมด',
-                    noData: 'ยังไม่มีรายการ', newPocket: 'สร้างกระเป๋าใหม่', scanReceipt: 'สแกนสลิป', gallery: 'คลังภาพ',
-                    manual: 'กรอกเอง', reviewDetails: 'ตรวจสอบข้อมูล', merchant: 'ชื่อร้าน/ผู้รับโอน', date: 'วันที่',
-                    confirmSave: 'ยืนยันและบันทึก', addTx: 'กรอกข้อมูลเอง', amount: 'จำนวนเงิน', saveTx: 'บันทึกรายการ',
-                    splitBill: 'หารบิลกับเพื่อน', totalAmount: 'ยอดรวมบิล', addFriend: 'เพิ่มเพื่อน', confirmSplit: 'ยืนยันการหารบิล',
-                    txDetail: 'รายละเอียด', status: 'สถานะ', category: 'หมวดหมู่', editProfile: 'แก้ไขโปรไฟล์',
-                    security: 'ความปลอดภัย', language: 'ภาษา', theme: 'ธีมแอป', logout: 'ออกจากระบบ',
-                    light: 'สว่าง', dark: 'มืด', system: 'ตามอุปกรณ์', reduceMotion: 'ลดภาพเคลื่อนไหว', changePass: 'เปลี่ยนรหัสผ่าน',
-                    pinCode: 'รหัส PIN', biometric: 'สแกนใบหน้า/นิ้วมือ (จำลอง)', setPin: 'ตั้งรหัส PIN', changePin: 'เปลี่ยน PIN',
-                    yourDevices: 'อุปกรณ์ของคุณ', currentDevice: 'อุปกรณ์นี้', pocketName: 'ชื่อกระเป๋า', targetAmount: 'เป้าหมาย (บาท)',
-                    savePocket: 'บันทึกกระเป๋า', passMismatch: 'รหัสผ่านไม่ตรงกัน', fillAll: 'กรุณากรอกให้ครบ', loading: 'กำลังประมวลผล...',
-                    guestLogin: 'ทดลองใช้งาน (Guest)', aiSelected: 'AI เลือกให้', catFood: 'อาหาร/เครื่องดื่ม', catShop: 'ช้อปปิ้ง', catTransfer: 'โอนเงิน', catBill: 'จ่ายบิล', catTravel: 'เดินทาง/น้ำมัน', catGeneral: 'ทั่วไป',
-                    searchPlaceholder: 'ค้นหารายการ...', all: 'ทั้งหมด', notFound: 'ไม่พบรายการที่ค้นหา'
-                },
-                EN: {
-                    welcome: 'Welcome', subWelcome: 'Manage your money easily', email: 'Email', password: 'Password',
-                    forgotPass: 'Forgot Password?', login: 'Sign In', loginGoogle: 'Sign In with Google',
-                    noAccount: 'No account?', signUp: 'Sign Up', createAccount: 'Create Account', name: 'Full Name',
-                    confirmPass: 'Confirm Password', sendLink: 'Send Link',
-                    home: 'Home', wallet: 'Wallet', scan: 'Scan', history: 'History', profile: 'Profile',
-                    totalSpend: 'Total Spent', safeSpend: 'Total Balance', recent: 'Recent', seeAll: 'See All',
-                    noData: 'No Data', newPocket: 'New Pocket', scanReceipt: 'Scan Receipt', gallery: 'Gallery',
-                    manual: 'Manual', reviewDetails: 'Review Details', merchant: 'Merchant', date: 'Date',
-                    confirmSave: 'Confirm & Save', addTx: 'Add Transaction', amount: 'Amount', saveTx: 'Save',
-                    splitBill: 'Split Bill', totalAmount: 'Total Amount', addFriend: 'Add Friend', confirmSplit: 'Confirm Split',
-                    txDetail: 'Details', status: 'Status', category: 'Category', editProfile: 'Edit Profile',
-                    security: 'Security', language: 'Language', theme: 'Theme', logout: 'Logout',
-                    light: 'Light', dark: 'Dark', system: 'System', reduceMotion: 'Reduce Motion', changePass: 'Change Password',
-                    pinCode: 'PIN Code', biometric: 'Face/Touch ID (Mock)', setPin: 'Set PIN', changePin: 'Change PIN',
-                    yourDevices: 'Your Devices', currentDevice: 'Current Device', pocketName: 'Pocket Name', targetAmount: 'Target Amount',
-                    savePocket: 'Save Pocket', passMismatch: 'Passwords do not match', fillAll: 'Please fill all fields', loading: 'Loading...',
-                    guestLogin: 'Try as Guest', aiSelected: 'AI Selected', catFood: 'Food/Drink', catShop: 'Shopping', catTransfer: 'Transfer', catBill: 'Bills', catTravel: 'Transport/Gas', catGeneral: 'General',
-                    searchPlaceholder: 'Search transactions...', all: 'All', notFound: 'No results found'
-                }
-            };
-            return d[lang]?.[key] || key;
+        const getDeviceName = () => {
+            const ua = navigator.userAgent;
+            if (/iPhone|iPod/.test(ua)) return 'iPhone';
+            if (/iPad/.test(ua)) return 'iPad';
+            if (/android/i.test(ua)) return 'Android Device';
+            if (/Macintosh/.test(ua)) return 'Mac';
+            if (/Windows/.test(ua)) return 'Windows PC';
+            return 'Web Browser';
         };
 
-        // ==========================================
-        // 4. ERROR BOUNDARY
-        // ==========================================
+        const categorizeText = (text) => {
+            const tText = text.toLowerCase();
+            if (tText.match(/น้ำปั่น|ครัว|coffee|คาเฟ่|อาหาร|เครื่องดื่ม|ข้าว|ชา|นม|food|drink|ปลา|หมู|ไก่|เนื้อ|กุ้ง|เบเกอรี่|ขนม|เค้ก|ชาบู|ปิ้งย่าง|สุกี้|restaurant|cafe/)) return { cat: 'Food & Drink', iconType: 'lucide', icon: 'coffee', colType: 'hex', col: '#ff9800' };
+            if (tText.match(/shop|ร้าน|ช้อป|โลตัส|เซเว่น|7-11|บิ๊กซี|มินิมาร์ท|ซื้อ|mart|ค้า|supermarket|mall|store/)) return { cat: 'Shopping', iconType: 'lucide', icon: 'shopping-bag', colType: 'hex', col: '#e91e63' };
+            if (tText.match(/นาย|นาง|น\.ส\.|ด\.ช\.|ด\.ญ\.|คุณ|โอนเงิน/)) return { cat: 'Transfer', iconType: 'lucide', icon: 'users', colType: 'hex', col: '#2196f3' };
+            if (tText.match(/บิล|การไฟฟ้า|การประปา|ais|true|dtac|ค่าเน็ต|ค่าไฟ|ค่าน้ำ|bill|ประกัน|สินเชื่อ|บัตรเครดิต|ชำระ/)) return { cat: 'Bills', iconType: 'lucide', icon: 'zap', colType: 'hex', col: '#ffc107' };
+            if (tText.match(/น้ำมัน|ปั๊ม|ptt|pt|shell|bangchak|caltex|gas/)) return { cat: 'Transport', iconType: 'lucide', icon: 'car', colType: 'hex', col: '#00bcd4' };
+            return { cat: 'General', iconType: 'lucide', icon: 'receipt', colType: 'hex', col: '#64748b' };
+        };
+
+        const processReceiptImage = async (file, onComplete) => {
+            try {
+                const worker = await Tesseract.createWorker('tha+eng');
+                const ret = await worker.recognize(file);
+                const rawText = ret.data.text;
+                const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                await worker.terminate();
+
+                let finalAmount = ''; let merchant = ''; let dateStr = new Date().toLocaleDateString('th-TH'); let memoText = '';
+
+                const amountRegex = /(?:จำนวนเงิน|จำนวน|ยอดรวม|ยอดเงิน|รวมทั้งสิ้น|Total|Amount|฿|B)[^\d]*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i;
+                for(let line of lines) {
+                    const match = line.match(amountRegex);
+                    if(match && match[1]) { finalAmount = parseFloat(match[1].replace(/,/g, '')).toFixed(2); break; }
+                }
+                if (!finalAmount || finalAmount === '0.00') {
+                    const numbers = rawText.match(/\b\d{1,3}(?:,\d{3})*\.\d{2}\b/g);
+                    if (numbers && numbers.length > 0) {
+                        const vals = numbers.map(n => parseFloat(n.replace(/,/g, '')));
+                        finalAmount = Math.max(...vals).toFixed(2);
+                    }
+                }
+
+                let foundTo = false;
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    if (line.match(/(บันทึกช่วยจำ|บันทึก|Memo)/i)) {
+                        const cleanMemo = line.replace(/(บันทึกช่วยจำ|บันทึก|Memo)[\s.:]*/i, '').trim();
+                        if (cleanMemo) memoText = cleanMemo; else if (i + 1 < lines.length) memoText = lines[i+1];
+                    }
+                    const dateMatch = line.match(/(\d{1,2}[\/\-\. ]\d{1,2}[\/\-\. ]\d{2,4})|(\d{1,2}\s+(ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.|มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)\s+\d{2,4})/);
+                    if(dateMatch) dateStr = dateMatch[0];
+                    if (line.match(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)/i)) {
+                        let cleanMerchant = line.replace(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)[\s.:]*/i, '').trim();
+                        if (cleanMerchant.length < 3 && i + 1 < lines.length) cleanMerchant = lines[i+1].trim();
+                        cleanMerchant = cleanMerchant.replace(/(ธนาคาร|พร้อมเพย์|PromptPay|KBank|SCB|KTB|BBL|GSB)/ig, '').trim();
+                        if (cleanMerchant.length > 2) { merchant = cleanMerchant; foundTo = true; }
+                    }
+                    if (!foundTo && !merchant && line.match(/(นาย|นาง|น\.ส\.|บจก|หจก|บริษัท|ร้าน|SHOP|ครัว|คาเฟ่|cafe|มินิมาร์ท|ตลาด)/i)) {
+                         if(!line.match(/^(จาก|ผู้โอน)/i)) merchant = line.replace(/^(จาก|ผู้โอน)[\s.:]*/i, '').trim();
+                    }
+                }
+                if (!merchant && finalAmount) {
+                    if(lines.length > 0) merchant = lines[0];
+                    if(merchant.match(/ใบเสร็จ|Receipt|รับเงิน/i) && lines.length > 1) merchant = lines[1];
+                }
+
+                let finalTitle = memoText || merchant || 'รายการใช้จ่าย';
+                finalTitle = finalTitle.replace(/(รหัสอ้างอิง|เลขอ้างอิง|Ref|วันที่).*/i, '').trim();
+                const categoryInfo = categorizeText(finalTitle + ' ' + rawText);
+
+                if (typeof file === 'string') {
+                    onComplete({ amount: finalAmount || '', merchant: finalTitle, date: dateStr, categoryKey: categoryInfo.cat, iconType: categoryInfo.iconType, icon: categoryInfo.icon, colorType: categoryInfo.colType, color: categoryInfo.col, isAuto: true, imageUrl: file });
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => onComplete({ amount: finalAmount || '', merchant: finalTitle, date: dateStr, categoryKey: categoryInfo.cat, iconType: categoryInfo.iconType, icon: categoryInfo.icon, colorType: categoryInfo.colType, color: categoryInfo.col, isAuto: true, imageUrl: ev.target.result });
+                    reader.readAsDataURL(file);
+                }
+            } catch (error) {
+                let imgData = null;
+                if (typeof file === 'string') imgData = file;
+                else if (file instanceof Blob) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => onComplete({ amount: '', merchant: '', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', iconType: 'lucide', icon: 'receipt', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: e.target.result });
+                    reader.readAsDataURL(file);
+                    return;
+                }
+                onComplete({ amount: '', merchant: '', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', iconType: 'lucide', icon: 'receipt', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: imgData });
+            }
+        };
+
+        const TRANSLATIONS = {
+            TH: {
+                welcome: 'ยินดีต้อนรับ', subWelcome: 'จัดการเงินง่ายๆ สไตล์คุณ', email: 'อีเมล', password: 'รหัสผ่าน',
+                forgotPass: 'ลืมรหัสผ่าน?', login: 'เข้าสู่ระบบ', loginGoogle: 'เข้าสู่ระบบด้วย Google',
+                noAccount: 'ยังไม่มีบัญชี?', signUp: 'สมัครเลย', createAccount: 'สร้างบัญชี', name: 'ชื่อ-นามสกุล',
+                confirmPass: 'ยืนยันรหัสผ่าน', sendLink: 'ส่งลิงก์',
+                home: 'หน้าหลัก', wallet: 'กระเป๋าเงิน', scan: 'สแกน', history: 'ประวัติ', profile: 'โปรไฟล์',
+                totalSpend: 'ยอดใช้จ่ายรวม', safeSpend: 'ยอดเงินคงเหลือ', recent: 'รายการล่าสุด', seeAll: 'ดูทั้งหมด',
+                noData: 'ยังไม่มีรายการ', newPocket: 'สร้างกระเป๋าใหม่', scanReceipt: 'สแกนสลิป', gallery: 'คลังภาพ',
+                manual: 'กรอกเอง', reviewDetails: 'ตรวจสอบข้อมูล', merchant: 'ชื่อร้าน/ผู้รับโอน', date: 'วันที่',
+                confirmSave: 'ยืนยันและบันทึก', addTx: 'บันทึกรายการ', amount: 'จำนวนเงิน', saveTx: 'บันทึกรายการ',
+                splitBill: 'หารบิลกับเพื่อน', totalAmount: 'ยอดรวมบิล', addFriend: 'เพิ่มเพื่อน', confirmSplit: 'ยืนยันการหารบิล',
+                txDetail: 'รายละเอียด', status: 'สถานะ', category: 'หมวดหมู่', editProfile: 'แก้ไขโปรไฟล์',
+                security: 'ความปลอดภัย', language: 'ภาษา', theme: 'ธีมแอป', logout: 'ออกจากระบบ',
+                light: 'Light', dark: 'Dark', system: 'System', reduceMotion: 'ลดการเคลื่อนไหว', changePass: 'เปลี่ยนรหัสผ่าน',
+                pinCode: 'รหัส PIN', setPin: 'ตั้งรหัส PIN', changePin: 'เปลี่ยน PIN',
+                yourDevices: 'อุปกรณ์ของคุณ', currentDevice: 'อุปกรณ์นี้', pocketName: 'ชื่อกระเป๋า', targetAmount: 'เป้าหมาย (บาท)',
+                savePocket: 'บันทึกกระเป๋า', passMismatch: 'รหัสผ่านไม่ตรงกัน', fillAll: 'กรุณากรอกให้ครบ', loading: 'กำลังประมวลผล...',
+                guestLogin: 'ทดลองใช้งาน (Guest)', aiSelected: 'AI เลือกให้', catFood: 'อาหาร/เครื่องดื่ม', catShop: 'ช้อปปิ้ง', catTransfer: 'โอนเงิน', catBill: 'จ่ายบิล', catTravel: 'เดินทาง/น้ำมัน', catGeneral: 'ทั่วไป',
+                searchPlaceholder: 'ค้นหารายการ...', all: 'ทั้งหมด', notFound: 'ไม่พบรายการที่ค้นหา',
+                notifications: 'การแจ้งเตือน', recentAlerts: 'รายการแจ้งเตือน', clearAll: 'ล้างทั้งหมด', caughtUp: 'คุณจัดการรายการสำคัญหมดแล้ว',
+                billReminder: 'แจ้งเตือนเป้าหมาย', newTx: 'รายการใหม่', lowBalance: 'เตือนเงินเหลือน้อย', safeThreshold: 'ยอดเงินในบัญชีรวมต่ำกว่าเกณฑ์ปลอดภัย (฿500.00)',
+                initialAmount: 'เงินเริ่มต้น', setMonthlyTarget: 'ตั้งเป้าหมายรายเดือน', optionalGoal: 'เป้าหมาย (เลือกได้)', chooseIcon: 'เลือกไอคอน & สี',
+                yourPockets: 'กระเป๋าเงินของคุณ', keepOrganized: 'จัดสรรเงินให้เป็นระเบียบ', createNewPocket: 'สร้างกระเป๋าใหม่',
+                pocketDetails: 'รายละเอียดกระเป๋า', saved: 'เก็บแล้ว', left: 'เหลือ', spendingTrend: 'แนวโน้มการใช้จ่าย', recentActivity: 'รายการในกระเป๋า', viewAll: 'ดูทั้งหมด',
+                pocketSettings: 'ตั้งค่ากระเป๋าเงิน', manageDetails: 'จัดการข้อมูลกระเป๋าของคุณ', general: 'ทั่วไป', iconColor: 'ไอคอน & สี', customizeApp: 'ปรับแต่งความสวยงาม',
+                budgeting: 'การจัดการเงิน', monthlyGoal: 'เป้าหมาย', setTargetAmount: 'ตั้งยอดเงินเป้าหมาย', notifSettings: 'การแจ้งเตือน', spendingAlerts: 'แจ้งเตือนการใช้จ่าย', notify80: 'เตือนเมื่อใช้เงินถึง 80% และ 100%',
+                archivePocket: 'ซ่อนกระเป๋า (Archive)', deletePocket: 'ลบกระเป๋านี้ทิ้ง', cannotUndone: 'ลบแล้วไม่สามารถกู้คืนได้', saveChanges: 'บันทึกการเปลี่ยนแปลง',
+                customIcon: 'หรือเลือกไอคอนลายเส้น:', pickColor: 'จิ้มเลือกสีที่ชอบ:', tapToUpload: 'แตะเพื่อเลือกรูป', preview: 'ตัวอย่างรูปภาพ', attachReceipt: 'แนบสลิป',
+                extractedAmount: 'ยอดเงินที่อ่านได้', notes: 'บันทึกเพิ่มเติม', alignReceipt: 'จัดวางสลิปให้อยู่ในกรอบ', camera: 'กล้อง', pocketDeducted: 'หักจากกระเป๋า', noPocket: 'ไม่ระบุกระเป๋า',
+                transactions: 'รายการใช้จ่าย', income: 'รายรับ', expense: 'รายจ่าย', today: 'วันนี้', yesterday: 'เมื่อวาน', completed: 'สำเร็จ', addCategory: 'เพิ่มหมวดหมู่ใหม่', categoryName: 'ชื่อหมวดหมู่...', cancel: 'ยกเลิก', add: 'เพิ่ม',
+                accountTitle: 'บัญชี', accountSettings: 'ตั้งค่าบัญชี', preferencesTitle: 'การปรับแต่ง', appTheme: 'ธีมแอป', bio: 'ประวัติส่วนตัว',
+                transactionAlerts: 'แจ้งเตือนรายการ', everyPurchase: 'ทุกรายการใช้จ่าย', budgetAlerts: 'แจ้งเตือนงบประมาณ',
+                budgetWarnings: 'เตือนเมื่อใช้เงินใกล้หมด', monthlySummaries: 'สรุปยอดรายเดือน', newLogins: 'การเข้าสู่ระบบเครื่องใหม่', passwordChanges: 'การเปลี่ยนรหัสผ่าน',
+                themeMode: 'โหมดหน้าจอ', activeNow: 'ใช้งานอยู่ตอนนี้', pinStatusNotSet: 'ยังไม่ได้ตั้งค่า', pinStatusSet: 'เปิดใช้งานแล้ว', viewReceipt: 'ดูสลิป'
+            },
+            EN: {
+                welcome: 'Welcome', subWelcome: 'Manage your money easily', email: 'Email', password: 'Password',
+                forgotPass: 'Forgot Password?', login: 'Sign In', loginGoogle: 'Sign In with Google',
+                noAccount: 'No account?', signUp: 'Sign Up', createAccount: 'Create Account', name: 'Full Name',
+                confirmPass: 'Confirm Password', sendLink: 'Send Link',
+                home: 'Home', wallet: 'Pockets', scan: 'Scan', history: 'History', profile: 'Profile',
+                totalSpend: 'Total Spent', safeSpend: 'Total Balance', recent: 'Recent', seeAll: 'See All',
+                noData: 'No Data', newPocket: 'New Pocket', scanReceipt: 'Scan Receipt', gallery: 'Gallery',
+                manual: 'Manual', reviewDetails: 'Review Details', merchant: 'Merchant', date: 'Date',
+                confirmSave: 'Confirm Details', addTx: 'Add Transaction', amount: 'Amount', saveTx: 'Save Transaction',
+                splitBill: 'Split Bill', totalAmount: 'Total Amount', addFriend: 'Add Friend', confirmSplit: 'Confirm Split',
+                txDetail: 'Receipt Details', status: 'Status', category: 'Category', editProfile: 'Edit Profile',
+                security: 'Security', language: 'Language', theme: 'Theme', logout: 'Log Out',
+                light: 'Light', dark: 'Dark', system: 'System', reduceMotion: 'Reduce Motion', changePass: 'Change Password',
+                pinCode: 'PIN Code', setPin: 'Set PIN', changePin: 'Change PIN',
+                yourDevices: 'Your Devices', currentDevice: 'Current Device', pocketName: 'Pocket Name', targetAmount: 'Target Amount',
+                savePocket: 'Save Pocket', passMismatch: 'Passwords do not match', fillAll: 'Please fill all fields', loading: 'Loading...',
+                guestLogin: 'Try as Guest', aiSelected: 'AI Selected', catFood: 'Dining', catShop: 'Shopping', catTransfer: 'Transfer', catBill: 'Bills', catTravel: 'Transport', catGeneral: 'General',
+                searchPlaceholder: 'Search transactions...', all: 'All', notFound: 'No results found',
+                notifications: 'Notifications', recentAlerts: 'Recent Alerts', clearAll: 'Clear All', caughtUp: 'You\'re all caught up on critical items.',
+                billReminder: 'Goal Reminder', newTx: 'New Transaction', lowBalance: 'Low Balance Alert', safeThreshold: 'Your total balance is below the safe threshold (฿500.00)',
+                initialAmount: 'Initial Amount', setMonthlyTarget: 'Set a monthly target', optionalGoal: 'Optional goal tracking', chooseIcon: 'Choose an Icon & Color',
+                yourPockets: 'Your Pockets', keepOrganized: 'Keep your funds organized and cozy.', createNewPocket: 'Create New Pocket',
+                pocketDetails: 'Pocket Details', saved: 'Saved', left: 'left', spendingTrend: 'Spending Trend', recentActivity: 'Recent Activity', viewAll: 'View All',
+                pocketSettings: 'Pocket Settings', manageDetails: 'Manage your pocket details.', general: 'GENERAL', iconColor: 'Icon & Color', customizeApp: 'Customize appearance',
+                budgeting: 'BUDGETING', monthlyGoal: 'Monthly Goal', setTargetAmount: 'Set a target amount', notifSettings: 'NOTIFICATIONS', spendingAlerts: 'Spending Alerts', notify80: 'Notify at 80% and 100%',
+                archivePocket: 'Archive Pocket', deletePocket: 'Delete Pocket', cannotUndone: 'Deleting a pocket cannot be undone.', saveChanges: 'Save Changes',
+                customIcon: 'Or pick any Icon:', pickColor: 'Pick your custom color:', tapToUpload: 'Tap to Upload', preview: 'Preview', attachReceipt: 'Attach Receipt',
+                extractedAmount: 'Extracted Amount', notes: 'Notes', alignReceipt: 'Align the receipt within the frame', camera: 'Camera', pocketDeducted: 'Pocket', noPocket: 'None',
+                transactions: 'Transactions', income: 'Income', expense: 'Expense', today: 'Today', yesterday: 'Yesterday', completed: 'Completed', addCategory: 'Add New Category', categoryName: 'Category Name...', cancel: 'Cancel', add: 'Add',
+                accountTitle: 'ACCOUNT', accountSettings: 'Account Settings', preferencesTitle: 'PREFERENCES', appTheme: 'App Theme', bio: 'Bio',
+                transactionAlerts: 'Transaction Alerts', everyPurchase: 'Every purchase', budgetAlerts: 'Budget Alerts',
+                budgetWarnings: 'Budget limit warnings', monthlySummaries: 'Monthly spending summaries', newLogins: 'New device logins', passwordChanges: 'Password changes',
+                themeMode: 'Theme Mode', activeNow: 'Active now', pinStatusNotSet: 'Not configured', pinStatusSet: 'Configured', viewReceipt: 'View Receipt'
+            }
+        };
+        const getT = (lang) => (key) => TRANSLATIONS[lang]?.[key] || key;
+
         class ErrorBoundary extends React.Component {
             constructor(props) { super(props); this.state = { hasError: false, error: null }; }
             static getDerivedStateFromError(error) { return { hasError: true, error }; }
@@ -183,7 +295,7 @@
                             <h1 className="text-4xl font-black mb-4 text-red-500">Oops!</h1>
                             <h2 className="text-xl font-bold mb-2">แอปเกิดข้อผิดพลาด</h2>
                             <p className="text-slate-400 text-center mb-8 text-xs bg-slate-800 p-4 rounded-xl">{this.state.error?.toString()}</p>
-                            <button onClick={()=>window.location.reload()} className="px-8 py-4 bg-[#2F80ED] text-white rounded-full font-black shadow-lg active:scale-95">โหลดแอปใหม่ (Reload)</button>
+                            <button onClick={()=>window.location.reload()} className="px-8 py-4 bg-[#F472B6] text-white rounded-full font-black shadow-lg active:scale-95">โหลดแอปใหม่ (Reload)</button>
                         </div>
                     );
                 }
@@ -191,253 +303,164 @@
             }
         }
 
-        // ==========================================
-        // 5. MAIN APPLICATION
-        // ==========================================
-        const App = () => {
-            const [isAuthReady, setIsAuthReady] = useState(false);
-            const [user, setUser] = useState(null);
-            const [screen, setScreen] = useState('SIGN_IN');
-            const [tab, setTab] = useState('HOME');
-            const [screenData, setScreenData] = useState(null);
-            
-            const [lang, setLang] = useState('TH');
-            const [themeMode, setThemeMode] = useState('system'); 
-            const [reduceMotion, setReduceMotion] = useState(false);
-            
-            const savedPin = localStorage.getItem('cozy_pin');
-            const [pinCode, setPinCode] = useState(savedPin); 
-            const [isLocked, setIsLocked] = useState(!!savedPin); 
-            const [showPinModal, setShowPinModal] = useState(false);
-            
-            const [txs, setTxs] = useState([]);
-            const [pockets, setPockets] = useState([]);
+        const SwitchToggle = ({ isOn, onToggle }) => (
+            <div onClick={onToggle} className={`w-12 h-7 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${isOn ? 'bg-[#56CC9D]' : 'bg-slate-200'}`}>
+                <div className={`bg-white w-5 h-5 rounded-full shadow-sm transform transition-transform duration-300 ${isOn ? 'translate-x-5' : ''}`}></div>
+            </div>
+        );
 
-            const t = useCallback((key) => getT(lang)(key), [lang]);
-            
-            const go = useCallback((s, tb = null, data = null) => {
-                setScreen(s);
-                if (tb) setTab(tb);
-                if (data !== undefined) setScreenData(data);
-            }, []);
-
-            const activeTheme = useMemo(() => {
-                if (themeMode === 'system') return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                return themeMode;
-            }, [themeMode]);
-
-            useEffect(() => {
-                const unsub = auth.onAuthStateChanged(u => {
-                    setIsAuthReady(true);
-                    if(u) {
-                        db.collection('users').doc(u.uid).onSnapshot(doc => {
-                            const dbData = doc.data() || {};
-                            setUser({
-                                uid: u.uid,
-                                email: u.email,
-                                displayName: dbData.displayName || u.displayName || u.email.split('@')[0],
-                                photoURL: dbData.photoURL || u.photoURL || 'https://ui-avatars.com/api/?name='+(dbData.displayName||u.displayName||'U')+'&background=2F80ED&color=fff'
-                            });
-                        });
-
-                        if(!isLocked) go('MAIN', 'HOME');
-                        
-                        try {
-                            db.collection('users').doc(u.uid).collection('transactions').orderBy('timestamp', 'desc').onSnapshot(
-                                snap => setTxs(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-                            );
-                            db.collection('users').doc(u.uid).collection('pockets').onSnapshot(
-                                snap => setPockets(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-                            );
-                        } catch(e) { console.error("Sync Error", e); }
-
-                    } else {
-                        const localGuest = localStorage.getItem('cozy_guest');
-                        if (localGuest) {
-                            setUser(JSON.parse(localGuest));
-                            if(!isLocked) go('MAIN', 'HOME');
-                        } else {
-                            go('SIGN_IN');
-                            setTxs([]); setPockets([]);
-                        }
-                    }
-                });
-                return unsub;
-            }, [go, isLocked]);
-
-            if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-[#0f172a] text-[#2F80ED]"><Icon name="loader-2" size={48} className="animate-spin"/></div>;
-
-            if (isLocked) {
-                return (
-                    <div className={`app-container ${activeTheme === 'dark' ? 'theme-dark' : 'bg-[#FCFBFA]'}`}>
-                        <LockScreen Icon={Icon} correctPin={pinCode} onUnlock={()=>{ setIsLocked(false); if(user) go('MAIN','HOME'); else go('SIGN_IN'); }} />
-                    </div>
-                );
-            }
-
-            const p = { user, setUser, go, t, lang, setLang, themeMode, setThemeMode, reduceMotion, setReduceMotion, pinCode, setPinCode, showPinModal, setShowPinModal, txs, setTxs, pockets, setPockets, screenData, Icon, LoadingOverlay, translateAuthError };
-
-            return (
-                <div className={`app-container ${reduceMotion ? 'no-motion' : ''} ${activeTheme === 'dark' ? 'theme-dark' : 'bg-[#FCFBFA]'}`}>
-                    {screen === 'SIGN_IN' && <LoginScreen {...p} />}
-                    {screen === 'SIGN_UP' && <SignUpScreen {...p} />}
-                    {screen === 'FORGOT_PASS' && <ForgotScreen {...p} />}
-                    
-                    {screen === 'MAIN' && (
-                        <MainLayout {...p} tab={tab}>
-                            {tab === 'HOME' && <HomeScreen {...p} />}
-                            {tab === 'POCKETS' && <PocketsScreen {...p} />}
-                            {tab === 'HISTORY' && <HistoryScreen {...p} />}
-                            {tab === 'PROFILE' && <ProfileScreen {...p} onLogout={()=>{ auth.signOut(); localStorage.removeItem('cozy_guest'); setUser(null); go('SIGN_IN'); }} />}
-                        </MainLayout>
-                    )}
-                    
-                    {screen === 'SCAN' && <ScanScreen {...p} onNext={(d)=>go('REVIEW', null, d)} />}
-                    {screen === 'REVIEW' && <ReviewScreen {...p} onConfirm={async (d)=>{ 
-                        if(user && user.uid !== 'mock-uid') {
-                            await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
-                        } else setTxs([d, ...txs]); 
-                        go('MAIN','HISTORY'); 
-                    }} />}
-                    {screen === 'ADD_TX' && <AddTxScreen {...p} onSave={async (d)=>{ 
-                        if(user && user.uid !== 'mock-uid') {
-                            await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
-                        } else setTxs([d, ...txs]); 
-                        go('MAIN','HISTORY'); 
-                    }} />}
-                    {screen === 'TX_DETAIL' && <TxDetailScreen {...p} tx={screenData || txs[0]} />}
-                    {screen === 'SPLIT_BILL' && <SplitBillScreen {...p} tx={screenData || txs[0]} />}
-                    
-                    {screen === 'ADD_POCKET' && <AddPocketScreen {...p} onSave={async (pData)=>{ 
-                        if(user && user.uid !== 'mock-uid') {
-                            await db.collection('users').doc(user.uid).collection('pockets').add({...pData, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
-                        } else setPockets([...pockets, pData]); 
-                        go('MAIN', 'POCKETS'); 
-                    }} />}
-                    {screen === 'POCKET_DETAILS' && <PocketDetailsScreen {...p} pocket={screenData || pockets[0]} />}
-                    
-                    {screen === 'EDIT_PROFILE' && <EditProfileScreen {...p} />}
-                    {screen === 'SECURITY' && <SecuritySettingsScreen {...p} />}
-                    {screen === 'LANGUAGE' && <LanguageSettingsScreen {...p} />}
-                    {screen === 'THEME' && <ThemeSettingsScreen {...p} />}
-                    
-                    {showPinModal && <PinPadModal onClose={()=>setShowPinModal(false)} onSave={(pin)=>{ setPinCode(pin); localStorage.setItem('cozy_pin', pin); setShowPinModal(false); }} Icon={Icon} isSet={!!pinCode} />}
-                </div>
-            );
+        const PocketIcon = ({ pocket, size = 20 }) => {
+            if (!pocket) return null;
+            const isHex = pocket.colorType === 'hex';
+            const style = isHex ? { backgroundColor: `${pocket.color}33`, color: pocket.color } : {};
+            const className = `flex items-center justify-center shrink-0 ${isHex ? '' : (pocket.color || 'bg-blue-50 text-blue-500')}`;
+            return <div className={className} style={{...style, width: size*2.5, height: size*2.5, borderRadius: size}}><Icon name={pocket.icon || 'wallet'} size={size} /></div>;
         };
 
-        // --- LOCK SCREEN ---
-        const LockScreen = ({ Icon, correctPin, onUnlock }) => {
-            const [pin, setPin] = useState('');
-            const [err, setErr] = useState('');
-            const press = (n) => { if(pin.length < 6) { setPin(p => p + n); setErr(''); } };
-            const del = () => setPin(p => p.slice(0, -1));
-            
-            useEffect(() => {
-                if(pin.length === 6) {
-                    if(pin === correctPin) onUnlock();
-                    else { setErr('รหัสไม่ถูกต้อง'); setTimeout(()=>setPin(''), 500); }
-                }
-            }, [pin]);
+        const defaultPocketIcons = [
+            { type: 'lucide', icon: 'plane', colorType: 'tailwind', color: 'bg-[#E2F0E5] text-[#4A7D59]' },
+            { type: 'lucide', icon: 'car', colorType: 'tailwind', color: 'bg-[#FCEAEF] text-[#9D4D63]' },
+            { type: 'lucide', icon: 'gift', colorType: 'tailwind', color: 'bg-[#EAE4F2] text-[#6B5A82]' },
+            { type: 'lucide', icon: 'home', colorType: 'tailwind', color: 'bg-[#FFF5D1] text-[#B89B2B]' },
+            { type: 'lucide', icon: 'coffee', colorType: 'tailwind', color: 'bg-[#F2F2F2] text-[#666666]' },
+            { type: 'lucide', icon: 'piggy-bank', colorType: 'tailwind', color: 'bg-[#FCEAEF] text-[#9D4D63]' },
+            { type: 'lucide', icon: 'shopping-bag', colorType: 'tailwind', color: 'bg-[#E2F0E5] text-[#4A7D59]' }
+        ];
 
+        const lineIconsList = ['wallet', 'plane', 'car', 'gift', 'home', 'coffee', 'piggy-bank', 'shopping-bag', 'heart', 'star', 'music', 'book', 'smartphone', 'monitor', 'camera', 'zap', 'umbrella', 'scissors', 'trending-up', 'award'];
+        
+        const CustomIconModal = ({ onClose, onSelect, t }) => {
+            const [hex, setHex] = useState('#2F80ED');
             return (
-                <div className="flex-1 flex flex-col justify-end bg-[#0f172a] fade-in">
-                    <div className="flex-1 flex flex-col items-center justify-center pt-20">
-                        <div className="w-20 h-20 bg-[#2F80ED] rounded-[28px] text-white flex items-center justify-center mb-6 shadow-xl"><Icon name="lock" size={40}/></div>
-                        <h2 className="text-white text-2xl font-black mb-2">ปลดล็อคแอป</h2>
-                        <p className="text-slate-400 text-sm">กรุณากรอกรหัส PIN 6 หลัก</p>
+                <div className="absolute inset-0 bg-black/60 z-[100] flex flex-col justify-end fade-in">
+                    <div className="bg-white w-full rounded-t-[40px] p-6 pb-12 flex flex-col slide-up shadow-[0_-20px_50px_rgba(0,0,0,0.5)] h-[70vh]">
+                        <div className="flex justify-between items-center w-full mb-6">
+                            <h3 className="font-black text-slate-800 text-lg">{t('chooseIcon')}</h3>
+                            <button onClick={onClose} className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500"><Icon name="x" size={16}/></button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto no-scrollbar space-y-6">
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-400 mb-3 block">{t('pickColor')}</label>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-14 h-14 rounded-full overflow-hidden border-4 border-slate-100 shadow-sm relative shrink-0"><input type="color" value={hex} onChange={e=>setHex(e.target.value)} /></div>
+                                    <div className="flex-1 h-14 rounded-2xl flex items-center justify-center font-black" style={{backgroundColor: `${hex}33`, color: hex}}>Preview</div>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-400 mb-3 block">{t('customIcon')}</label>
+                                <div className="grid grid-cols-5 gap-3">
+                                    {lineIconsList.map((iconName, i) => (
+                                        <div key={i} onClick={() => { onSelect({ type: 'lucide', icon: iconName, colorType: 'hex', color: hex }); onClose(); }} className="aspect-square rounded-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-transform" style={{backgroundColor: `${hex}33`, color: hex}}>
+                                            <Icon name={iconName} size={24} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="bg-white w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
-                        <div className="flex gap-4 mb-8">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? (err?'bg-red-500':'bg-[#2F80ED]') : 'bg-slate-200'}`}></div>)}</div>
-                        {err && <p className="text-red-500 text-xs font-bold mb-4">{err}</p>}
-                        <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
-                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200 transition-colors">{n}</button>)}
-                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200 transition-colors">0</button><button onClick={del} className="h-16 flex items-center justify-center text-slate-500 active:bg-slate-100 rounded-full transition-colors"><Icon name="delete" size={28}/></button>
+                </div>
+            )
+        };
+
+        const AddCategoryModal = ({ onClose, onAdd, t }) => {
+            const [newCat, setNewCat] = useState('');
+            return (
+                <div className="absolute inset-0 bg-black/60 z-[100] flex items-center justify-center fade-in p-6">
+                    <div className="bg-white w-full rounded-[32px] p-6 slide-up shadow-2xl">
+                        <h3 className="font-black text-slate-800 text-lg mb-4">{t('addCategory')}</h3>
+                        <input autoFocus value={newCat} onChange={e=>setNewCat(e.target.value)} className="w-full bg-slate-50 p-4 rounded-2xl font-bold text-sm outline-none focus:ring-2 ring-[#F472B6] mb-6" placeholder={t('categoryName')} />
+                        <div className="flex gap-4">
+                            <button onClick={onClose} className="flex-1 bg-slate-100 text-slate-500 font-bold py-3 rounded-xl">{t('cancel')}</button>
+                            <button onClick={()=>onAdd(newCat)} disabled={!newCat} className="flex-1 bg-[#F472B6] text-white font-bold py-3 rounded-xl disabled:opacity-50">{t('add')}</button>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        // --- LAYOUT ---
-        const MainLayout = ({ children, tab, go, t, Icon }) => (
+        const Section = ({ title, children }) => (
+            <div className="mb-6"><h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-4">{title}</h4><div className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">{children}</div></div>
+        );
+
+        const PinPadModal = ({ onClose, onSave, isSet, t }) => {
+            const [pin, setPin] = useState('');
+            const press = (n) => { if(pin.length < 6) setPin(p => p + n); };
+            const del = () => setPin(p => p.slice(0, -1));
+            useEffect(() => { if(pin.length === 6) setTimeout(()=>{ onSave(pin); onClose(); }, 200); }, [pin]);
+            return (
+                <div className="absolute inset-0 bg-black/60 z-[100] flex flex-col justify-end fade-in">
+                    <div className="bg-white w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center slide-up shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
+                        <div className="flex justify-between w-full mb-8"><div className="w-8"></div><h3 className="font-black text-slate-800 text-lg">{isSet?t('changePin'):t('setPin')}</h3><button onClick={onClose} className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500"><Icon name="x" size={16}/></button></div>
+                        <div className="flex gap-4 mb-10">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? 'bg-[#F472B6]' : 'bg-slate-200'}`}></div>)}</div>
+                        <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
+                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200">{n}</button>)}
+                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200">0</button><button onClick={del} className="h-16 flex items-center justify-center text-slate-500 active:bg-slate-100 rounded-full"><Icon name="delete" size={28}/></button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const LockScreen = ({ correctPin, onUnlock }) => {
+            const [pin, setPin] = useState(''); const [err, setErr] = useState('');
+            const press = (n) => { if(pin.length < 6) { setPin(p => p + n); setErr(''); } };
+            const del = () => setPin(p => p.slice(0, -1));
+            useEffect(() => { if(pin.length === 6) { if(pin === correctPin) onUnlock(); else { setErr('Error'); setTimeout(()=>setPin(''), 500); } } }, [pin]);
+            return (
+                <div className="flex-1 flex flex-col justify-end bg-[#0f172a] fade-in">
+                    <div className="flex-1 flex flex-col items-center justify-center pt-20"><div className="w-20 h-20 bg-[#F472B6] rounded-[28px] text-white flex items-center justify-center mb-6 shadow-xl"><Icon name="lock" size={40}/></div><h2 className="text-white text-2xl font-black mb-2">QR Scanner</h2><p className="text-slate-400 text-sm">Enter PIN to unlock</p></div>
+                    <div className="bg-white w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
+                        <div className="flex gap-4 mb-8">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? (err?'bg-red-500':'bg-[#F472B6]') : 'bg-slate-200'}`}></div>)}</div>
+                        <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
+                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200">{n}</button>)}
+                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200">0</button><button onClick={del} className="h-16 flex items-center justify-center text-slate-500 active:bg-slate-100 rounded-full"><Icon name="delete" size={28}/></button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const MainLayout = ({ children, tab, go, t }) => (
             <div className="flex flex-col h-full relative fade-in">
                 <div className="flex-1 overflow-y-auto pb-24 no-scrollbar">{children}</div>
                 <div className="absolute bottom-0 w-full bg-white/95 backdrop-blur-xl border-t border-slate-100 px-6 py-4 flex justify-between items-center z-50 rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
-                    <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} Icon={Icon} />
-                    <NavBtn icon="wallet" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} Icon={Icon} />
-                    <div className="relative -top-8">
-                        <button onClick={()=>go('SCAN')} className="bg-[#2F80ED] text-white p-4 rounded-full shadow-lg active:scale-95 transition-transform border-4 border-[#FCFBFA]">
-                            <Icon name="scan-line" size={28} />
-                        </button>
-                    </div>
-                    <NavBtn icon="clock" label={t('history')} active={tab==='HISTORY'} onClick={()=>go('MAIN','HISTORY')} Icon={Icon} />
-                    <NavBtn icon="user" label={t('profile')} active={tab==='PROFILE'} onClick={()=>go('MAIN','PROFILE')} Icon={Icon} />
+                    <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} />
+                    <NavBtn icon="layout-grid" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} />
+                    <div className="relative -top-8"><button onClick={()=>go('SCAN')} className="bg-[#2F80ED] text-white p-4 rounded-full shadow-lg active:scale-95 transition-transform border-4 border-[#FCFBFA]"><Icon name="scan-line" size={28} /></button></div>
+                    <NavBtn icon="clock" label={t('history')} active={tab==='HISTORY'} onClick={()=>go('MAIN','HISTORY')} />
+                    <NavBtn icon="user" label={t('profile')} active={tab==='PROFILE'} onClick={()=>go('MAIN','PROFILE')} />
                 </div>
             </div>
         );
-        const NavBtn = ({ icon, label, active, onClick, Icon }) => (
-            <button onClick={onClick} className={`flex flex-col items-center gap-1 w-12 transition-colors ${active?'text-[#2F80ED]':'text-slate-400'}`}>
-                <Icon name={icon} size={24} strokeWidth={active?2.5:2} />
-                <span className="text-[9px] font-bold tracking-wide">{label}</span>
-            </button>
-        );
+        const NavBtn = ({ icon, label, active, onClick }) => (<button onClick={onClick} className={`flex flex-col items-center gap-1 w-12 transition-colors ${active?'text-[#2F80ED]':'text-slate-400'}`}><Icon name={icon} size={24} strokeWidth={active?2.5:2} /><span className="text-[9px] font-bold tracking-wide">{label}</span></button>);
 
-        // --- AUTH LOGIC ---
-        const LoginScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
-            const [email, setEmail] = useState('');
-            const [password, setPassword] = useState('');
-            const [err, setErr] = useState('');
-            const [loading, setLoading] = useState(false);
-
+        const LoginScreen = ({ go, setUser, t }) => {
+            const [email, setEmail] = useState(''); const [password, setPassword] = useState('');
+            const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
             const handleLogin = async (e) => {
-                e.preventDefault();
-                if(!email || !password) return setErr(t('fillAll'));
-                setLoading(true); setErr('');
-                try {
-                    await auth.signInWithEmailAndPassword(email, password);
-                } catch (e) {
+                e.preventDefault(); if(!email || !password) return setErr(t('fillAll')); setLoading(true); setErr('');
+                try { await auth.signInWithEmailAndPassword(email, password); } 
+                catch (e) {
                     if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
                         setTimeout(() => {
-                            const guestUser = { uid: 'mock-uid', email: email, displayName: 'ผู้ใช้งานทั่วไป', photoURL: 'https://ui-avatars.com/api/?name=User&background=2F80ED&color=fff' };
-                            localStorage.setItem('cozy_guest', JSON.stringify(guestUser));
-                            setUser(guestUser); go('MAIN', 'HOME');
+                            const guest = { uid: 'mock-uid', email, displayName: 'ผู้ใช้งานทั่วไป', photoURL: 'https://ui-avatars.com/api/?name=User&background=F472B6&color=fff' };
+                            localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
                         }, 1000);
-                    } else {
-                        setErr(translateAuthError(e.code));
-                        setLoading(false);
-                    }
+                    } else { setErr(translateAuthError(e.code)); setLoading(false); }
                 }
             };
-
             const googleLogin = async () => {
                 setLoading(true);
-                try {
-                    const p = new firebase.auth.GoogleAuthProvider();
-                    await auth.signInWithPopup(p);
-                } catch (e) {
+                try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); } 
+                catch (e) {
                     if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
                         setTimeout(() => {
-                            const guestGoogle = { uid: 'mock-uid', email: 'guest@google.com', displayName: 'Google User', photoURL: 'https://ui-avatars.com/api/?name=Google&background=DB4437&color=fff' };
-                            localStorage.setItem('cozy_guest', JSON.stringify(guestGoogle));
-                            setUser(guestGoogle); go('MAIN', 'HOME');
+                            const guest = { uid: 'mock-uid', email: 'guest@google.com', displayName: 'Google User', photoURL: 'https://ui-avatars.com/api/?name=G&background=F472B6&color=fff' };
+                            localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
                         }, 1000);
-                    } else {
-                        setErr(e.message);
-                        setLoading(false);
-                    }
+                    } else { setErr(e.message); setLoading(false); }
                 }
             };
-
-            const guestLogin = () => {
-                setLoading(true);
-                setTimeout(() => {
-                    const guest = { uid: 'mock-uid', email: 'guest@app.com', displayName: 'ผู้ใช้งานทั่วไป', photoURL: 'https://ui-avatars.com/api/?name=User&background=2F80ED&color=fff' };
-                    localStorage.setItem('cozy_guest', JSON.stringify(guest));
-                    setUser(guest); go('MAIN', 'HOME');
-                }, 1000);
-            };
-
             return (
                 <div className="flex-1 p-8 flex flex-col justify-center fade-in bg-white relative">
                     {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
@@ -446,30 +469,21 @@
                         <div className="bg-slate-50 p-4 rounded-2xl flex items-center border border-transparent focus-within:border-[#2F80ED]"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('email')} /></div>
                         <div className="bg-slate-50 p-4 rounded-2xl flex items-center border border-transparent focus-within:border-[#2F80ED]"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('password')} /></div>
                         <div className="text-right"><button type="button" onClick={()=>go('FORGOT_PASS')} className="text-sm font-bold text-[#2F80ED]">{t('forgotPass')}</button></div>
-                        <button type="submit" className="w-full bg-[#2F80ED] text-white font-black py-4 rounded-[20px] shadow-lg shadow-blue-200 active:scale-95 transition-transform uppercase tracking-widest">{t('login')}</button>
+                        <button type="submit" className="w-full bg-[#2F80ED] text-white font-black py-4 rounded-[20px] shadow-lg active:scale-95 transition-transform uppercase tracking-widest">{t('login')}</button>
                     </form>
-                    {err && <div className="bg-red-50 text-red-500 p-3 rounded-xl text-xs font-bold text-center mt-4 border border-red-100">{err}</div>}
+                    {err && <div className="bg-red-50 text-red-500 p-3 rounded-xl text-xs font-bold text-center mt-4">{err}</div>}
                     <div className="flex items-center gap-4 my-8"><div className="h-px bg-slate-100 flex-1"/><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">OR</span><div className="h-px bg-slate-100 flex-1"/></div>
-                    
-                    <button onClick={googleLogin} className="w-full border border-slate-200 py-4 rounded-[20px] flex items-center justify-center gap-3 font-bold text-slate-700 active:scale-95 transition-transform shadow-sm mb-4">
-                        <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                        {t('loginGoogle')}
-                    </button>
-                    <button onClick={guestLogin} className="w-full border border-slate-200 py-4 rounded-[20px] flex items-center justify-center gap-3 font-bold text-slate-700 active:scale-95 transition-transform shadow-sm mb-4"><Icon name="user" size={20} className="text-slate-500" /> {t('guestLogin')}</button>
+                    <button onClick={googleLogin} className="w-full border border-slate-200 py-4 rounded-[20px] flex items-center justify-center gap-3 font-bold text-slate-700 active:scale-95 mb-4"><svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>{t('loginGoogle')}</button>
                     <button onClick={()=>go('SIGN_UP')} className="mt-8 text-sm font-bold text-slate-500 text-center w-full">{t('noAccount')} <span className="text-[#2F80ED] underline">{t('signUp')}</span></button>
                 </div>
             );
         };
 
-        const SignUpScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
-            const [name, setName] = useState(''); const [email, setEmail] = useState('');
-            const [pass, setPass] = useState(''); const [confirm, setConfirm] = useState('');
+        const SignUpScreen = ({ go, setUser, t }) => {
+            const [name, setName] = useState(''); const [email, setEmail] = useState(''); const [pass, setPass] = useState(''); const [confirm, setConfirm] = useState('');
             const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
-
             const handleSignUp = async (e) => {
-                e.preventDefault();
-                if(pass !== confirm) return setErr(t('passMismatch'));
-                if(!name || !email || !pass) return setErr(t('fillAll'));
+                e.preventDefault(); if(pass !== confirm) return setErr(t('passMismatch')); if(!name || !email || !pass) return setErr(t('fillAll'));
                 setLoading(true); setErr('');
                 try {
                     const res = await auth.createUserWithEmailAndPassword(email, pass);
@@ -477,17 +491,12 @@
                 } catch(error) {
                     if(error.code.includes('operation-not-supported') || error.code.includes('operation-not-allowed')) {
                         setTimeout(() => {
-                            const guestUser = { uid: 'mock-uid', email: email, displayName: name, photoURL: 'https://ui-avatars.com/api/?name='+name+'&background=2F80ED&color=fff' };
-                            localStorage.setItem('cozy_guest', JSON.stringify(guestUser));
-                            setUser(guestUser); go('MAIN', 'HOME');
-                        }, 1500);
-                    } else {
-                        setErr(translateAuthError(error.code));
-                        setLoading(false);
-                    }
+                            const guest = { uid: 'mock-uid', email, displayName: name, photoURL: 'https://ui-avatars.com/api/?name='+name+'&background=F472B6&color=fff' };
+                            localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
+                        }, 1000);
+                    } else { setErr(translateAuthError(error.code)); setLoading(false); }
                 }
             };
-
             return (
                 <div className="flex-1 p-8 flex flex-col bg-white fade-in relative">
                     {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
@@ -496,65 +505,45 @@
                     <form onSubmit={handleSignUp} className="space-y-4">
                         <div className="bg-slate-50 p-4 rounded-2xl flex items-center"><Icon name="user" size={20} className="text-slate-400 mr-3"/><input required value={name} onChange={e=>setName(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('name')} /></div>
                         <div className="bg-slate-50 p-4 rounded-2xl flex items-center"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('email')} /></div>
-                        <div className="bg-slate-50 p-4 rounded-2xl flex items-center"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input required type="password" value={pass} onChange={e=>setPass(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={`${t('password')} (ขั้นต่ำ 6 ตัว)`} /></div>
+                        <div className="bg-slate-50 p-4 rounded-2xl flex items-center"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input required type="password" value={pass} onChange={e=>setPass(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={`${t('password')} (min 6)`} /></div>
                         <div className={`bg-slate-50 p-4 rounded-2xl flex items-center border ${(pass&&confirm&&pass!==confirm)?'border-red-500':'border-transparent'}`}><Icon name="lock" size={20} className={(pass&&confirm&&pass!==confirm)?'text-red-500 mr-3':'text-slate-400 mr-3'}/><input required type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('confirmPass')} /></div>
                         {err && <p className="text-[10px] font-bold text-red-500 text-center bg-red-50 p-2 rounded-xl">{err}</p>}
-                        <button type="submit" className="w-full bg-[#2F80ED] text-white font-black py-4 rounded-[20px] mt-8 shadow-lg active:scale-95 transition-transform">{t('createAccount')}</button>
+                        <button type="submit" className="w-full bg-[#2F80ED] text-white font-black py-4 rounded-[20px] mt-8 shadow-lg active:scale-95">{t('createAccount')}</button>
                     </form>
                 </div>
             );
         };
 
-        const ForgotScreen = ({ go, t, Icon, LoadingOverlay, translateAuthError }) => {
-            const [email, setEmail] = useState(''); const [sent, setSent] = useState(false);
-            const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
-
+        const ForgotScreen = ({ go, t }) => {
+            const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [err, setErr] = useState('');
             const handleReset = async (e) => {
-                e.preventDefault();
-                if(!email) return setErr(t('fillAll'));
-                setLoading(true); setErr('');
-                try {
-                    await auth.sendPasswordResetEmail(email);
-                    setSent(true); setTimeout(()=>go('SIGN_IN'), 3000);
-                } catch(error) {
-                    if(error.code.includes('operation-not-supported')) {
-                        setTimeout(() => { setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); }, 1500);
-                    } else {
-                        setErr(translateAuthError(error.code));
-                        setLoading(false);
-                    }
-                }
+                e.preventDefault(); if(!email) return setErr(t('fillAll'));
+                try { await auth.sendPasswordResetEmail(email); setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); } 
+                catch(error) { if(error.code.includes('operation-not-supported')) { setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); } else { setErr(translateAuthError(error.code)); } }
             };
-
             return (
                 <div className="flex-1 p-8 flex flex-col bg-white fade-in text-center relative">
-                    {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
                     <button onClick={()=>go('SIGN_IN')} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center mb-8 absolute"><Icon name="chevron-left"/></button>
                     <div className="w-24 h-24 bg-blue-50 text-[#2F80ED] rounded-full flex items-center justify-center mx-auto mt-16 mb-8"><Icon name="key" size={40}/></div>
                     <h1 className="text-3xl font-black text-slate-800 mb-2">{t('forgotPass')}</h1>
-                    
                     {sent ? <div className="bg-green-50 text-green-600 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 animate-pulse mt-10"><Icon name="check-circle"/> ส่งลิงก์ไปยังอีเมลแล้ว!</div> : 
                     <form onSubmit={handleReset} className="space-y-6 mt-10">
                         <div className="bg-slate-50 p-4 rounded-2xl flex items-center text-left"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('email')} /></div>
                         {err && <p className="text-[10px] font-bold text-red-500 bg-red-50 p-2 rounded-xl">{err}</p>}
-                        <button type="submit" className="w-full bg-[#2F80ED] text-white font-black py-4 rounded-[20px] shadow-lg active:scale-95 transition-transform">{t('sendLink')}</button>
+                        <button type="submit" className="w-full bg-[#2F80ED] text-white font-black py-4 rounded-[20px] shadow-lg active:scale-95">{t('sendLink')}</button>
                     </form>}
                 </div>
             );
         };
 
-        // --- 6. DASHBOARDS ---
-        const HomeScreen = ({ user, txs, pockets, go, t, Icon }) => {
+        const HomeScreen = ({ user, txs, pockets, safeToSpend, visibleNotifications, go, t }) => {
             const totalSpend = txs.reduce((a,c) => a + Number(c.amount), 0);
-            const safeToSpend = pockets.reduce((a,c) => a + Number(c.balance), 0);
-
             return (
                 <div className="p-6 pt-10 fade-in">
-                    <div className="flex justify-between items-center mb-6">
-                        <div className="flex items-center gap-3">
-                            <img src={user?.photoURL || 'https://ui-avatars.com/api/?name=User&background=2F80ED&color=fff'} className="w-12 h-12 rounded-full border border-slate-200 object-cover shadow-sm"/>
-                            <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('welcome')},</p><h2 className="text-lg font-black text-slate-800 leading-none">{user?.displayName || 'ผู้ใช้งาน'}</h2></div>
-                        </div>
+                    <div className="flex justify-end items-center mb-6">
+                        <button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-[#F472B6] relative active:scale-95">
+                            <Icon name="bell" size={20}/>{visibleNotifications.length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
+                        </button>
                     </div>
                     <div className="bg-[#2F80ED] p-8 rounded-[36px] text-white shadow-[0_15px_30px_rgba(47,128,237,0.2)] mb-8 relative overflow-hidden">
                         <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
@@ -564,9 +553,9 @@
                     <div className="flex justify-between items-end mb-4"><h3 className="text-xl font-black text-slate-800">{t('recent')}</h3><button onClick={()=>go('MAIN','HISTORY')} className="text-xs font-black text-[#2F80ED] uppercase tracking-widest hover:underline">{t('seeAll')}</button></div>
                     <div className="space-y-3">
                         {txs.length === 0 ? <div className="text-center p-8 bg-white rounded-3xl border border-dashed border-slate-200"><p className="font-bold text-slate-400 text-sm">{t('noData')}</p></div> : 
-                        txs.slice(0,3).map(tx => (
+                        txs.slice(0,4).map(tx => (
                             <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white p-4 rounded-3xl flex justify-between items-center shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98] transition-all">
-                                <div className="flex items-center gap-4"><div className={`w-12 h-12 rounded-2xl ${tx.color||'bg-slate-50 text-slate-600'} flex items-center justify-center`}><Icon name={tx.icon||'receipt'} size={20}/></div><div><h4 className="font-black text-slate-800 text-sm leading-tight">{tx.title}</h4><p className="text-[10px] font-bold text-slate-400 mt-1">{tx.category}</p></div></div>
+                                <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20} /><div><h4 className="font-black text-slate-800 text-sm leading-tight">{tx.title}</h4><p className="text-[10px] font-bold text-slate-400 mt-1">{tx.category}</p></div></div>
                                 <div className="font-black text-slate-800 text-sm">฿{formatMoney(tx.amount)}</div>
                             </div>
                         ))}
@@ -575,91 +564,232 @@
             );
         };
 
-        const PocketsScreen = ({ pockets, go, t, Icon }) => (
-            <div className="p-6 pt-10 fade-in flex flex-col h-full">
-                <h2 className="text-3xl font-black text-slate-800 mb-8 leading-none">{t('wallet')}</h2>
-                <div className="grid grid-cols-2 gap-4 mb-6 flex-1 overflow-y-auto no-scrollbar">
-                    {pockets.length===0 ? <div className="col-span-2 text-center p-8 text-slate-400 font-bold border border-dashed border-slate-200 rounded-3xl h-fit">{t('noData')}</div> : pockets.map(p => (
-                        <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-white p-6 rounded-[36px] shadow-sm border border-slate-100 active:scale-[0.98] transition-transform cursor-pointer h-fit">
-                            <div className={`w-12 h-12 rounded-2xl ${p.color||'bg-blue-50 text-blue-500'} flex items-center justify-center mb-5`}><Icon name={p.icon||'wallet'}/></div>
-                            <h4 className="font-black text-slate-800 text-sm mb-1">{p.name}</h4><p className="text-lg font-black text-slate-800 mb-4">฿{formatMoney(p.balance)}</p>
-                        </div>
-                    ))}
+        const NotificationsScreen = ({ go, user, t, visibleNotifications, clearAllNotifs }) => (
+            <div className="flex-1 bg-[#FAFAF9] flex flex-col h-full fade-in relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-[#E2F0E5]/60 via-[#FCEAEF]/60 to-transparent z-0 pointer-events-none"></div>
+                <div className="px-6 pt-12 flex justify-between items-center relative z-10 mb-8">
+                    <button onClick={() => go('MAIN', 'HOME')} className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center shadow-sm text-slate-600 active:scale-95"><Icon name="arrow-left" size={20}/></button>
+                    <h2 className="font-bold text-slate-800 text-lg">{t('notifications')}</h2>
+                    <img src={user?.photoURL} className="w-10 h-10 rounded-full border border-white shadow-sm object-cover"/>
                 </div>
-                <button onClick={()=>go('ADD_POCKET')} className="w-full bg-white border-2 border-dashed border-[#2F80ED]/30 text-[#2F80ED] font-black py-5 rounded-[28px] flex items-center justify-center gap-2 active:scale-95 transition-transform shrink-0"><Icon name="plus" size={20}/> {t('newPocket')}</button>
+                <div className="px-6 flex-1 overflow-y-auto no-scrollbar relative z-10 pb-10">
+                    <div className="flex justify-between items-center mb-8">
+                        <div><h1 className="text-3xl font-black text-slate-900 mb-1 tracking-tight">{t('recentAlerts')}</h1><p className="text-sm text-slate-500 font-medium leading-tight pr-4">{t('caughtUp')}</p></div>
+                        {visibleNotifications.length > 0 && (<button onClick={clearAllNotifs} className="bg-[#EFEFEF] text-slate-600 w-14 h-14 rounded-full text-[10px] font-bold active:scale-95 shrink-0 flex flex-col items-center justify-center leading-tight">ล้าง</button>)}
+                    </div>
+                    <div className="space-y-4">
+                        {visibleNotifications.length === 0 ? (<div className="text-center p-8 text-slate-400 font-bold border border-dashed border-slate-200 rounded-3xl mt-10">{t('caughtUp')}</div>) : (
+                            visibleNotifications.map(notif => (
+                                <div key={notif.id} className="bg-white/80 backdrop-blur-md p-5 rounded-[32px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.06)] border border-white flex gap-4 relative">
+                                    <div className="w-14 h-14 rounded-[20px] bg-[#FADDE5] text-[#9D4D63] flex items-center justify-center shrink-0"><Icon name={notif.type==='alert'?'alert-triangle':'calendar'} size={24} /></div>
+                                    <div className="flex-1 pt-1">
+                                        <div className="flex justify-between items-start mb-1"><h3 className="font-bold text-slate-800 text-base">{notif.title}</h3><span className="text-[10px] font-bold text-slate-400 mt-1">{notif.time}</span></div>
+                                        <p className="text-xs text-slate-500 font-medium leading-relaxed pr-2">{notif.desc}</p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
             </div>
         );
 
-        // 🌟 SMART SEARCH & CATEGORY PILLS 🌟
-        const HistoryScreen = ({ txs, go, t, Icon }) => {
-            const [searchQuery, setSearchQuery] = useState('');
-            const [activeCategory, setActiveCategory] = useState(t('all'));
+        const PocketsScreen = ({ pockets, go, t }) => (
+            <div className="p-6 pt-12 fade-in flex flex-col h-full bg-[#FCFBFA]">
+                <div className="flex justify-between items-center mb-8"><h2 className="text-3xl font-black text-slate-800 leading-none">{t('yourPockets')}</h2><button onClick={()=>go('NOTIFICATIONS')} className="text-slate-400"><Icon name="bell" size={20}/></button></div>
+                <div className="grid grid-cols-2 gap-4 mb-6 flex-1 overflow-y-auto no-scrollbar">
+                    {pockets.length===0 ? <div className="col-span-2 text-center p-8 text-slate-400 font-bold border border-dashed border-slate-200 rounded-3xl h-fit">{t('noData')}</div> : pockets.map(p => {
+                        const pct = p.hasTarget && p.target > 0 ? Math.min((p.balance / p.target) * 100, 100) : 0;
+                        const barColor = p.colorType === 'hex' ? p.color : (p.color.match(/text-\[(#[0-9A-F]{6})\]/i)?.[1] || '#2F80ED');
+                        return (
+                            <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 active:scale-[0.98] transition-transform cursor-pointer h-fit relative overflow-hidden">
+                                <div className={`absolute -top-4 -right-4 w-16 h-16 rounded-full opacity-20 ${p.colorType === 'hex' ? '' : p.color.split(' ')[0]}`} style={p.colorType === 'hex' ? {backgroundColor: p.color} : {}}></div>
+                                <div className="mb-4 relative z-10"><PocketIcon pocket={p} size={18} /></div>
+                                <h4 className="font-bold text-slate-800 text-sm mb-1 relative z-10 truncate">{p.name}</h4>
+                                <div className="flex items-baseline gap-1 mb-4 relative z-10"><p className="text-xl font-black text-slate-800">฿{formatMoney(p.balance)}</p></div>
+                                {p.hasTarget && (<div className="relative z-10"><div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{width:`${pct}%`, backgroundColor: barColor}}></div></div></div>)}
+                            </div>
+                        )
+                    })}
+                </div>
+                <button onClick={()=>go('ADD_POCKET')} className="w-full bg-[#FCEAEF] text-[#9D4D63] font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-95 transition-transform shrink-0"><Icon name="plus" size={18}/> {t('createNewPocket')}</button>
+            </div>
+        );
 
-            // ดึงหมวดหมู่ที่ไม่ซ้ำกันจากรายการมาสร้างเป็นปุ่ม (ไม่เอาค่าว่าง)
-            const categories = useMemo(() => {
-                const uniqueCats = [...new Set(txs.map(tx => tx.category))].filter(Boolean);
-                return [t('all'), ...uniqueCats];
-            }, [txs, t]);
-
-            // ระบบค้นหาและกรองข้อมูล
-            const filteredTxs = useMemo(() => {
-                return txs.filter(tx => {
-                    const matchCategory = activeCategory === t('all') || tx.category === activeCategory;
-                    const matchSearch = tx.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                        (tx.merchant && tx.merchant.toLowerCase().includes(searchQuery.toLowerCase()));
-                    return matchCategory && matchSearch;
-                });
-            }, [txs, activeCategory, searchQuery, t]);
+        const AddPocketScreen = ({ go, onSave, t }) => {
+            const [name, setName] = useState(''); const [balance, setBalance] = useState(''); const [hasTarget, setHasTarget] = useState(false); const [target, setTarget] = useState('');
+            const [selectedIcon, setSelectedIcon] = useState(defaultPocketIcons[0]); const [showCustomModal, setShowCustomModal] = useState(false);
+            const handleSave = () => { setTimeout(() => onSave({ id: Date.now().toString(), name, balance: Number(balance||0), hasTarget, target: hasTarget ? Number(target) : 0, iconType: selectedIcon.type || 'lucide', icon: selectedIcon.icon || 'wallet', colorType: selectedIcon.colorType || 'tailwind', color: selectedIcon.color || 'bg-blue-50 text-blue-500' }), 500); };
 
             return (
-                <div className="p-6 pt-10 fade-in flex flex-col h-full">
-                    {/* Header แบบ Sticky */}
-                    <div className="shrink-0 mb-6 bg-[#FCFBFA] z-10 pb-2">
-                        <h2 className="text-3xl font-black text-slate-800 mb-6 leading-none">{t('history')}</h2>
-                        
-                        {/* Search Bar */}
-                        <div className="bg-white p-4 rounded-[24px] flex items-center shadow-sm border border-slate-100 mb-4 focus-within:ring-2 ring-[#2F80ED] transition-all">
-                            <Icon name="search" size={20} className="text-slate-400 mr-3"/>
-                            <input 
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="bg-transparent w-full font-bold text-sm outline-none text-slate-800" 
-                                placeholder={t('searchPlaceholder')} 
-                            />
-                            {searchQuery && (
-                                <button onClick={() => setSearchQuery('')} className="text-slate-400 p-1 active:scale-90">
-                                    <Icon name="x-circle" size={16} />
-                                </button>
-                            )}
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[#FAFAF9] relative">
+                    {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={setSelectedIcon} t={t} />}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24} /></button><h2 className="font-bold text-slate-800 text-lg">{t('newPocket')}</h2><div className="w-6"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <div><label className="text-[10px] font-bold text-slate-400 ml-4 mb-2 block">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full p-5 rounded-3xl bg-white shadow-sm border border-slate-100 font-bold outline-none text-slate-800" /></div>
+                        <div><label className="text-[10px] font-bold text-slate-400 ml-4 mb-2 block">{t('initialAmount')}</label><div className="w-full p-5 rounded-3xl bg-white shadow-sm border border-slate-100 flex items-center"><span className="text-2xl font-black text-slate-800 mr-2">฿</span><input type="number" value={balance} onChange={e=>setBalance(e.target.value)} className="w-full bg-transparent font-black text-3xl outline-none text-slate-800" placeholder="0.00"/></div></div>
+                        <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                            <div className="flex justify-between items-center mb-1"><h4 className="font-bold text-sm text-slate-800">{t('setMonthlyTarget')}</h4><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>
+                            {hasTarget && (<div className="pt-4 mt-4 border-t border-slate-50 fade-in"><div className="flex items-center"><span className="text-lg font-bold text-slate-800 mr-2">฿</span><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-transparent font-bold text-xl outline-none text-slate-800" placeholder="0.00"/></div></div>)}
                         </div>
-
-                        {/* Category Pills (เลื่อนแนวนอนได้) */}
-                        <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">
-                            {categories.map(cat => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setActiveCategory(cat)}
-                                    className={`whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-black transition-all border ${activeCategory === cat ? 'bg-[#2F80ED] text-white border-[#2F80ED] shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
+                        <div>
+                            <label className="text-[10px] font-bold text-slate-400 ml-4 mb-3 block">{t('chooseIcon')}</label>
+                            <div className="grid grid-cols-4 gap-4 px-2">
+                                {defaultPocketIcons.map((ic, i) => (<div key={i} onClick={()=>setSelectedIcon(ic)} className={`cursor-pointer transition-transform flex items-center justify-center ${selectedIcon.icon === ic.icon ? 'ring-4 ring-offset-2 ring-slate-200 scale-110 rounded-2xl' : 'hover:scale-105'}`}><PocketIcon pocket={ic} size={20} /></div>))}
+                                <div onClick={()=>setShowCustomModal(true)} className="aspect-square rounded-2xl flex items-center justify-center cursor-pointer hover:scale-105 bg-white text-slate-400 border-2 border-dashed border-slate-200"><Icon name="plus" size={20} /></div>
+                            </div>
                         </div>
                     </div>
+                    <button disabled={!name} onClick={handleSave} className="mt-4 w-full bg-[#FCEAEF] text-[#9D4D63] font-bold p-5 rounded-full shadow-sm active:scale-95 disabled:opacity-50">{t('savePocket')}</button>
+                </div>
+            );
+        };
 
-                    {/* Transaction List */}
-                    <div className="space-y-3 pb-24 overflow-y-auto flex-1 no-scrollbar -mx-6 px-6">
-                        {filteredTxs.length === 0 ? (
-                            <div className="text-center text-slate-400 font-bold p-8 border border-dashed border-slate-200 rounded-3xl mt-4">
-                                {searchQuery ? t('notFound') : t('noData')}
-                            </div>
-                        ) : filteredTxs.map(tx => (
-                            <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white p-4 rounded-3xl flex justify-between items-center shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98] transition-all">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-14 h-14 rounded-2xl ${tx.color||'bg-slate-50 text-slate-600'} flex items-center justify-center`}><Icon name={tx.icon||'receipt'} size={24}/></div>
-                                    <div><h4 className="font-black text-slate-800 text-sm leading-tight mb-1">{tx.title}</h4><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{tx.category} • {tx.date}</p></div>
-                                </div>
-                                <div className="font-black text-slate-800">฿{formatMoney(tx.amount)}</div>
+        const PocketDetailsScreen = ({ go, pocket, t }) => {
+            if(!pocket) return null;
+            const pct = pocket.hasTarget && pocket.target > 0 ? Math.min((pocket.balance / pocket.target) * 100, 100) : 0;
+            const barColor = pocket.colorType === 'hex' ? pocket.color : (pocket.color?.match(/text-\[(#[0-9A-F]{6})\]/)?.[1] || '#2F80ED');
+            return (
+                <div className="p-6 pt-12 h-full flex flex-col bg-[#FAFAF9] fade-in">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="text-slate-600"><Icon name="arrow-left" size={24} /></button><h2 className="font-bold text-slate-800 text-lg">{t('pocketDetails')}</h2><button onClick={()=>go('POCKET_SETTINGS', null, pocket)} className="text-slate-600"><Icon name="more-vertical" size={24} /></button></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <div className="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-30 -mr-10 -mt-10" style={{backgroundColor: barColor}}></div>
+                            <div className="flex items-center gap-3 mb-6 relative z-10"><PocketIcon pocket={pocket} size={18} /><h3 className="font-bold text-slate-800 text-lg">{pocket.name}</h3></div>
+                            <h1 className="text-5xl font-black text-slate-800 mb-1 relative z-10">฿{formatMoney(pocket.balance)}</h1>
+                            {pocket.hasTarget && <p className="text-xs font-bold text-slate-400 mb-6 relative z-10">Goal: ฿{formatMoney(pocket.target)}</p>}
+                            {pocket.hasTarget && (<div className="relative z-10"><div className="flex justify-between text-[10px] font-bold text-slate-500 mb-2"><span>{Math.round(pct)}% {t('saved')}</span><span>฿{formatMoney(pocket.target - pocket.balance)} {t('left')}</span></div><div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{width:`${pct}%`, backgroundColor: barColor}}></div></div></div>)}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const PocketSettingsScreen = ({ go, pocket, onUpdate, onDelete, t }) => {
+            const [name, setName] = useState(pocket?.name || ''); const [hasTarget, setHasTarget] = useState(pocket?.hasTarget || false); const [target, setTarget] = useState(pocket?.target || '');
+            const [selectedIcon, setSelectedIcon] = useState({ type: pocket?.iconType || 'lucide', icon: pocket?.icon || 'wallet', colorType: pocket?.colorType || 'tailwind', color: pocket?.color || 'bg-slate-100 text-slate-500' });
+            const [showCustomModal, setShowCustomModal] = useState(false);
+            if(!pocket) return null;
+
+            return (
+                <div className="p-6 pt-12 h-full flex flex-col bg-[#FAFAF9] fade-in relative">
+                    {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={setSelectedIcon} t={t} />}
+                    <div className="flex items-center justify-between mb-6"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24} /></button><h2 className="font-bold text-slate-800 text-lg">{t('pocketSettings')}</h2><div className="w-6"></div></div>
+                    <div className="flex flex-col items-center mb-8"><div className="mb-3"><PocketIcon pocket={selectedIcon} size={28} /></div><h2 className="text-xl font-bold text-slate-800">{pocket.name}</h2></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <Section title={t('general')}><div className="p-4 border-b border-slate-50"><label className="text-[10px] font-bold text-slate-400 mb-1 block">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 p-3 rounded-xl font-bold text-sm outline-none"/></div><div onClick={()=>setShowCustomModal(true)} className="p-4 flex justify-between items-center cursor-pointer"><span className="font-bold text-sm">{t('iconColor')}</span><Icon name="edit-2" size={14}/></div></Section>
+                        <Section title={t('budgeting')}><div className="p-4 flex justify-between items-center"><span className="font-bold text-sm">{t('monthlyGoal')}</span><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>{hasTarget && <div className="p-4"><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-slate-50 p-3 rounded-xl font-bold text-sm outline-none" placeholder="0.00"/></div>}</Section>
+                        <div className="flex flex-col gap-3 pt-4"><button onClick={()=>onDelete(pocket.id)} className="bg-[#FCEAEF] p-4 rounded-2xl text-[#9D4D63] font-bold text-sm flex justify-center gap-2"><Icon name="trash-2" size={16}/> {t('deletePocket')}</button></div>
+                    </div>
+                    <button onClick={()=>onUpdate(pocket.id, {name, hasTarget, target: Number(target)||0, iconType: selectedIcon.type, icon: selectedIcon.icon, colorType: selectedIcon.colorType, color: selectedIcon.color})} className="w-full bg-[#2F80ED] text-white font-bold py-4 rounded-full shadow-lg active:scale-95">{t('saveChanges')}</button>
+                </div>
+            );
+        };
+
+        const ProfileScreen = ({ user, go, t, onLogout, themeMode }) => {
+            const MenuItem = ({ icon, label, onClick, value }) => (<div onClick={onClick} className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 border-b border-slate-50 last:border-0"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-[#F7F9FC] rounded-full flex items-center justify-center text-slate-600"><Icon name={icon} size={18}/></div><span className="font-bold text-slate-700 text-sm">{label}</span></div><div className="flex items-center gap-2">{value && <span className="text-xs font-bold text-slate-400">{value}</span>}<Icon name="chevron-right" size={18} className="text-slate-300"/></div></div>);
+            return (
+                <div className="p-6 pt-12 fade-in bg-[#FAFAF9] h-full overflow-y-auto no-scrollbar">
+                    <div className="flex flex-col items-center mb-10 relative">
+                        <div className="relative mb-4"><img src={user?.photoURL || 'https://ui-avatars.com/api/?name=User&background=F472B6&color=fff'} className="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover"/><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-[#FCEAEF] rounded-full flex items-center justify-center text-[#F472B6] shadow-sm cursor-pointer"><Icon name="edit-2" size={14}/></div></div>
+                        <h1 className="text-2xl font-black text-slate-800">{user?.displayName || 'ผู้ใช้งาน'}</h1><p className="text-xs font-bold text-slate-400 mt-1">{user?.email || ''}</p>
+                    </div>
+                    <div className="space-y-6 mb-10">
+                        <Section title={t('accountTitle')}><MenuItem icon="user" label={t('accountSettings')} onClick={()=>go('EDIT_PROFILE')} /><MenuItem icon="shield" label={t('security')} onClick={()=>go('SECURITY')} /></Section>
+                        <Section title={t('preferencesTitle')}><MenuItem icon="globe" label={t('language')} onClick={()=>go('LANGUAGE')} /><MenuItem icon="palette" label={t('appTheme')} value={t(themeMode)} onClick={()=>go('THEME')} /></Section>
+                    </div>
+                    <button onClick={onLogout} className="w-full bg-[#FCEAEF] text-[#9D4D63] font-bold py-4 rounded-[24px] flex items-center justify-center gap-2 active:scale-95 shadow-sm mb-10"><Icon name="log-out" size={20}/> {t('logout')}</button>
+                </div>
+            );
+        };
+
+        const EditProfileScreen = ({ go, user, setUser, t }) => {
+            const [name, setName] = useState(user?.displayName || ''); const [bio, setBio] = useState(user?.bio || '');
+            const handleUpdate = () => {
+                if(user && user.uid !== 'mock-uid') { try { user.updateProfile({ displayName: name }); db.collection('users').doc(user.uid).set({ displayName: name, bio }, { merge: true }); } catch(e) {} } 
+                else { const guestData = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...guestData, displayName: name, bio})); }
+                setUser(prev => ({...prev, displayName: name, bio})); go('MAIN','PROFILE');
+            };
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full bg-[#FAFAF9] fade-in relative">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('editProfile')}</h2><div className="w-6"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
+                        <div><label className="text-[10px] font-bold text-slate-400 ml-4 mb-2 block uppercase">{t('name')}</label><div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100"><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none" /></div></div>
+                        <div><label className="text-[10px] font-bold text-slate-400 ml-4 mb-2 block uppercase">{t('bio')}</label><div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100"><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none h-24 resize-none" placeholder="Add bio..." /></div></div>
+                    </div>
+                    <button onClick={handleUpdate} className="w-full bg-[#FCEAEF] text-[#9D4D63] font-bold py-5 rounded-[24px] active:scale-95">{t('saveChanges')}</button>
+                </div>
+            );
+        };
+
+        const SecuritySettingsScreen = ({ go, pinCode, setPinCode, setShowPinModal, t }) => {
+            const handleTogglePin = () => { if (pinCode) { setPinCode(''); localStorage.removeItem('cozy_pin'); } else { setShowPinModal(true); } };
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full bg-[#FAFAF9] fade-in">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('security')}</h2><div className="w-6"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6">
+                        <Section title="Security">
+                            <div className="p-4 flex justify-between items-center"><div className="flex items-center gap-4"><Icon name="layout-grid" size={18}/><div><span className="font-bold text-sm text-slate-800 block mb-1">{t('pinCode')}</span><span className="text-[10px] text-slate-400">{pinCode ? t('pinStatusSet') : t('pinStatusNotSet')}</span></div></div><div className="flex items-center gap-2">{pinCode && (<button onClick={()=>setShowPinModal(true)} className="text-[10px] font-black px-3 py-1.5 bg-slate-100 rounded-xl">{t('changePin')}</button>)}<SwitchToggle isOn={!!pinCode} onToggle={handleTogglePin} /></div></div>
+                        </Section>
+                        <Section title={t('yourDevices')}><div className="p-4 flex justify-between items-center bg-[#E2F0E5]/10"><div className="flex items-center gap-4"><Icon name="smartphone" size={18} className="text-[#4A7D59]"/><div><h4 className="font-bold text-sm">{getDeviceName()}</h4><p className="text-[10px] text-slate-400">{t('activeNow')}</p></div></div></div></Section>
+                    </div>
+                </div>
+            );
+        };
+
+        const ThemeSettingsScreen = ({ themeMode, setThemeMode, go, t }) => (
+            <div className="p-6 pt-12 flex flex-col h-full bg-[#FAFAF9] fade-in">
+                <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('theme')}</h2><div className="w-6"></div></div>
+                <div className="flex justify-between gap-4">
+                    {['Light', 'Dark', 'System'].map(mode => (
+                        <div key={mode} onClick={()=>setThemeMode(mode)} className={`flex-1 p-4 rounded-2xl text-center cursor-pointer font-bold text-sm border-2 ${themeMode===mode?'border-[#F472B6] text-[#F472B6] bg-white':'border-slate-100 text-slate-400 bg-white'}`}>{t(mode.toLowerCase())}</div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const LanguageSettingsScreen = ({ lang, setLang, go, t }) => (
+            <div className="p-6 pt-12 flex flex-col h-full bg-[#FAFAF9] fade-in">
+                <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="arrow-left"/></button><h2 className="font-black text-lg ml-4">{t('language')}</h2></div>
+                <div className="space-y-4">{['TH', 'EN'].map(l => (<div key={l} onClick={()=>setLang(l)} className={`p-6 rounded-[28px] border-2 flex justify-between items-center cursor-pointer transition-all ${lang===l?'border-[#F472B6] bg-[#FCEAEF]':'border-white bg-white shadow-sm'}`}><span className={`font-bold text-sm ${lang===l?'text-[#9D4D63]':'text-slate-600'}`}>{l === 'TH' ? 'ภาษาไทย' : 'English'}</span>{lang===l && <Icon name="check-circle-2" size={20} className="text-[#F472B6]"/>}</div>))}</div>
+            </div>
+        );
+
+        // 🌟 HISTORY & SEARCH 🌟
+        const HistoryScreen = ({ txs, go, t, visibleNotifications, userCategories }) => {
+            const [searchQuery, setSearchQuery] = useState(''); const [activeFilter, setActiveFilter] = useState(t('all'));
+            const filters = [t('all'), t('expense'), ...userCategories.map(c => c.id)];
+
+            const filteredTxs = useMemo(() => txs.filter(tx => {
+                let matchF = activeFilter === t('all') || (activeFilter === t('expense') ? tx.amount >= 0 : tx.category === activeFilter);
+                let matchS = (tx.title||'').toLowerCase().includes(searchQuery.toLowerCase()) || (tx.category||'').toLowerCase().includes(searchQuery.toLowerCase());
+                return matchF && matchS;
+            }), [txs, activeFilter, searchQuery, t]);
+
+            const grouped = useMemo(() => {
+                const g = {}; const today = new Date().toLocaleDateString('th-TH');
+                filteredTxs.forEach(tx => { let d = tx.date === today ? t('today') : tx.date; if(!g[d]) g[d]=[]; g[d].push(tx); });
+                return g;
+            }, [filteredTxs, t]);
+
+            return (
+                <div className="p-6 pt-10 fade-in flex flex-col h-full bg-[#FAFAF9]">
+                    <div className="shrink-0 mb-6 z-10 pb-2">
+                        <div className="flex justify-end mb-4"><button onClick={()=>go('NOTIFICATIONS')} className="relative text-[#F472B6]"><Icon name="bell" size={24}/>{visibleNotifications?.length > 0 && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#FAFAF9]"></span>}</button></div>
+                        <h2 className="text-3xl font-black text-slate-800 mb-6 leading-none">{t('transactions')}</h2>
+                        <div className="bg-white p-4 rounded-2xl flex items-center shadow-sm border border-slate-100 mb-4 focus-within:ring-2 ring-[#F472B6]"><Icon name="search" size={20} className="text-slate-400 mr-3"/><input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent w-full font-bold text-sm outline-none text-slate-800" placeholder={t('searchPlaceholder')} /></div>
+                        <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">{filters.map(cat => (<button key={cat} onClick={() => setActiveFilter(cat)} className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all border ${activeFilter === cat ? 'bg-[#E2F0E5] text-[#4A7D59]' : 'bg-white text-slate-500'}`}>{cat}</button>))}</div>
+                    </div>
+                    <div className="space-y-6 pb-24 overflow-y-auto flex-1 no-scrollbar -mx-6 px-6">
+                        {Object.keys(grouped).length === 0 ? <div className="text-center text-slate-400 font-bold p-8 border border-dashed border-slate-200 rounded-3xl mt-4">{t('noData')}</div> : Object.keys(grouped).map(dateLabel => (
+                            <div key={dateLabel}>
+                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-2">{dateLabel}</h4>
+                                <div className="space-y-3">{grouped[dateLabel].map(tx => (
+                                    <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white p-4 rounded-[24px] flex justify-between items-center shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98]">
+                                        <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20}/><div><h4 className="font-bold text-slate-800 text-sm leading-tight mb-1">{tx.title}</h4><p className="text-[10px] font-bold text-slate-400 tracking-wider">{tx.category}</p></div></div>
+                                        <div className="font-black text-slate-800 text-sm">-{tx.amount > 0 ? '' : ''}฿{formatMoney(Math.abs(tx.amount))}</div>
+                                    </div>
+                                ))}</div>
                             </div>
                         ))}
                     </div>
@@ -667,114 +797,29 @@
             );
         };
 
-        // --- 7. CAMERA & AI OCR SCANNING ---
-        const categorizeText = (text) => {
-            const tText = text.toLowerCase();
-            if (tText.match(/น้ำปั่น|ครัว|coffee|คาเฟ่|อาหาร|เครื่องดื่ม|ข้าว|ชา|นม|food|drink|ปลา|หมู|ไก่|เนื้อ|กุ้ง|เบเกอรี่|ขนม|เค้ก|ชาบู|ปิ้งย่าง|สุกี้|restaurant|cafe/)) return { cat: 'catFood', icon: 'coffee', col: 'bg-orange-50 text-orange-500' };
-            if (tText.match(/shop|ร้าน|ช้อป|โลตัส|เซเว่น|7-11|บิ๊กซี|มินิมาร์ท|ซื้อ|mart|ค้า|supermarket|mall|store/)) return { cat: 'catShop', icon: 'shopping-bag', col: 'bg-pink-50 text-pink-500' };
-            if (tText.match(/นาย|นาง|น\.ส\.|ด\.ช\.|ด\.ญ\.|คุณ|โอนเงิน/)) return { cat: 'catTransfer', icon: 'users', col: 'bg-blue-50 text-blue-500' };
-            if (tText.match(/บิล|การไฟฟ้า|การประปา|ais|true|dtac|ค่าเน็ต|ค่าไฟ|ค่าน้ำ|bill|ประกัน|สินเชื่อ|บัตรเครดิต|ชำระ/)) return { cat: 'catBill', icon: 'zap', col: 'bg-yellow-50 text-yellow-500' };
-            if (tText.match(/น้ำมัน|ปั๊ม|ptt|pt|shell|bangchak|caltex|gas/)) return { cat: 'catTravel', icon: 'car', col: 'bg-teal-50 text-teal-500' };
-            return { cat: 'catGeneral', icon: 'receipt', col: 'bg-slate-50 text-slate-500' };
-        };
-
-        const ScanScreen = ({ go, onNext, t, Icon, LoadingOverlay }) => {
-            const videoRef = useRef(null);
-            const fileInputRef = useRef(null);
-            const [flash, setFlash] = useState(false);
-            const [scanning, setScanning] = useState(false);
+        const ScanScreen = ({ go, onNext, t }) => {
+            const videoRef = useRef(null); const fileInputRef = useRef(null); const streamRef = useRef(null);
+            const [flash, setFlash] = useState(false); const [scanning, setScanning] = useState(false);
 
             useEffect(() => {
-                let stream = null;
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
-                    .then(s => { 
-                        stream = s; 
-                        if(videoRef.current) {
-                            videoRef.current.srcObject = s;
-                            videoRef.current.setAttribute('playsinline', true);
-                            videoRef.current.play().catch(e=>console.log(e));
-                        }
-                    }).catch(e => console.log("Camera not available"));
-                return () => stream?.getTracks().forEach(t => t.stop());
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(s => { streamRef.current = s; if(videoRef.current) { videoRef.current.srcObject = s; videoRef.current.setAttribute('playsinline', true); videoRef.current.play().catch(()=>{}); } }).catch(()=>{});
+                return () => streamRef.current?.getTracks().forEach(t => t.stop());
             }, []);
 
-            const processImage = async (file) => {
-                setScanning(true);
-                try {
-                    const worker = await Tesseract.createWorker('tha+eng');
-                    const ret = await worker.recognize(file);
-                    const rawText = ret.data.text;
-                    const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                    await worker.terminate();
-
-                    let finalAmount = '';
-                    let merchant = '';
-                    let dateStr = new Date().toLocaleDateString('th-TH');
-                    let memoText = '';
-
-                    const amountRegex = /(?:จำนวนเงิน|จำนวน|ยอดรวม|ยอดเงิน|รวมทั้งสิ้น|Total|Amount|฿|B)[^\d]*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i;
-                    for(let line of lines) {
-                        const match = line.match(amountRegex);
-                        if(match && match[1]) { finalAmount = parseFloat(match[1].replace(/,/g, '')).toFixed(2); break; }
-                    }
-                    if (!finalAmount || finalAmount === '0.00') {
-                        const numbers = rawText.match(/\b\d{1,3}(?:,\d{3})*\.\d{2}\b/g);
-                        if (numbers && numbers.length > 0) {
-                            const vals = numbers.map(n => parseFloat(n.replace(/,/g, '')));
-                            finalAmount = Math.max(...vals).toFixed(2);
-                        }
-                    }
-
-                    let foundTo = false;
-                    for (let i = 0; i < lines.length; i++) {
-                        const line = lines[i];
-                        if (line.match(/(บันทึกช่วยจำ|บันทึก|Memo)/i)) {
-                            const cleanMemo = line.replace(/(บันทึกช่วยจำ|บันทึก|Memo)[\s.:]*/i, '').trim();
-                            if (cleanMemo) memoText = cleanMemo; else if (i + 1 < lines.length) memoText = lines[i+1];
-                        }
-                        const dateMatch = line.match(/(\d{1,2}[\/\-\. ]\d{1,2}[\/\-\. ]\d{2,4})|(\d{1,2}\s+(ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.|มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)\s+\d{2,4})/);
-                        if(dateMatch) dateStr = dateMatch[0];
-                        if (line.match(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)/i)) {
-                            let cleanMerchant = line.replace(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)[\s.:]*/i, '').trim();
-                            if (cleanMerchant.length < 3 && i + 1 < lines.length) cleanMerchant = lines[i+1].trim();
-                            cleanMerchant = cleanMerchant.replace(/(ธนาคาร|พร้อมเพย์|PromptPay|KBank|SCB|KTB|BBL|GSB)/ig, '').trim();
-                            if (cleanMerchant.length > 2) { merchant = cleanMerchant; foundTo = true; }
-                        }
-                        if (!foundTo && !merchant && line.match(/(นาย|นาง|น\.ส\.|บจก|หจก|บริษัท|ร้าน|SHOP|ครัว|คาเฟ่|cafe|มินิมาร์ท|ตลาด)/i)) {
-                             if(!line.match(/^(จาก|ผู้โอน)/i)) merchant = line.replace(/^(จาก|ผู้โอน)[\s.:]*/i, '').trim();
-                        }
-                    }
-                    if (!merchant && finalAmount) {
-                        if(lines.length > 0) merchant = lines[0];
-                        if(merchant.match(/ใบเสร็จ|Receipt|รับเงิน/i) && lines.length > 1) merchant = lines[1];
-                    }
-
-                    let finalTitle = memoText || merchant || 'รายการใช้จ่าย';
-                    finalTitle = finalTitle.replace(/(รหัสอ้างอิง|เลขอ้างอิง|Ref|วันที่).*/i, '').trim();
-                    
-                    const categoryInfo = categorizeText(finalTitle + ' ' + rawText);
-
-                    setTimeout(() => {
-                        setScanning(false);
-                        onNext({ amount: finalAmount || '', merchant: finalTitle, date: dateStr || new Date().toLocaleDateString('th-TH'), categoryKey: categoryInfo.cat, icon: categoryInfo.icon, color: categoryInfo.col, isAuto: true });
-                    }, 500);
-
-                } catch (error) {
-                    setTimeout(() => {
-                        setScanning(false);
-                        onNext({ amount: '', merchant: '', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'catGeneral', icon: 'receipt', color: 'bg-slate-50 text-slate-500', isAuto: false });
-                    }, 500);
-                }
+            const toggleFlash = async () => {
+                if (streamRef.current) { try { const track = streamRef.current.getVideoTracks()[0]; await track.applyConstraints({ advanced: [{ torch: !flash }] }); setFlash(!flash); return; } catch (e) {} }
+                setFlash(true); setTimeout(()=>setFlash(false), 150);
             };
 
             const capture = () => { 
                 setFlash(true); 
                 setTimeout(() => { 
                     setFlash(false); setScanning(true);
-                    setTimeout(() => {
-                        setScanning(false);
-                        onNext({ amount: '', merchant: 'ถ่ายภาพใหม่', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'catGeneral', icon: 'receipt', color: 'bg-slate-50 text-slate-500', isAuto: false });
-                    }, 1500);
+                    if (videoRef.current) {
+                        const canvas = document.createElement('canvas'); canvas.width = videoRef.current.videoWidth; canvas.height = videoRef.current.videoHeight;
+                        const ctx = canvas.getContext('2d'); ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+                        setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใช้จ่ายใหม่', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', iconType: 'lucide', icon: 'camera', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: canvas.toDataURL('image/jpeg', 0.8) }); }, 1500);
+                    } else { setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใช้จ่ายใหม่', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', iconType: 'lucide', icon: 'camera', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: null }); }, 1500); }
                 }, 300); 
             };
 
@@ -782,380 +827,218 @@
 
             return (
                 <div className="flex-1 bg-black relative flex flex-col h-full fade-in">
-                    <div className="absolute top-10 left-0 w-full px-6 flex justify-between items-center z-40">
-                        <button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white backdrop-blur-md"><Icon name="chevron-left"/></button>
-                        <span className="text-white font-black text-sm tracking-widest">{t('scanReceipt')}</span><div className="w-10"></div>
-                    </div>
-                    <div className="flex-1 relative overflow-hidden flex items-center justify-center">
-                        <video ref={videoRef} playsInline webkit-playsinline autoPlay muted className="absolute inset-0 w-full h-full object-cover opacity-90" />
-                        {flash && <div className="absolute inset-0 bg-white z-50 animate-pulse"></div>}
-                        <div className="scan-frame"><div className="scan-corner tl"></div><div className="scan-corner tr"></div><div className="scan-corner bl"></div><div className="scan-corner br"></div><div className="laser"></div></div>
-                    </div>
-                    <div className="bg-black/90 backdrop-blur-xl p-8 pb-12 flex justify-between items-center z-40 rounded-t-[40px]">
-                        <button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-2 text-white/70 active:scale-90 transition-transform"><div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center border border-white/20"><Icon name="image"/></div><span className="text-[10px] font-bold">{t('gallery')}</span></button>
-                        <div className="relative"><div className="absolute inset-0 bg-[#2F80ED]/30 rounded-full blur-xl scale-150 animate-pulse"></div><button onClick={capture} className="w-20 h-20 bg-white rounded-full flex items-center justify-center border-[6px] border-slate-300 relative z-10 active:scale-90 transition-transform"><div className="w-14 h-14 bg-[#2F80ED] rounded-full flex items-center justify-center text-white"><Icon name="camera" size={28}/></div></button></div>
-                        <button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-2 text-white/70 active:scale-90 transition-transform"><div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center border border-white/20"><Icon name="edit-2"/></div><span className="text-[10px] font-bold">{t('manual')}</span></button>
-                    </div>
-                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e=>e.target.files[0]&&processImage(e.target.files[0])} />
+                    <div className="absolute top-10 left-0 w-full px-6 flex justify-between items-center z-40"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white"><Icon name="x" size={20}/></button><button onClick={toggleFlash} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white"><Icon name={flash ? 'zap' : 'zap-off'} size={20}/></button></div>
+                    <div className="flex-1 relative overflow-hidden flex items-center justify-center"><video ref={videoRef} playsInline webkit-playsinline autoPlay muted className="absolute inset-0 w-full h-full object-cover opacity-90" />{flash && <div className="absolute inset-0 bg-white z-50 animate-pulse"></div>}<div className="scan-frame"><div className="scan-corner tl"></div><div className="scan-corner tr"></div><div className="scan-corner bl"></div><div className="scan-corner br"></div><div className="laser"></div></div></div>
+                    <div className="bg-white rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-2xl z-40 relative"><div className="w-12 h-1.5 bg-slate-200 rounded-full mb-6"></div><h2 className="text-xl font-bold text-slate-800">{t('scanReceipt')}</h2><p className="text-xs text-slate-400 mt-2 mb-8">{t('alignReceipt')}</p><div className="flex justify-between w-full px-8 items-center"><button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-2"><div className="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center text-slate-600 border border-slate-100"><Icon name="image" size={22}/></div></button><button onClick={capture} className="relative w-20 h-20 flex items-center justify-center"><div className="absolute inset-0 border-4 border-[#FCEAEF] rounded-full"></div><div className="w-14 h-14 bg-[#F472B6] rounded-full shadow-lg border-2 border-white flex items-center justify-center text-white"><Icon name="camera" size={24}/></div></button><button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-2"><div className="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center text-slate-600 border border-slate-100"><Icon name="edit-2" size={22}/></div></button></div></div>
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e=>{if(e.target.files[0]){ setScanning(true); processReceiptImage(e.target.files[0], (data)=>{ setScanning(false); onNext(data); }); }}} />
                 </div>
             );
         };
 
-        const ReviewScreen = ({ go, screenData, onConfirm, t, Icon, LoadingOverlay }) => {
-            const [amount, setAmount] = useState(screenData?.amount || '');
-            const [merchant, setMerchant] = useState(screenData?.merchant || '');
-            const [category, setCategory] = useState(screenData?.categoryKey || 'catGeneral');
-            const [catIcon, setCatIcon] = useState(screenData?.icon || 'receipt');
-            const [catColor, setCatColor] = useState(screenData?.color || 'bg-slate-100 text-slate-600');
-            const [saving, setSaving] = useState(false);
-            
-            const handleSave = () => {
-                setSaving(true);
-                setTimeout(() => {
-                    onConfirm({ title: merchant||'รายการใหม่', amount: Number(amount), category: t(category), date: screenData?.date || 'วันนี้', icon: catIcon, color: catColor });
-                }, 1000);
-            };
+        const ReviewScreen = ({ go, screenData, onConfirm, t, pockets, userCategories, setUserCategories, defaultCatIds }) => {
+            const [amount, setAmount] = useState(screenData?.amount || ''); const [merchant, setMerchant] = useState(screenData?.merchant || ''); const [txDate, setTxDate] = useState(screenData?.date || new Date().toLocaleDateString('th-TH')); const [selectedPocket, setSelectedPocket] = useState('none'); const [activeCategory, setActiveCategory] = useState(screenData?.categoryKey || 'General'); const [saving, setSaving] = useState(false); const [showAddCat, setShowAddCat] = useState(false);
+            const handleSave = () => { setSaving(true); setTimeout(() => { const catObj = userCategories.find(c => c.id === activeCategory) || userCategories[0]; onConfirm({ title: merchant || t('manual'), amount: Number(amount), category: activeCategory, date: txDate, iconType: 'lucide', icon: catObj.icon, colorType: 'hex', color: catObj.color, pocketId: selectedPocket, imageUrl: screenData?.imageUrl || null }); }, 800); };
 
             return (
-                <div className="p-6 pt-10 flex flex-col h-full bg-[#F7F9FC] fade-in relative">
+                <div className="flex-1 bg-[#FAFAF9] flex flex-col h-full fade-in relative">
                     {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button><h2 className="font-black text-slate-800 text-lg">{t('reviewDetails')}</h2><div className="w-10"></div></div>
-                    
-                    <div className="bg-white p-8 rounded-[36px] shadow-sm border border-slate-100 flex flex-col items-center mb-6">
-                        <p className={`text-[10px] font-black ${amount?'text-green-500':'text-orange-500'} uppercase tracking-widest mb-2 flex items-center gap-1 px-3 py-1 rounded-full ${amount?'bg-green-50':'bg-orange-50'}`}><Icon name={amount?'check-circle-2':'alert-circle'} size={12}/> {amount?'ดึงข้อมูลสำเร็จ':'กรุณาตรวจสอบยอดเงิน'}</p>
-                        <div className="flex items-center gap-1"><span className="text-2xl font-black text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-black text-slate-800 bg-transparent text-center w-full outline-none focus:border-b-2 border-[#2F80ED] transition-colors" placeholder="0.00"/></div>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4 mb-6">
-                        <div><label className="text-[10px] font-bold text-slate-400 uppercase">{t('merchant')}</label><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-slate-50 p-4 rounded-2xl mt-1 font-bold text-slate-700 text-sm outline-none focus:ring-2 ring-[#2F80ED]"/></div>
-                        
-                        <div>
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">{t('category')}</label>
-                            <div className="bg-slate-50 p-4 rounded-2xl mt-1 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-full ${catColor} flex items-center justify-center`}><Icon name={catIcon} size={14}/></div>
-                                    <span className="font-bold text-slate-700 text-sm">{t(category)}</span>
+                    {showAddCat && <AddCategoryModal onClose={()=>setShowAddCat(false)} onAdd={(cat)=>{setUserCategories([...userCategories, {id: cat, icon: 'tag', color: '#64748b'}]); setActiveCategory(cat); setShowAddCat(false);}} t={t} />}
+                    <div className="px-6 pt-12 flex items-center justify-between mb-4"><button onClick={()=>go('SCAN')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('reviewDetails')}</h2><button onClick={handleSave} disabled={!amount} className="text-[#F472B6] font-bold text-sm disabled:opacity-50">{t('save')}</button></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-6">
+                        {screenData?.imageUrl && (<div className="w-full h-32 bg-slate-800 rounded-3xl overflow-hidden relative shadow-sm border-2 border-white"><img src={screenData.imageUrl} className="w-full h-full object-cover opacity-60" /><div className="absolute right-3 bottom-3 w-8 h-8 bg-[#F472B6] rounded-full flex items-center justify-center text-white shadow-md"><Icon name="scan-line" size={16}/></div></div>)}
+                        <div className="bg-white p-6 rounded-[36px] shadow-sm border border-slate-100 flex flex-col items-center relative">{screenData?.isAuto && <div className="absolute top-4 right-4 bg-[#FCEAEF] text-[#F472B6] w-6 h-6 rounded-full flex items-center justify-center"><Icon name="sparkles" size={12}/></div>}<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('extractedAmount')}</p><div className="flex items-center gap-1"><span className="text-2xl font-black text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-black text-slate-800 bg-transparent text-center w-full outline-none focus:border-b-2 border-[#F472B6] transition-colors" placeholder="0.00"/></div></div>
+                        <div className="bg-white p-5 rounded-[32px] border border-slate-100 shadow-sm space-y-5">
+                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block">{t('merchant')}</label><div className="flex items-center bg-[#FCEAEF]/30 p-3.5 rounded-2xl mt-1"><Icon name="store" size={18} className="text-[#F472B6] mr-3" /><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-transparent font-bold text-slate-700 text-sm outline-none" placeholder="ระบุชื่อร้านค้า"/></div></div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block">{t('date')}</label><div className="flex items-center bg-slate-50 p-3.5 rounded-2xl mt-1"><Icon name="calendar" size={16} className="text-slate-400 mr-2" /><input value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-slate-700 text-xs outline-none"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block">{t('pocketDeducted')}</label><div className="flex items-center bg-slate-50 p-3.5 rounded-2xl mt-1 relative"><Icon name="wallet" size={16} className="text-[#2F80ED] mr-2" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-slate-700 text-xs outline-none appearance-none pr-4"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label>
+                                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full border shrink-0 ${activeCategory === cat.id ? 'bg-[#E2F0E5] text-[#4A7D59]' : 'bg-white text-slate-500'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{!defaultCatIds.includes(cat.id) && (<button onClick={()=>setUserCategories(userCategories.filter(c=>c.id!==cat.id))} className="pr-3 pl-1 hover:text-red-500"><Icon name="x" size={12}/></button>)}</div>))}
+                                    <button onClick={()=>setShowAddCat(true)} className="px-4 py-2 rounded-full text-xs font-bold border border-dashed text-slate-400 shrink-0"><Icon name="plus" size={14}/></button>
                                 </div>
-                                {screenData?.isAuto && <span className="text-[10px] text-slate-400 font-bold bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-sm flex items-center gap-1"><Icon name="sparkles" size={10} className="text-[#2F80ED]"/> {t('aiSelected')}</span>}
                             </div>
                         </div>
-
-                        <div><label className="text-[10px] font-bold text-slate-400 uppercase">{t('date')}</label><div className="bg-slate-50 p-4 rounded-2xl mt-1 text-sm font-bold text-slate-700">{screenData?.date || 'วันนี้'}</div></div>
+                        <button disabled={!amount} onClick={handleSave} className="w-full bg-[#FCEAEF] text-[#9D4D63] font-bold py-5 rounded-full shadow-sm active:scale-95 disabled:opacity-50">{t('confirmSave')}</button>
                     </div>
-                    <button disabled={!amount || amount==='0' || amount==='0.00'} onClick={handleSave} className="mt-auto w-full bg-[#2F80ED] text-white font-black py-5 rounded-[24px] shadow-lg active:scale-95 disabled:bg-slate-300">{t('confirmSave')}</button>
                 </div>
             );
         };
 
-        const AddTxScreen = ({ go, onSave, t, Icon, LoadingOverlay }) => {
-            const [amount, setAmount] = useState(''); const [merchant, setMerchant] = useState('');
-            const [saving, setSaving] = useState(false);
-            
-            const handleSave = () => {
-                setSaving(true);
-                setTimeout(() => {
-                    onSave({id:Date.now().toString(), title:merchant||t('manual'), amount:Number(amount), category:t('catGeneral'), date:new Date().toLocaleDateString('th-TH'), icon:'edit-3', color:'bg-slate-50 text-slate-600'});
-                }, 1000);
-            };
+        const AddTxScreen = ({ go, onSave, t, pockets, userCategories, setUserCategories, defaultCatIds }) => {
+            const [amount, setAmount] = useState(''); const [notes, setNotes] = useState(''); const [txDate, setTxDate] = useState(new Date().toLocaleDateString('th-TH')); const [activeCategory, setActiveCategory] = useState('Food & Drink'); const [showAddCat, setShowAddCat] = useState(false);
+            const handleSave = () => { const catObj = userCategories.find(c => c.id === activeCategory) || userCategories[0]; onSave({ id: Date.now().toString(), title: notes || t('manual'), amount: Number(amount), category: activeCategory, date: txDate, iconType: 'lucide', icon: catObj.icon, colorType: 'hex', color: catObj.color, notes: notes }); };
 
             return (
-                <div className="p-6 pt-10 flex flex-col h-full bg-[#F7F9FC] fade-in relative">
-                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <div className="flex items-center mb-8"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button><h2 className="font-black text-lg ml-4">{t('addTx')}</h2></div>
-                    <div className="bg-white p-8 rounded-[36px] text-center border border-slate-100 mb-6 shadow-sm"><label className="text-xs font-bold text-slate-400">{t('amount')}</label><div className="flex justify-center items-center mt-2"><span className="text-3xl font-black text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00" className="text-6xl font-black text-slate-800 w-48 text-center bg-transparent outline-none"/></div></div>
-                    <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4"><div><label className="text-xs font-bold text-slate-400 block">{t('merchant')}</label><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-slate-50 mt-2 p-4 rounded-2xl outline-none focus:ring-2 ring-[#2F80ED] font-medium" placeholder="เช่น ค่าอาหาร"/></div></div>
-                    <button disabled={!amount} onClick={handleSave} className="mt-auto w-full bg-[#2F80ED] text-white font-black py-5 rounded-[24px] shadow-lg disabled:bg-slate-300">{t('saveTx')}</button>
+                <div className="flex-1 bg-[#FAFAF9] flex flex-col h-full fade-in relative">
+                    {showAddCat && <AddCategoryModal onClose={()=>setShowAddCat(false)} onAdd={(cat)=>{setUserCategories([...userCategories, {id: cat, icon: 'tag', color: '#64748b'}]); setActiveCategory(cat); setShowAddCat(false);}} t={t} />}
+                    <div className="px-6 pt-12 flex items-center justify-between mb-8"><button onClick={()=>go('SCAN')} className="text-slate-600"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('addTx')}</h2><div className="w-6"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-6">
+                        <div className="bg-white p-8 rounded-[36px] text-center border border-slate-100 shadow-sm relative"><div className="absolute top-4 right-4 text-slate-200"><Icon name="activity" size={40}/></div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('amount')}</label><div className="flex justify-center items-center"><span className="text-3xl font-black text-slate-800 mr-1">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00" className="text-6xl font-black text-slate-800 w-48 text-center bg-transparent outline-none"/></div></div>
+                        <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-5">
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label>
+                                <div className="flex gap-2 flex-wrap">
+                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full border ${activeCategory === cat.id ? 'bg-[#E2F0E5] text-[#4A7D59]' : 'bg-white text-slate-500'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{!defaultCatIds.includes(cat.id) && <button onClick={()=>setUserCategories(userCategories.filter(c=>c.id!==cat.id))} className="pr-3 pl-1 hover:text-red-500"><Icon name="x" size={12}/></button>}</div>))}
+                                    <button onClick={()=>setShowAddCat(true)} className="px-4 py-2 rounded-full text-xs font-bold border border-dashed text-slate-400"><Icon name="plus" size={14}/></button>
+                                </div>
+                            </div>
+                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block">{t('date')}</label><div className="flex items-center bg-slate-50 p-4 rounded-2xl mt-1"><Icon name="calendar" size={16} className="text-slate-400 mr-2" /><input value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-slate-700 text-sm outline-none"/></div></div>
+                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-1">{t('notes')}</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} className="w-full bg-[#FCEAEF]/30 p-4 rounded-2xl text-sm font-bold text-[#9D4D63] outline-none resize-none h-24" /></div>
+                        </div>
+                        <button disabled={!amount} onClick={handleSave} className="w-full bg-[#FCEAEF] text-[#9D4D63] font-bold py-5 rounded-full shadow-sm disabled:opacity-50">{t('saveTx')}</button>
+                    </div>
                 </div>
             );
         };
 
-        // ==========================================
-        // 8. OTHER TRANSACTION SCREENS
-        // ==========================================
-        const SplitBillScreen = ({ tx, go, t, Icon }) => {
+        const TxDetailScreen = ({ tx, go, t }) => {
+            const [viewImage, setViewImage] = useState(false);
+            if(!tx) return null;
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full bg-[#FAFAF9] fade-in relative">
+                    {viewImage && tx.imageUrl && (<div className="absolute inset-0 bg-black/90 z-[100] flex flex-col fade-in pb-10"><div className="p-6 pt-12 flex justify-between items-center w-full"><button onClick={()=>setViewImage(false)} className="text-white bg-white/20 p-2 rounded-full"><Icon name="x" size={24}/></button></div><div className="flex-1 flex items-center justify-center p-4"><img src={tx.imageUrl} className="max-w-full max-h-full rounded-2xl object-contain shadow-2xl" /></div></div>)}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('txDetail')}</h2><div className="w-6"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <div className="flex flex-col items-center mb-2"><div className="mb-4 shadow-sm"><PocketIcon pocket={tx} size={36} /></div><h1 className="text-4xl font-black text-slate-800 mb-2">-฿{formatMoney(Math.abs(tx.amount))}</h1><p className="font-bold text-slate-500 text-sm text-center">{tx.title || tx.merchant}</p></div>
+                        <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm space-y-5">
+                            <div className="flex justify-between items-center border-b border-slate-50 pb-4"><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('status')}</span><span className="bg-[#E2F0E5] text-[#4A7D59] font-bold text-[10px] px-3 py-1 rounded-full">{t('completed')}</span></div>
+                            <div className="flex justify-between items-center border-b border-slate-50 pb-4"><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('date')}</span><span className="font-bold text-slate-700 text-xs">{tx.date}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('category')}</span><span className="font-bold text-[#4A7D59] bg-[#E2F0E5] px-3 py-1 rounded-full text-[10px] flex items-center gap-1.5"><Icon name={tx.icon||'coffee'} size={12}/> {tx.category}</span></div>
+                        </div>
+                        {tx.notes && (<div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm"><h4 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1"><Icon name="align-left" size={14}/> {t('notes')}</h4><p className="text-sm font-bold text-slate-700">{tx.notes}</p></div>)}
+                        <div className="flex gap-4">
+                            <button onClick={()=>go('SPLIT_BILL', null, tx)} className="flex-1 bg-[#FCEAEF] text-[#9D4D63] font-bold py-4 rounded-[24px] shadow-sm flex justify-center gap-2"><Icon name="split-square-horizontal" size={18}/> {t('splitBill')}</button>
+                            {tx.imageUrl && (<button onClick={()=>setViewImage(true)} className="flex-1 bg-white border border-slate-200 text-slate-600 font-bold py-4 rounded-[24px] shadow-sm flex justify-center gap-2"><Icon name="image" size={18}/> {t('viewReceipt')}</button>)}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const SplitBillScreen = ({ tx, go, t }) => {
             const billTotal = Number(tx?.amount || 0);
             const [friends, setFriends] = useState([{id:1, name:'ฉัน', amount:billTotal/2}, {id:2, name:'เพื่อน 1', amount:billTotal/2}]);
-            const currentSum = friends.reduce((a,c)=>a+Number(c.amount), 0);
-            const isMatch = Math.abs(currentSum - billTotal) < 0.01;
-
+            const currentSum = friends.reduce((a,c)=>a+Number(c.amount), 0); const isMatch = Math.abs(currentSum - billTotal) < 0.01;
             const updateAmount = (id, val) => setFriends(friends.map(f=>f.id===id?{...f, amount:val}:f));
 
             return (
                 <div className="p-6 pt-10 flex flex-col h-full bg-[#F7F9FC] fade-in">
                     <div className="flex items-center mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button><h2 className="font-black text-lg ml-4">{t('splitBill')}</h2></div>
-                    <div className="bg-white p-6 rounded-[36px] shadow-sm border border-slate-100 text-center mb-6">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('totalAmount')}</p><h1 className="text-4xl font-black text-slate-800 my-2">฿{formatMoney(billTotal)}</h1>
-                        <div className="flex justify-between items-center mt-4 px-4 bg-slate-50 py-3 rounded-2xl"><span className="text-xs font-bold text-slate-500">แบ่งแล้ว: ฿{formatMoney(currentSum)}</span><span className={`text-xs font-black ${isMatch?'text-green-500':'text-red-500'}`}>เหลือ: ฿{formatMoney(Math.max(billTotal-currentSum, 0))}</span></div>
-                    </div>
+                    <div className="bg-white p-6 rounded-[36px] shadow-sm border border-slate-100 text-center mb-6"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('totalAmount')}</p><h1 className="text-4xl font-black text-slate-800 my-2">฿{formatMoney(billTotal)}</h1><div className="flex justify-between items-center mt-4 px-4 bg-slate-50 py-3 rounded-2xl"><span className="text-xs font-bold text-slate-500">แบ่งแล้ว: ฿{formatMoney(currentSum)}</span><span className={`text-xs font-black ${isMatch?'text-green-500':'text-red-500'}`}>เหลือ: ฿{formatMoney(Math.max(billTotal-currentSum, 0))}</span></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-6">
-                        {friends.map(f => (
-                            <div key={f.id} className="bg-white p-4 rounded-[24px] border border-slate-100 flex items-center shadow-sm">
-                                <div className="flex-1 ml-3 font-bold text-slate-700 text-sm">{f.name}</div>
-                                <div className="bg-slate-50 px-3 py-2 rounded-xl flex items-center focus-within:ring-2 ring-[#2F80ED] transition-all"><span className="text-xs font-bold text-slate-400">฿</span><input type="number" value={f.amount} onChange={e=>updateAmount(f.id, e.target.value)} className="w-16 bg-transparent text-right font-black text-[#2F80ED] outline-none"/></div>
-                                {f.name!=='ฉัน' && <button onClick={()=>setFriends(friends.filter(x=>x.id!==f.id))} className="ml-2 text-slate-300 hover:text-red-500 p-2"><Icon name="x" size={18}/></button>}
-                            </div>
-                        ))}
-                        <button onClick={()=>setFriends([...friends,{id:Date.now(), name:`เพื่อน ${friends.length+1}`, amount:0}])} className="w-full py-4 border-2 border-dashed border-[#2F80ED]/30 rounded-[24px] text-[#2F80ED] font-black flex items-center justify-center gap-2 active:scale-95 transition-all"><Icon name="plus" size={18}/> {t('addFriend')}</button>
+                        {friends.map(f => (<div key={f.id} className="bg-white p-4 rounded-[24px] border border-slate-100 flex items-center shadow-sm"><div className="flex-1 ml-3 font-bold text-slate-700 text-sm">{f.name}</div><div className="bg-slate-50 px-3 py-2 rounded-xl flex items-center"><span className="text-xs font-bold text-slate-400">฿</span><input type="number" value={f.amount} onChange={e=>updateAmount(f.id, e.target.value)} className="w-16 bg-transparent text-right font-black text-[#2F80ED] outline-none"/></div>{f.name!=='ฉัน' && <button onClick={()=>setFriends(friends.filter(x=>x.id!==f.id))} className="ml-2 text-slate-300 hover:text-red-500 p-2"><Icon name="x" size={18}/></button>}</div>))}
+                        <button onClick={()=>setFriends([...friends,{id:Date.now(), name:`เพื่อน ${friends.length+1}`, amount:0}])} className="w-full py-4 border-2 border-dashed border-[#2F80ED]/30 rounded-[24px] text-[#2F80ED] font-black flex items-center justify-center gap-2"><Icon name="plus" size={18}/> {t('addFriend')}</button>
                     </div>
-                    <button disabled={!isMatch} onClick={()=>go('MAIN','HISTORY')} className={`w-full py-5 rounded-[24px] font-black text-white shadow-xl transition-all ${isMatch?'bg-[#2F80ED] active:scale-95':'bg-slate-300'}`}>{t('confirmSplit')}</button>
+                    <button disabled={!isMatch} onClick={()=>go('MAIN','HISTORY')} className={`w-full py-5 rounded-[24px] font-black text-white shadow-xl ${isMatch?'bg-[#2F80ED]':'bg-slate-300'}`}>{t('confirmSplit')}</button>
                 </div>
             );
         };
 
-        const TxDetailScreen = ({ tx, go, t, Icon }) => {
-            if(!tx) return null;
-            return (
-                <div className="p-6 pt-10 flex flex-col h-full bg-[#F7F9FC] fade-in">
-                    <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button></div>
-                    <div className="flex flex-col items-center mb-8"><div className={`w-20 h-20 rounded-[32px] ${tx.color||'bg-slate-100'} flex items-center justify-center mb-6 shadow-sm`}><Icon name={tx.icon||'receipt'} size={36}/></div><h1 className="text-5xl font-black text-slate-800 mb-2">฿{formatMoney(tx.amount)}</h1><p className="font-bold text-slate-400 text-lg">{tx.title}</p></div>
-                    <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm space-y-6 mb-8">
-                        <div className="flex justify-between items-center"><span className="text-xs font-bold text-slate-400 uppercase">{t('status')}</span><span className="bg-green-50 text-green-600 font-black text-xs px-3 py-1.5 rounded-full">สำเร็จ</span></div>
-                        <div className="flex justify-between items-center"><span className="text-xs font-bold text-slate-400 uppercase">{t('category')}</span><span className="font-bold text-slate-700 text-sm">{tx.category}</span></div>
-                        <div className="flex justify-between items-center"><span className="text-xs font-bold text-slate-400 uppercase">{t('date')}</span><span className="font-bold text-slate-700 text-sm">{tx.date}</span></div>
-                    </div>
-                    <button onClick={()=>go('SPLIT_BILL', null, tx)} className="mt-auto w-full bg-[#2F80ED] text-white font-black py-4 rounded-[24px] shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"><Icon name="users" size={20}/> {t('splitBill')}</button>
-                </div>
-            );
-        };
-
-        const AddPocketScreen = ({ go, onSave, t, Icon, LoadingOverlay }) => {
-            const [name, setName] = useState(''); const [balance, setBalance] = useState(''); const [target, setTarget] = useState('');
-            const [saving, setSaving] = useState(false);
+        const App = () => {
+            const [isAuthReady, setIsAuthReady] = useState(false); const [user, setUser] = useState(null);
+            const [screen, setScreen] = useState('SIGN_IN'); const [tab, setTab] = useState('HOME'); const [screenData, setScreenData] = useState(null);
+            const [lang, setLang] = useState('EN'); const [themeMode, setThemeMode] = useState('Light'); const [reduceMotion, setReduceMotion] = useState(false);
+            const [pinCode, setPinCode] = useState(localStorage.getItem('cozy_pin')); const [isLocked, setIsLocked] = useState(!!localStorage.getItem('cozy_pin')); const [showPinModal, setShowPinModal] = useState(false);
+            const [txs, setTxs] = useState([]); const [pockets, setPockets] = useState([]); const [dismissedNotifs, setDismissedNotifs] = useState([]);
+            const defaultCatIds = ['Food & Drink', 'Shopping', 'Transport', 'Bills'];
+            const [userCategories, setUserCategories] = useState([{ id: 'Food & Drink', icon: 'coffee', color: '#ff9800' },{ id: 'Shopping', icon: 'shopping-bag', color: '#e91e63' },{ id: 'Transport', icon: 'car', color: '#00bcd4' },{ id: 'Bills', icon: 'zap', color: '#ffc107' }]);
             
-            const handleSave = () => {
-                setSaving(true);
-                setTimeout(() => {
-                    onSave({ id: Date.now().toString(), name, balance: Number(balance||0), target: Number(target), icon: 'wallet', color: 'bg-blue-50 text-blue-500' });
-                }, 1000);
-            };
+            const t = useCallback((key) => getT(lang)(key), [lang]);
+            const go = useCallback((s, tb = null, data = null) => { setScreen(s); if(tb) setTab(tb); if(data!==undefined) setScreenData(data); }, []);
 
-            return (
-                <div className="p-8 h-full flex flex-col fade-in bg-[#F7F9FC] relative">
-                    {saving && <LoadingOverlay text="กำลังบันทึก..." Icon={Icon} />}
-                    <button onClick={()=>go('MAIN','POCKETS')} className="mb-8 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left" /></button>
-                    <h2 className="text-3xl font-black mb-8 text-slate-800">{t('newPocket')}</h2>
-                    <div className="space-y-4">
-                        <div><label className="text-[10px] font-bold text-slate-400 uppercase">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full p-4 rounded-2xl bg-white border border-slate-100 font-bold outline-none focus:ring-2 ring-[#2F80ED] text-slate-800" placeholder="เช่น ค่าอาหาร"/></div>
-                        <div><label className="text-[10px] font-bold text-slate-400 uppercase">เงินเริ่มต้น (มีอยู่แล้ว)</label><input type="number" value={balance} onChange={e=>setBalance(e.target.value)} className="w-full p-4 rounded-2xl bg-white border border-slate-100 font-bold outline-none focus:ring-2 ring-[#2F80ED] text-slate-800" placeholder="0.00"/></div>
-                        <div><label className="text-[10px] font-bold text-slate-400 uppercase">{t('targetAmount')}</label><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full p-4 rounded-2xl bg-white border border-slate-100 font-bold outline-none focus:ring-2 ring-[#2F80ED] text-slate-800" placeholder="0.00"/></div>
-                    </div>
-                    <button disabled={!name || !target} onClick={handleSave} className="mt-auto w-full bg-[#2F80ED] text-white font-black p-5 rounded-[24px] shadow-lg disabled:bg-slate-300">{t('savePocket')}</button>
-                </div>
-            );
-        };
-
-        const PocketDetailsScreen = ({ go, pocket, t, Icon }) => {
-            if(!pocket) return null;
-            return (
-                <div className="p-8 h-full flex flex-col bg-[#F7F9FC] fade-in">
-                    <button onClick={()=>go('MAIN','POCKETS')} className="mb-8 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left" /></button>
-                    <div className="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 text-center mb-6"><div className={`w-16 h-16 ${pocket.color||'bg-blue-50 text-blue-500'} rounded-2xl flex items-center justify-center mx-auto mb-4`}><Icon name={pocket.icon||'wallet'} size={32}/></div><h2 className="text-xl font-bold text-slate-500 mb-1">{pocket.name}</h2><h1 className="text-4xl font-black text-slate-800">฿{formatMoney(pocket.balance)}</h1><div className="mt-6 flex justify-between text-[10px] font-bold text-slate-400 uppercase px-2"><span>เป้าหมาย: ฿{formatMoney(pocket.target)}</span><span>{Math.round((pocket.balance/pocket.target)*100)}%</span></div><div className="h-2 w-full bg-slate-100 rounded-full mt-2 overflow-hidden"><div className="h-full bg-[#2F80ED]" style={{width:`${(pocket.balance/pocket.target)*100}%`}}></div></div></div>
-                </div>
-            );
-        };
-
-        // ==========================================
-        // 9. PROFILE & SETTINGS
-        // ==========================================
-        const ProfileScreen = ({ user, go, t, onLogout, Icon, LoadingOverlay }) => {
-            const [loggingOut, setLoggingOut] = useState(false);
-            const doLogout = () => {
-                setLoggingOut(true);
-                setTimeout(() => onLogout(), 1000);
-            };
-            return (
-                <div className="p-6 pt-10 fade-in relative">
-                    {loggingOut && <LoadingOverlay text="กำลังออกจากระบบ..." Icon={Icon} />}
-                    <h2 className="text-3xl font-black text-slate-800 mb-8 leading-none">{t('profile')}</h2>
-                    <div className="flex flex-col items-center mb-10">
-                        <div className="relative">
-                            <img src={user?.photoURL || 'https://ui-avatars.com/api/?name=User&background=2F80ED&color=fff'} className="w-28 h-28 rounded-[40px] border-4 border-white shadow-xl mb-4 object-cover"/>
-                            <div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-4 right-1 w-10 h-10 bg-[#2F80ED] border-4 border-white rounded-full flex items-center justify-center text-white shadow-lg cursor-pointer"><Icon name="edit-2" size={14}/></div>
-                        </div>
-                        <h1 className="text-2xl font-black text-slate-800">{user?.displayName || 'ผู้ใช้งาน'}</h1>
-                    </div>
-                    <div className="space-y-4 mb-8">
-                        <div onClick={()=>go('EDIT_PROFILE')} className="flex justify-between items-center bg-white p-5 rounded-[28px] shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98] transition-all"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-600"><Icon name="user"/></div><span className="font-bold text-slate-700">{t('editProfile')}</span></div><Icon name="chevron-right" className="text-slate-300"/></div>
-                        <div onClick={()=>go('SECURITY')} className="flex justify-between items-center bg-white p-5 rounded-[28px] shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98] transition-all"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-600"><Icon name="shield"/></div><span className="font-bold text-slate-700">{t('security')}</span></div><Icon name="chevron-right" className="text-slate-300"/></div>
-                        <div onClick={()=>go('LANGUAGE')} className="flex justify-between items-center bg-white p-5 rounded-[28px] shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98] transition-all"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-600"><Icon name="globe"/></div><span className="font-bold text-slate-700">{t('language')}</span></div><Icon name="chevron-right" className="text-slate-300"/></div>
-                        <div onClick={()=>go('THEME')} className="flex justify-between items-center bg-white p-5 rounded-[28px] shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98] transition-all"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-600"><Icon name="palette"/></div><span className="font-bold text-slate-700">{t('theme')}</span></div><Icon name="chevron-right" className="text-slate-300"/></div>
-                    </div>
-                    <button onClick={doLogout} className="w-full bg-red-50 text-red-500 font-black py-5 rounded-[28px] flex items-center justify-center gap-2 active:scale-95 transition-transform"><Icon name="log-out" size={20}/> {t('logout')}</button>
-                </div>
-            );
-        };
-
-        const EditProfileScreen = ({ go, user, setUser, t, Icon, LoadingOverlay }) => {
-            const [name, setName] = useState(user?.displayName || '');
-            const [saving, setSaving] = useState(false);
-            const fileInputRef = useRef(null);
-
-            const handleUpdate = async () => {
-                setSaving(true);
-                
-                const updateLogic = async () => {
-                    if(user && user.uid !== 'mock-uid') {
-                        try {
-                            await user.updateProfile({ displayName: name });
-                            await db.collection('users').doc(user.uid).set({ displayName: name }, { merge: true });
-                        } catch(e) {}
-                    } else if (user && user.uid === 'mock-uid') {
-                        const guestData = JSON.parse(localStorage.getItem('cozy_guest')) || {};
-                        localStorage.setItem('cozy_guest', JSON.stringify({...guestData, displayName: name}));
+            useEffect(() => {
+                const unsub = auth.onAuthStateChanged(u => {
+                    setIsAuthReady(true);
+                    if(u) {
+                        db.collection('users').doc(u.uid).onSnapshot(doc => { const d = doc.data() || {}; setUser({ uid: u.uid, email: u.email, displayName: d.displayName || u.email.split('@')[0], photoURL: d.photoURL || 'https://ui-avatars.com/api/?name=U&background=F472B6&color=fff', bio: d.bio || '' }); });
+                        if(!isLocked) go('MAIN', 'HOME');
+                        db.collection('users').doc(u.uid).collection('transactions').orderBy('timestamp', 'desc').onSnapshot(snap => setTxs(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+                        db.collection('users').doc(u.uid).collection('pockets').onSnapshot(snap => setPockets(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+                    } else {
+                        const localGuest = localStorage.getItem('cozy_guest');
+                        if (localGuest) { setUser(JSON.parse(localGuest)); if(!isLocked) go('MAIN', 'HOME'); } else { go('SIGN_IN'); setTxs([]); setPockets([]); setDismissedNotifs([]); }
                     }
-                    setUser(prev => ({...prev, displayName: name}));
-                    go('MAIN','PROFILE');
-                };
-                
-                setTimeout(updateLogic, 1000);
-            };
+                });
+                return unsub;
+            }, [go, isLocked]);
 
-            const compressImage = (file, callback) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 300;
-                        const scaleSize = MAX_WIDTH / img.width;
-                        canvas.width = MAX_WIDTH;
-                        canvas.height = img.height * scaleSize;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        callback(canvas.toDataURL('image/jpeg', 0.7));
-                    }
-                }
-            };
+            const safeToSpend = useMemo(() => pockets.reduce((a,c) => a + Number(c.balance), 0), [pockets]);
+            const notifications = useMemo(() => {
+                const notifs = [];
+                if (safeToSpend > 0 && safeToSpend <= 500) notifs.push({ id: 'low-bal', type: 'alert', title: t('lowBalance'), desc: t('safeThreshold'), time: 'Now' });
+                pockets.filter(p => p.hasTarget && Number(p.target) > Number(p.balance)).forEach(p => { notifs.push({ id: `pocket-${p.id}`, type: 'calendar', title: t('billReminder'), desc: `${p.name} ขาดอีก ฿${formatMoney(p.target - p.balance)}`, time: 'Target' }); });
+                if (txs.length > 0) { const latest = txs[0]; notifs.push({ id: `tx-${latest.id}`, type: 'receipt', title: t('newTx'), desc: `${latest.title} ฿${formatMoney(latest.amount)}`, time: latest.date }); }
+                return notifs.filter(n => !dismissedNotifs.includes(n.id));
+            }, [safeToSpend, pockets, txs, t, dismissedNotifs]);
 
-            const handleAvatarUpload = (e) => {
-                const file = e.target.files[0];
-                if(file) {
-                    setSaving(true);
-                    compressImage(file, async (compressedBase64) => {
+            if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-[#0f172a] text-[#F472B6]"><Icon name="loader-2" size={48} className="animate-spin"/></div>;
+            if (isLocked) return <div className="app-container bg-[#FCFBFA]"><LockScreen Icon={Icon} correctPin={pinCode} onUnlock={()=>{ setIsLocked(false); go(user?'MAIN':'SIGN_IN', user?'HOME':null); }} /></div>;
+
+            const p = { user, setUser, go, t, lang, setLang, themeMode, setThemeMode, reduceMotion, setReduceMotion, pinCode, setPinCode, showPinModal, setShowPinModal, txs, setTxs, pockets, setPockets, screenData, Icon, LoadingOverlay, translateAuthError, visibleNotifications: notifications, clearAllNotifs: ()=>setDismissedNotifs(notifications.map(n=>n.id)), safeToSpend, db, userCategories, setUserCategories, defaultCatIds };
+
+            return (
+                <div className={`app-container ${reduceMotion?'no-motion':''} ${themeMode==='Dark'?'theme-dark':'bg-[#FAFAF9]'}`}>
+                    {screen === 'SIGN_IN' && <LoginScreen {...p} />}
+                    {screen === 'SIGN_UP' && <SignUpScreen {...p} />}
+                    {screen === 'FORGOT_PASS' && <ForgotScreen {...p} />}
+                    {screen === 'MAIN' && (
+                        <MainLayout {...p} tab={tab}>
+                            {tab === 'HOME' && <HomeScreen {...p} />}
+                            {tab === 'POCKETS' && <PocketsScreen {...p} />}
+                            {tab === 'HISTORY' && <HistoryScreen {...p} />}
+                            {tab === 'PROFILE' && <ProfileScreen {...p} onLogout={()=>{ auth.signOut(); localStorage.removeItem('cozy_guest'); setUser(null); go('SIGN_IN'); }} />}
+                        </MainLayout>
+                    )}
+                    {screen === 'NOTIFICATIONS' && <NotificationsScreen {...p} />}
+                    {screen === 'SCAN' && <ScanScreen {...p} onNext={(d)=>go('REVIEW', null, d)} />}
+                    {screen === 'REVIEW' && <ReviewScreen {...p} onConfirm={async (d)=>{ 
                         if(user && user.uid !== 'mock-uid') {
-                            try {
-                                await db.collection('users').doc(user.uid).set({ photoURL: compressedBase64 }, { merge: true });
-                            } catch(e) { console.error(e); }
-                        } else if (user && user.uid === 'mock-uid') {
-                            const guestData = JSON.parse(localStorage.getItem('cozy_guest')) || {};
-                            localStorage.setItem('cozy_guest', JSON.stringify({...guestData, photoURL: compressedBase64}));
+                            await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
+                            if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: pkt.balance - d.amount }); }
+                        } else {
+                            setTxs([{id: Date.now().toString(), ...d}, ...txs]);
+                            if (d.pocketId && d.pocketId !== 'none') setPockets(pockets.map(pk => pk.id === d.pocketId ? {...pk, balance: pk.balance - d.amount} : pk));
                         }
-                        setUser(prev => ({...prev, photoURL: compressedBase64}));
-                        setSaving(false);
-                    });
-                }
-            };
-
-            return (
-                <div className="p-6 pt-10 flex flex-col h-full bg-[#F7F9FC] fade-in relative">
-                    {saving && <LoadingOverlay text="กำลังบันทึก..." Icon={Icon} />}
-                    <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button><h2 className="font-black text-lg ml-4">{t('editProfile')}</h2></div>
-                    <div className="flex flex-col items-center mb-8 relative">
-                        <img src={user?.photoURL || 'https://ui-avatars.com/api/?name=User&background=2F80ED&color=fff'} className="w-32 h-32 rounded-full border-[6px] border-white shadow-xl object-cover"/>
-                        <button onClick={()=>fileInputRef.current.click()} className="absolute bottom-0 bg-[#2F80ED] text-white p-3 rounded-full border-4 border-white shadow-md active:scale-90"><Icon name="camera" size={18}/></button>
-                        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-                    </div>
-                    <div className="space-y-4">
-                        <div><label className="text-xs font-bold text-slate-400 ml-2 block mb-2">{t('name')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full p-4 rounded-2xl bg-white border border-slate-100 font-bold outline-none text-slate-800" placeholder="ชื่อของคุณ"/></div>
-                    </div>
-                    <button onClick={handleUpdate} className="mt-auto w-full bg-[#2F80ED] text-white font-black py-5 rounded-[24px] shadow-lg active:scale-95">บันทึกการเปลี่ยนแปลง</button>
+                        go('MAIN','HISTORY'); 
+                    }} />}
+                    {screen === 'ADD_TX' && <AddTxScreen {...p} onSave={async (d)=>{ 
+                        if(user && user.uid !== 'mock-uid') {
+                            await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
+                            if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: pkt.balance - d.amount }); }
+                        } else {
+                            setTxs([{id: Date.now().toString(), ...d}, ...txs]); 
+                            if (d.pocketId && d.pocketId !== 'none') setPockets(pockets.map(pk => pk.id === d.pocketId ? {...pk, balance: pk.balance - d.amount} : pk));
+                        }
+                        go('MAIN','HISTORY'); 
+                    }} />}
+                    {screen === 'TX_DETAIL' && <TxDetailScreen {...p} tx={screenData || txs[0]} />}
+                    {screen === 'SPLIT_BILL' && <SplitBillScreen {...p} tx={screenData || txs[0]} />}
+                    {screen === 'ADD_POCKET' && <AddPocketScreen {...p} onSave={async (pData)=>{ 
+                        if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').add({...pData, timestamp: firebase.firestore.FieldValue.serverTimestamp()}); } else setPockets([...pockets, {id: Date.now().toString(), ...pData}]); 
+                        go('MAIN', 'POCKETS'); 
+                    }} />}
+                    {screen === 'POCKET_DETAILS' && <PocketDetailsScreen {...p} pocket={screenData || pockets[0]} />}
+                    {screen === 'POCKET_SETTINGS' && <PocketSettingsScreen {...p} pocket={screenData} onUpdate={async (id, data)=>{
+                        if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').doc(id).set(data, {merge: true}); } else setPockets(pockets.map(p => p.id === id ? {...p, ...data} : p));
+                        go('POCKET_DETAILS', null, {...screenData, ...data});
+                    }} onDelete={async (id)=>{
+                        if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').doc(id).delete(); } else setPockets(pockets.filter(p => p.id !== id));
+                        go('MAIN', 'POCKETS');
+                    }} />}
+                    {screen === 'EDIT_PROFILE' && <EditProfileScreen {...p} />}
+                    {screen === 'SECURITY' && <SecuritySettingsScreen {...p} />}
+                    {screen === 'LANGUAGE' && <LanguageSettingsScreen {...p} />}
+                    {screen === 'THEME' && <ThemeSettingsScreen {...p} />}
+                    {showPinModal && <PinPadModal onClose={()=>setShowPinModal(false)} onSave={(pin)=>{ setPinCode(pin); localStorage.setItem('cozy_pin', pin); setShowPinModal(false); }} Icon={Icon} isSet={!!pinCode} t={t} />}
                 </div>
             );
         };
-
-        const ThemeSettingsScreen = ({ themeMode, setThemeMode, reduceMotion, setReduceMotion, go, t, Icon }) => (
-            <div className="p-6 pt-10 flex flex-col h-full bg-[#F7F9FC] fade-in">
-                <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button><h2 className="font-black text-lg ml-4">{t('theme')}</h2></div>
-                <div className="space-y-4 mb-8">
-                    {['light', 'dark', 'system'].map(mode => (
-                        <div key={mode} onClick={()=>setThemeMode(mode)} className={`bg-white p-6 rounded-[32px] border-2 shadow-sm flex justify-between items-center cursor-pointer transition-all ${themeMode===mode ? 'border-[#2F80ED] bg-[#2F80ED]/5' : 'border-transparent'}`}>
-                            <div className="flex gap-4 items-center">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${themeMode===mode?'bg-[#2F80ED] text-white':'bg-slate-50 text-slate-400'}`}>
-                                    <Icon name={mode==='light'?'sun':mode==='dark'?'moon':'smartphone'} size={20}/>
-                                </div>
-                                <span className={`font-black text-sm ${themeMode===mode?'text-[#2F80ED]':'text-slate-700'}`}>{t(mode)}</span>
-                            </div>
-                            {themeMode===mode && <Icon name="check-circle-2" size={24} className="text-[#2F80ED]"/>}
-                        </div>
-                    ))}
-                </div>
-                <div onClick={()=>setReduceMotion(!reduceMotion)} className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex justify-between items-center cursor-pointer">
-                    <span className="font-black text-slate-700 text-sm">{t('reduceMotion')}</span>
-                    <div className={`w-12 h-7 rounded-full flex items-center p-1 transition-colors ${reduceMotion?'bg-[#56CC9D]':'bg-slate-200'}`}><div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${reduceMotion?'translate-x-5':'translate-x-0'}`}></div></div>
-                </div>
-            </div>
-        );
-
-        const LanguageSettingsScreen = ({ lang, setLang, go, t, Icon }) => (
-            <div className="p-6 pt-10 flex flex-col h-full bg-[#F7F9FC] fade-in">
-                <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button><h2 className="font-black text-lg ml-4">{t('language')}</h2></div>
-                <div className="space-y-4">
-                    {['TH', 'EN'].map(l => (
-                        <div key={l} onClick={()=>setLang(l)} className={`p-6 rounded-[28px] border-2 flex justify-between items-center cursor-pointer transition-all ${lang===l?'border-[#2F80ED] bg-blue-50':'border-white bg-white shadow-sm'}`}>
-                            <span className={`font-black text-sm ${lang===l?'text-[#2F80ED]':'text-slate-600'}`}>{l === 'TH' ? 'ภาษาไทย' : 'English'}</span>
-                            {lang===l && <Icon name="check-circle-2" size={20} className="text-[#2F80ED]"/>}
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-
-        const SecuritySettingsScreen = ({ go, pinCode, setShowPinModal, t, Icon, user, translateAuthError }) => {
-            const [bio, setBio] = useState(true);
-            const [msg, setMsg] = useState('');
-            
-            const handleResetPass = async () => {
-                if(user && user.uid !== 'mock-uid') {
-                    try {
-                        await auth.sendPasswordResetEmail(user.email);
-                        setMsg('ส่งลิงก์เปลี่ยนรหัสไปที่อีเมลแล้ว');
-                    } catch(e) { setMsg(translateAuthError(e.code)); }
-                } else setMsg('ไม่รองรับในโหมดทดลองใช้งาน');
-                setTimeout(()=>setMsg(''), 3000);
-            };
-
-            return (
-                <div className="p-6 pt-10 flex flex-col h-full bg-[#F7F9FC] fade-in">
-                    <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button><h2 className="font-black text-lg ml-4">{t('security')}</h2></div>
-                    <div className="bg-white rounded-[36px] border border-slate-100 shadow-sm p-2 mb-8">
-                        <div onClick={handleResetPass} className="p-4 border-b border-slate-50 flex items-center justify-between cursor-pointer active:bg-slate-50 rounded-t-[32px]"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500"><Icon name="lock"/></div><span className="font-bold text-sm text-slate-800">{t('changePass')}</span></div><Icon name="chevron-right" className="text-slate-300"/></div>
-                        <div className="p-4 border-b border-slate-50 flex items-center justify-between"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500"><Icon name="layout-grid"/></div><div><span className="font-bold text-sm text-slate-800 block leading-none mb-1">{t('pinCode')}</span><span className="text-[10px] font-bold text-slate-400 uppercase">{pinCode?t('changePin'):'ยังไม่ได้ตั้ง'}</span></div></div><button onClick={()=>setShowPinModal(true)} className={`text-[10px] font-black px-4 py-2 rounded-xl transition-colors ${pinCode?'bg-slate-100 text-slate-500':'bg-[#2F80ED] text-white'}`}>{pinCode?t('changePin'):t('setPin')}</button></div>
-                        <div className="p-4 flex items-center justify-between"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500"><Icon name="fingerprint"/></div><span className="font-bold text-sm text-slate-800">{t('biometric')}</span></div><div onClick={()=>setBio(!bio)} className={`w-12 h-7 rounded-full flex items-center p-1 cursor-pointer transition-colors ${bio?'bg-[#56CC9D]':'bg-slate-200'}`}><div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${bio?'translate-x-5':'translate-x-0'}`}></div></div></div>
-                    </div>
-                    {msg && <div className="text-center bg-green-50 text-green-600 p-4 rounded-2xl font-bold text-xs">{msg}</div>}
-                </div>
-            );
-        };
-
-        const NotificationSettingsScreen = ({ go, Icon }) => <div className="p-6 pt-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button><h2 className="text-xl font-black mt-6">การแจ้งเตือน</h2></div>;
-
-        const PinPadModal = ({ onClose, onSave, Icon, isSet }) => {
-            const [pin, setPin] = useState('');
-            const press = (n) => { if(pin.length < 6) setPin(p => p + n); };
-            const del = () => setPin(p => p.slice(0, -1));
-            useEffect(() => { if(pin.length === 6) setTimeout(()=>{ onSave(pin); onClose(); }, 200); }, [pin]);
-
-            return (
-                <div className="absolute inset-0 bg-black/60 z-[100] flex flex-col justify-end fade-in">
-                    <div className="bg-white w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center slide-up shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
-                        <div className="flex justify-between w-full mb-8"><div className="w-8"></div><h3 className="font-black text-slate-800 text-lg">{isSet?'ตั้งรหัส PIN ใหม่':'ตั้งรหัส PIN 6 หลัก'}</h3><button onClick={onClose} className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500"><Icon name="x" size={16}/></button></div>
-                        <div className="flex gap-4 mb-10">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? 'bg-[#2F80ED]' : 'bg-slate-200'}`}></div>)}</div>
-                        <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
-                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200 transition-colors">{n}</button>)}
-                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200 transition-colors">0</button><button onClick={del} className="h-16 flex items-center justify-center text-slate-500 active:bg-slate-100 rounded-full transition-colors"><Icon name="delete" size={28}/></button>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<ErrorBoundary><App /></ErrorBoundary>);
     </script>
 </body>
 </html>
-
-
-```
