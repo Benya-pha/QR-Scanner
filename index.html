@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/lazywasabi/thai-web-fonts@7/fonts/CSPrajad/CS-Prajad.css" rel="stylesheet" />
     
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -25,41 +25,69 @@
     
     <style>
         * { font-family: 'Plus Jakarta Sans', 'CS Prajad', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
-        body, html, #root { width: 100%; height: 100%; margin: 0; background-color: #0f172a; overflow: hidden; }
+        
+        /* 📱 Responsive Full Width/Height - No Desktop Mockup */
+        body, html, #root { 
+            width: 100%; 
+            height: 100%; 
+            margin: 0; 
+            background-color: #FFD84D; 
+            overflow: hidden; 
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        .app-container { width: 100%; max-width: 480px; height: 100%; margin: 0 auto; background: #FCFBFA; position: relative; display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.1); overflow: hidden; }
-        @media (max-width: 480px) { .app-container { max-width: 100%; box-shadow: none; } }
+        /* Playful Utility Base */
+        .app-container { 
+            width: 100%; 
+            height: 100%; 
+            background: #FFD84D; 
+            color: #1F1F1F; 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
 
         video { object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; pointer-events: none; }
+        
+        /* Animations */
         .fade-in { animation: fadeIn 0.3s ease-out forwards; }
         .slide-up { animation: slideUp 0.3s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
         .no-motion * { transition: none !important; animation: none !important; }
         
-        .theme-dark { background-color: #0f172a !important; color: #f1f5f9 !important; }
-        .theme-dark .bg-white { background-color: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; }
-        .theme-dark .text-slate-800, .theme-dark .text-slate-700 { color: #f1f5f9 !important; }
-        .theme-dark .text-slate-600, .theme-dark .text-slate-500 { color: #cbd5e1 !important; }
-        .theme-dark .bg-\[\#F7F9FC\] { background-color: #0f172a !important; }
-        .theme-dark .bg-slate-50 { background-color: #0f172a !important; border: 1px solid #334155; color: #f1f5f9 !important;}
-        .theme-dark input, .theme-dark select, .theme-dark textarea { color: #f1f5f9 !important; }
-        
-        .scan-frame { position: absolute; inset: 20%; border-radius: 24px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); z-index: 10; border: 2px solid rgba(255,255,255,0.5); }
-        .scan-corner { position: absolute; width: 40px; height: 40px; border-color: #F472B6; border-width: 0; }
-        .tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 24px; }
-        .tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-top-right-radius: 24px; }
-        .bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 24px; }
-        .br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 24px; }
-        @keyframes scanLine { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-        .laser { position: absolute; width: 100%; height: 2px; background: #F472B6; box-shadow: 0 0 15px #F472B6; animation: scanLine 2.5s linear infinite; z-index: 11; }
+        /* Dark Theme overrides */
+        .theme-dark { background-color: #1F1F1F !important; color: #F7F9FC !important; }
+        .theme-dark .bg-white { background-color: #2D2D2D !important; border-color: #444 !important; color: #F7F9FC !important; }
+        .theme-dark .text-slate-800, .theme-dark .text-slate-700 { color: #F7F9FC !important; }
+        .theme-dark .text-slate-600, .theme-dark .text-slate-500 { color: #A0AEC0 !important; }
+        .theme-dark input, .theme-dark select, .theme-dark textarea { color: #F7F9FC !important; }
 
-        .toggle-checkbox:checked { right: 0; border-color: #68CCA2; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #68CCA2; }
+        /* Sticker Style UI Elements */
+        .sticker-border { border: 4px solid #FFFFFF; box-shadow: 0 6px 12px rgba(0,0,0,0.08); }
+        .sticker-card { background-color: #FFFFFF; border-radius: 32px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+        .sticker-btn-red { background-color: #FF4D4D; color: #FFFFFF; border: 4px solid #FFFFFF; border-radius: 9999px; box-shadow: 0 6px 15px rgba(255, 77, 77, 0.3); transition: transform 0.15s ease-in-out; }
+        .sticker-btn-red:active { transform: scale(0.95); }
+        .sticker-btn-blue { background-color: #3B82F6; color: #FFFFFF; border: 4px solid #FFFFFF; border-radius: 9999px; box-shadow: 0 6px 15px rgba(59, 130, 246, 0.3); transition: transform 0.15s ease-in-out; }
+        .sticker-btn-blue:active { transform: scale(0.95); }
+        .sticker-icon { border: 3px solid #FFFFFF; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        input[type="color"] { -webkit-appearance: none; border: none; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; cursor: pointer; }
+        /* Forms */
+        .input-box { background: #FFFFFF; border: 3px solid #FFFFFF; border-radius: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: border 0.2s; }
+        .input-box:focus-within { border-color: #3B82F6; }
+
+        /* Scan Overlay */
+        .scan-frame { position: absolute; inset: 20%; border-radius: 32px; box-shadow: 0 0 0 9999px rgba(31, 31, 31, 0.8); z-index: 10; border: 4px solid #FFFFFF; }
+        @keyframes scanLine { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        .laser { position: absolute; width: 100%; height: 4px; background: #FF4D4D; box-shadow: 0 0 15px #FF4D4D; animation: scanLine 2.5s linear infinite; z-index: 11; }
+
+        /* Toggles */
+        .toggle-checkbox:checked { right: 0; border-color: #3B82F6; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #3B82F6; }
+        input[type="color"] { -webkit-appearance: none; border: none; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; cursor: pointer; padding: 0; }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
     </style>
@@ -70,6 +98,9 @@
     <script type="text/babel">
         const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
+        // ==========================================
+        // 1. FIREBASE INIT
+        // ==========================================
         const fbConfig = {
             apiKey: "AIzaSyCv1D7XjSuSYWJxpFxT7umaCAb9o8fY2o8",
             authDomain: "qr-scanner-a29e3.firebaseapp.com",
@@ -82,11 +113,14 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        // ==========================================
+        // 2. GLOBALS & HELPERS
+        // ==========================================
         const formatMoney = (num) => Number(num || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         
         const translateAuthError = (code) => {
             if(code.includes('api-key-not-valid')) return 'API Key ไม่ถูกต้อง';
-            if(code.includes('operation-not-supported')) return 'ไม่ได้เปิดใช้งาน Email/Password Auth';
+            if(code.includes('operation-not-supported')) return 'ไม่ได้เปิดใช้งาน Email/Password Auth ใน Firebase';
             switch(code) {
                 case 'auth/invalid-credential':
                 case 'auth/user-not-found':
@@ -98,7 +132,7 @@
             }
         };
 
-        const Icon = ({ name, size=24, className="", strokeWidth=2 }) => {
+        const Icon = ({ name, size=24, className="", strokeWidth=2.5 }) => {
             const spanRef = useRef(null);
             useEffect(() => { 
                 if(spanRef.current && window.lucide) {
@@ -114,9 +148,9 @@
         };
 
         const LoadingOverlay = ({ text, Icon }) => (
-            <div className="absolute inset-0 bg-[#0f172a]/90 backdrop-blur-md z-[100] flex flex-col items-center justify-center text-white fade-in">
-                <Icon name="loader-2" size={48} className="animate-spin text-[#F472B6] mb-6"/>
-                <h2 className="font-black text-lg tracking-widest uppercase">{text}</h2>
+            <div className="absolute inset-0 bg-[#FFD84D]/90 backdrop-blur-sm z-[100] flex flex-col items-center justify-center text-[#1F1F1F] fade-in">
+                <Icon name="loader-2" size={48} className="animate-spin text-[#3B82F6] mb-6"/>
+                <h2 className="font-black text-xl tracking-widest uppercase">{text}</h2>
             </div>
         );
 
@@ -149,7 +183,6 @@
                 await worker.terminate();
 
                 let finalAmount = ''; let merchant = ''; let dateStr = new Date().toLocaleDateString('th-TH'); let memoText = '';
-
                 const amountRegex = /(?:จำนวนเงิน|จำนวน|ยอดรวม|ยอดเงิน|รวมทั้งสิ้น|Total|Amount|฿|B)[^\d]*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i;
                 for(let line of lines) {
                     const match = line.match(amountRegex);
@@ -211,80 +244,80 @@
             }
         };
 
+        // ==========================================
+        // 3. DICTIONARY (i18n)
+        // ==========================================
         const TRANSLATIONS = {
             TH: {
-                welcome: 'ยินดีต้อนรับ', subWelcome: 'จัดการเงินง่ายๆ สไตล์คุณ', email: 'อีเมล', password: 'รหัสผ่าน',
-                forgotPass: 'ลืมรหัสผ่าน?', login: 'เข้าสู่ระบบ', loginGoogle: 'เข้าสู่ระบบด้วย Google',
-                noAccount: 'ยังไม่มีบัญชี?', signUp: 'สมัครเลย', createAccount: 'สร้างบัญชี', name: 'ชื่อ-นามสกุล',
-                confirmPass: 'ยืนยันรหัสผ่าน', sendLink: 'ส่งลิงก์',
-                home: 'หน้าหลัก', wallet: 'กระเป๋าเงิน', scan: 'สแกน', history: 'ประวัติ', profile: 'โปรไฟล์',
+                welcome: 'ยินดีต้อนรับ', home: 'หน้าหลัก', wallet: 'กระเป๋า', scan: 'สแกน', history: 'ประวัติ', profile: 'โปรไฟล์',
                 totalSpend: 'ยอดใช้จ่ายรวม', safeSpend: 'ยอดเงินคงเหลือ', recent: 'รายการล่าสุด', seeAll: 'ดูทั้งหมด',
-                noData: 'ยังไม่มีรายการ', newPocket: 'สร้างกระเป๋าใหม่', scanReceipt: 'สแกนสลิป', gallery: 'คลังภาพ',
-                manual: 'กรอกเอง', reviewDetails: 'ตรวจสอบข้อมูล', merchant: 'ชื่อร้าน/ผู้รับโอน', date: 'วันที่',
+                noData: 'ยังไม่มีรายการ', newPocket: 'สร้างกระเป๋าใหม่', scanReceipt: 'สแกนสลิป', gallery: 'อัลบั้ม',
+                manual: 'กรอกเอง', reviewDetails: 'ตรวจสอบข้อมูล', merchant: 'ร้านค้า/ผู้รับ', date: 'วันที่',
                 confirmSave: 'ยืนยันและบันทึก', addTx: 'บันทึกรายการ', amount: 'จำนวนเงิน', saveTx: 'บันทึกรายการ',
                 splitBill: 'หารบิลกับเพื่อน', totalAmount: 'ยอดรวมบิล', addFriend: 'เพิ่มเพื่อน', confirmSplit: 'ยืนยันการหารบิล',
                 txDetail: 'รายละเอียด', status: 'สถานะ', category: 'หมวดหมู่', editProfile: 'แก้ไขโปรไฟล์',
                 security: 'ความปลอดภัย', language: 'ภาษา', theme: 'ธีมแอป', logout: 'ออกจากระบบ',
-                light: 'Light', dark: 'Dark', system: 'System', reduceMotion: 'ลดการเคลื่อนไหว', changePass: 'เปลี่ยนรหัสผ่าน',
+                light: 'สว่าง', dark: 'มืด', system: 'ระบบ', reduceMotion: 'ลดภาพเคลื่อนไหว', changePass: 'เปลี่ยนรหัสผ่าน',
                 pinCode: 'รหัส PIN', setPin: 'ตั้งรหัส PIN', changePin: 'เปลี่ยน PIN',
                 yourDevices: 'อุปกรณ์ของคุณ', currentDevice: 'อุปกรณ์นี้', pocketName: 'ชื่อกระเป๋า', targetAmount: 'เป้าหมาย (บาท)',
                 savePocket: 'บันทึกกระเป๋า', passMismatch: 'รหัสผ่านไม่ตรงกัน', fillAll: 'กรุณากรอกให้ครบ', loading: 'กำลังประมวลผล...',
-                guestLogin: 'ทดลองใช้งาน (Guest)', aiSelected: 'AI เลือกให้', catFood: 'อาหาร/เครื่องดื่ม', catShop: 'ช้อปปิ้ง', catTransfer: 'โอนเงิน', catBill: 'จ่ายบิล', catTravel: 'เดินทาง/น้ำมัน', catGeneral: 'ทั่วไป',
-                searchPlaceholder: 'ค้นหารายการ...', all: 'ทั้งหมด', notFound: 'ไม่พบรายการที่ค้นหา',
-                notifications: 'การแจ้งเตือน', recentAlerts: 'รายการแจ้งเตือน', clearAll: 'ล้างทั้งหมด', caughtUp: 'คุณจัดการรายการสำคัญหมดแล้ว',
-                billReminder: 'แจ้งเตือนเป้าหมาย', newTx: 'รายการใหม่', lowBalance: 'เตือนเงินเหลือน้อย', safeThreshold: 'ยอดเงินในบัญชีรวมต่ำกว่าเกณฑ์ปลอดภัย (฿500.00)',
-                initialAmount: 'เงินเริ่มต้น', setMonthlyTarget: 'ตั้งเป้าหมายรายเดือน', optionalGoal: 'เป้าหมาย (เลือกได้)', chooseIcon: 'เลือกไอคอน & สี',
-                yourPockets: 'กระเป๋าเงินของคุณ', keepOrganized: 'จัดสรรเงินให้เป็นระเบียบ', createNewPocket: 'สร้างกระเป๋าใหม่',
+                guestLogin: 'ทดลองใช้งาน (Guest)', aiSelected: 'AI เลือกให้', 
+                searchPlaceholder: 'ค้นหา...', all: 'ทั้งหมด', notFound: 'ไม่พบรายการที่ค้นหา',
+                notifications: 'การแจ้งเตือน', recentAlerts: 'รายการแจ้งเตือน', clearAll: 'ล้าง', caughtUp: 'ไม่มีการแจ้งเตือนใหม่',
+                billReminder: 'แจ้งเตือนเป้าหมาย', newTx: 'รายการใหม่', lowBalance: 'เตือนเงินเหลือน้อย', safeThreshold: 'ยอดเงินในบัญชีต่ำกว่าเกณฑ์',
+                initialAmount: 'เงินเริ่มต้น', setMonthlyTarget: 'ตั้งเป้าหมายรายเดือน', optionalGoal: 'เลือกได้', chooseIcon: 'เลือกไอคอน & สี',
+                yourPockets: 'กระเป๋าเงินของคุณ', keepOrganized: 'จัดการเงินให้เป็นระเบียบสนุกๆ', createNewPocket: 'สร้างกระเป๋า',
                 pocketDetails: 'รายละเอียดกระเป๋า', saved: 'เก็บแล้ว', left: 'เหลือ', spendingTrend: 'แนวโน้มการใช้จ่าย', recentActivity: 'รายการในกระเป๋า', viewAll: 'ดูทั้งหมด',
-                pocketSettings: 'ตั้งค่ากระเป๋าเงิน', manageDetails: 'จัดการข้อมูลกระเป๋าของคุณ', general: 'ทั่วไป', iconColor: 'ไอคอน & สี', customizeApp: 'ปรับแต่งความสวยงาม',
-                budgeting: 'การจัดการเงิน', monthlyGoal: 'เป้าหมาย', setTargetAmount: 'ตั้งยอดเงินเป้าหมาย', notifSettings: 'การแจ้งเตือน', spendingAlerts: 'แจ้งเตือนการใช้จ่าย', notify80: 'เตือนเมื่อใช้เงินถึง 80% และ 100%',
-                archivePocket: 'ซ่อนกระเป๋า (Archive)', deletePocket: 'ลบกระเป๋านี้ทิ้ง', cannotUndone: 'ลบแล้วไม่สามารถกู้คืนได้', saveChanges: 'บันทึกการเปลี่ยนแปลง',
-                customIcon: 'หรือเลือกไอคอนลายเส้น:', pickColor: 'จิ้มเลือกสีที่ชอบ:', tapToUpload: 'แตะเพื่อเลือกรูป', preview: 'ตัวอย่างรูปภาพ', attachReceipt: 'แนบสลิป',
-                extractedAmount: 'ยอดเงินที่อ่านได้', notes: 'บันทึกเพิ่มเติม', alignReceipt: 'จัดวางสลิปให้อยู่ในกรอบ', camera: 'กล้อง', pocketDeducted: 'หักจากกระเป๋า', noPocket: 'ไม่ระบุกระเป๋า',
-                transactions: 'รายการใช้จ่าย', income: 'รายรับ', expense: 'รายจ่าย', today: 'วันนี้', yesterday: 'เมื่อวาน', completed: 'สำเร็จ', addCategory: 'เพิ่มหมวดหมู่ใหม่', categoryName: 'ชื่อหมวดหมู่...', cancel: 'ยกเลิก', add: 'เพิ่ม',
-                accountTitle: 'บัญชี', accountSettings: 'ตั้งค่าบัญชี', preferencesTitle: 'การปรับแต่ง', appTheme: 'ธีมแอป', bio: 'ประวัติส่วนตัว',
-                transactionAlerts: 'แจ้งเตือนรายการ', everyPurchase: 'ทุกรายการใช้จ่าย', budgetAlerts: 'แจ้งเตือนงบประมาณ',
-                budgetWarnings: 'เตือนเมื่อใช้เงินใกล้หมด', monthlySummaries: 'สรุปยอดรายเดือน', newLogins: 'การเข้าสู่ระบบเครื่องใหม่', passwordChanges: 'การเปลี่ยนรหัสผ่าน',
-                themeMode: 'โหมดหน้าจอ', activeNow: 'ใช้งานอยู่ตอนนี้', pinStatusNotSet: 'ยังไม่ได้ตั้งค่า', pinStatusSet: 'เปิดใช้งานแล้ว', viewReceipt: 'ดูสลิป'
+                pocketSettings: 'ตั้งค่ากระเป๋า', manageDetails: 'จัดการข้อมูล', general: 'ทั่วไป', iconColor: 'ไอคอน & สี', customizeApp: 'ปรับแต่งตามใจชอบ',
+                budgeting: 'เป้าหมาย', monthlyGoal: 'เป้าหมาย', setTargetAmount: 'ยอดเป้าหมาย', notifSettings: 'การแจ้งเตือน', spendingAlerts: 'แจ้งเตือนการใช้เงิน', notify80: 'เตือนเมื่อถึง 80%',
+                archivePocket: 'ซ่อนกระเป๋า', deletePocket: 'ลบกระเป๋านี้', cannotUndone: 'ลบแล้วกู้คืนไม่ได้', saveChanges: 'บันทึกการเปลี่ยนแปลง',
+                customIcon: 'ไอคอนลายเส้น:', pickColor: 'เลือกสีสัน:', tapToUpload: 'แตะเพื่อเลือกรูป', preview: 'ตัวอย่างสลิป', attachReceipt: 'แนบสลิป',
+                extractedAmount: 'ยอดเงินที่สแกนได้', notes: 'บันทึกช่วยจำ', alignReceipt: 'จัดวางสลิปให้อยู่ในกรอบสี่เหลี่ยม', camera: 'กล้อง', pocketDeducted: 'หักจากกระเป๋า', noPocket: 'ไม่ระบุ',
+                transactions: 'รายการใช้จ่าย', income: 'รายรับ', expense: 'รายจ่าย', today: 'วันนี้', yesterday: 'เมื่อวาน', completed: 'สำเร็จ', addCategory: 'สร้างหมวดหมู่', categoryName: 'ชื่อหมวดหมู่...', cancel: 'ยกเลิก', add: 'เพิ่ม',
+                accountTitle: 'บัญชี', accountSettings: 'ตั้งค่าบัญชี', preferencesTitle: 'การปรับแต่ง', appTheme: 'ธีมแอป', bio: 'ประวัติย่อ',
+                transactionAlerts: 'เตือนการทำรายการ', everyPurchase: 'ทุกรายการใช้จ่าย', budgetAlerts: 'เตือนงบประมาณ',
+                budgetWarnings: 'เตือนเมื่อใกล้หมดงบ', monthlySummaries: 'สรุปยอดรายเดือน', newLogins: 'การเข้าระบบใหม่', passwordChanges: 'เปลี่ยนรหัสผ่าน',
+                themeMode: 'โหมดหน้าจอ', activeNow: 'กำลังใช้งาน', pinStatusNotSet: 'ยังไม่ตั้งค่า', pinStatusSet: 'ตั้งค่าแล้ว', viewReceipt: 'ดูรูปสลิป',
+                resetData: 'ล้างข้อมูลทั้งหมด', confirmReset: 'คุณแน่ใจหรือไม่ว่าจะล้างประวัติและกระเป๋าเงินทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้', resetSuccess: 'ล้างข้อมูลเรียบร้อยแล้ว!'
             },
             EN: {
-                welcome: 'Welcome', subWelcome: 'Manage your money easily', email: 'Email', password: 'Password',
-                forgotPass: 'Forgot Password?', login: 'Sign In', loginGoogle: 'Sign In with Google',
-                noAccount: 'No account?', signUp: 'Sign Up', createAccount: 'Create Account', name: 'Full Name',
-                confirmPass: 'Confirm Password', sendLink: 'Send Link',
-                home: 'Home', wallet: 'Pockets', scan: 'Scan', history: 'History', profile: 'Profile',
-                totalSpend: 'Total Spent', safeSpend: 'Total Balance', recent: 'Recent', seeAll: 'See All',
+                welcome: 'Welcome', home: 'Home', wallet: 'Pockets', scan: 'Scan', history: 'History', profile: 'Profile',
+                totalSpend: 'Total Spent', safeSpend: 'Safe Balance', recent: 'Recent', seeAll: 'See All',
                 noData: 'No Data', newPocket: 'New Pocket', scanReceipt: 'Scan Receipt', gallery: 'Gallery',
                 manual: 'Manual', reviewDetails: 'Review Details', merchant: 'Merchant', date: 'Date',
-                confirmSave: 'Confirm Details', addTx: 'Add Transaction', amount: 'Amount', saveTx: 'Save Transaction',
-                splitBill: 'Split Bill', totalAmount: 'Total Amount', addFriend: 'Add Friend', confirmSplit: 'Confirm Split',
-                txDetail: 'Receipt Details', status: 'Status', category: 'Category', editProfile: 'Edit Profile',
+                confirmSave: 'Confirm & Save', addTx: 'Add Tx', amount: 'Amount', saveTx: 'Save',
+                splitBill: 'Split Bill', totalAmount: 'Total Amount', addFriend: 'Add Friend', confirmSplit: 'Confirm',
+                txDetail: 'Receipt', status: 'Status', category: 'Category', editProfile: 'Edit Profile',
                 security: 'Security', language: 'Language', theme: 'Theme', logout: 'Log Out',
                 light: 'Light', dark: 'Dark', system: 'System', reduceMotion: 'Reduce Motion', changePass: 'Change Password',
                 pinCode: 'PIN Code', setPin: 'Set PIN', changePin: 'Change PIN',
                 yourDevices: 'Your Devices', currentDevice: 'Current Device', pocketName: 'Pocket Name', targetAmount: 'Target Amount',
-                savePocket: 'Save Pocket', passMismatch: 'Passwords do not match', fillAll: 'Please fill all fields', loading: 'Loading...',
-                guestLogin: 'Try as Guest', aiSelected: 'AI Selected', catFood: 'Dining', catShop: 'Shopping', catTransfer: 'Transfer', catBill: 'Bills', catTravel: 'Transport', catGeneral: 'General',
-                searchPlaceholder: 'Search transactions...', all: 'All', notFound: 'No results found',
-                notifications: 'Notifications', recentAlerts: 'Recent Alerts', clearAll: 'Clear All', caughtUp: 'You\'re all caught up on critical items.',
-                billReminder: 'Goal Reminder', newTx: 'New Transaction', lowBalance: 'Low Balance Alert', safeThreshold: 'Your total balance is below the safe threshold (฿500.00)',
-                initialAmount: 'Initial Amount', setMonthlyTarget: 'Set a monthly target', optionalGoal: 'Optional goal tracking', chooseIcon: 'Choose an Icon & Color',
-                yourPockets: 'Your Pockets', keepOrganized: 'Keep your funds organized and cozy.', createNewPocket: 'Create New Pocket',
+                savePocket: 'Save Pocket', passMismatch: 'Passwords mismatch', fillAll: 'Please fill all fields', loading: 'Loading...',
+                guestLogin: 'Guest Login', aiSelected: 'AI Selected', 
+                searchPlaceholder: 'Search...', all: 'All', notFound: 'Not found',
+                notifications: 'Notifications', recentAlerts: 'Recent Alerts', clearAll: 'Clear All', caughtUp: 'You are caught up.',
+                billReminder: 'Goal Reminder', newTx: 'New Transaction', lowBalance: 'Low Balance', safeThreshold: 'Balance below safe limit',
+                initialAmount: 'Initial Amount', setMonthlyTarget: 'Monthly Target', optionalGoal: 'Optional', chooseIcon: 'Icon & Color',
+                yourPockets: 'Your Pockets', keepOrganized: 'Keep funds organized & playful.', createNewPocket: 'Create Pocket',
                 pocketDetails: 'Pocket Details', saved: 'Saved', left: 'left', spendingTrend: 'Spending Trend', recentActivity: 'Recent Activity', viewAll: 'View All',
-                pocketSettings: 'Pocket Settings', manageDetails: 'Manage your pocket details.', general: 'GENERAL', iconColor: 'Icon & Color', customizeApp: 'Customize appearance',
-                budgeting: 'BUDGETING', monthlyGoal: 'Monthly Goal', setTargetAmount: 'Set a target amount', notifSettings: 'NOTIFICATIONS', spendingAlerts: 'Spending Alerts', notify80: 'Notify at 80% and 100%',
-                archivePocket: 'Archive Pocket', deletePocket: 'Delete Pocket', cannotUndone: 'Deleting a pocket cannot be undone.', saveChanges: 'Save Changes',
-                customIcon: 'Or pick any Icon:', pickColor: 'Pick your custom color:', tapToUpload: 'Tap to Upload', preview: 'Preview', attachReceipt: 'Attach Receipt',
-                extractedAmount: 'Extracted Amount', notes: 'Notes', alignReceipt: 'Align the receipt within the frame', camera: 'Camera', pocketDeducted: 'Pocket', noPocket: 'None',
-                transactions: 'Transactions', income: 'Income', expense: 'Expense', today: 'Today', yesterday: 'Yesterday', completed: 'Completed', addCategory: 'Add New Category', categoryName: 'Category Name...', cancel: 'Cancel', add: 'Add',
+                pocketSettings: 'Settings', manageDetails: 'Manage details', general: 'GENERAL', iconColor: 'Icon & Color', customizeApp: 'Customize',
+                budgeting: 'BUDGETING', monthlyGoal: 'Monthly Goal', setTargetAmount: 'Target Amount', notifSettings: 'NOTIFICATIONS', spendingAlerts: 'Spending Alerts', notify80: 'Notify at 80%',
+                archivePocket: 'Archive', deletePocket: 'Delete', cannotUndone: 'Cannot be undone', saveChanges: 'Save Changes',
+                customIcon: 'Choose Icon:', pickColor: 'Pick Color:', tapToUpload: 'Tap to Upload', preview: 'Preview', attachReceipt: 'Attach',
+                extractedAmount: 'Extracted', notes: 'Notes', alignReceipt: 'Align receipt within the frame', camera: 'Camera', pocketDeducted: 'Pocket', noPocket: 'None',
+                transactions: 'Transactions', income: 'Income', expense: 'Expense', today: 'Today', yesterday: 'Yesterday', completed: 'Completed', addCategory: 'Add Category', categoryName: 'Category Name...', cancel: 'Cancel', add: 'Add',
                 accountTitle: 'ACCOUNT', accountSettings: 'Account Settings', preferencesTitle: 'PREFERENCES', appTheme: 'App Theme', bio: 'Bio',
                 transactionAlerts: 'Transaction Alerts', everyPurchase: 'Every purchase', budgetAlerts: 'Budget Alerts',
-                budgetWarnings: 'Budget limit warnings', monthlySummaries: 'Monthly spending summaries', newLogins: 'New device logins', passwordChanges: 'Password changes',
-                themeMode: 'Theme Mode', activeNow: 'Active now', pinStatusNotSet: 'Not configured', pinStatusSet: 'Configured', viewReceipt: 'View Receipt'
+                budgetWarnings: 'Budget warnings', monthlySummaries: 'Monthly summaries', newLogins: 'New device logins', passwordChanges: 'Password changes',
+                themeMode: 'Theme Mode', activeNow: 'Active now', pinStatusNotSet: 'Not configured', pinStatusSet: 'Configured', viewReceipt: 'View Receipt',
+                resetData: 'Reset All Data', confirmReset: 'Are you sure you want to clear all transactions and pockets? This cannot be undone.', resetSuccess: 'Data cleared successfully!'
             }
         };
         const getT = (lang) => (key) => TRANSLATIONS[lang]?.[key] || key;
 
+        // ==========================================
+        // 4. UI COMPONENTS
+        // ==========================================
         class ErrorBoundary extends React.Component {
             constructor(props) { super(props); this.state = { hasError: false, error: null }; }
             static getDerivedStateFromError(error) { return { hasError: true, error }; }
@@ -292,10 +325,10 @@
                 if (this.state.hasError) {
                     return (
                         <div className="p-8 bg-slate-900 text-white h-screen w-screen flex flex-col items-center justify-center">
-                            <h1 className="text-4xl font-black mb-4 text-red-500">Oops!</h1>
-                            <h2 className="text-xl font-bold mb-2">แอปเกิดข้อผิดพลาด</h2>
+                            <h1 className="text-4xl font-black mb-4 text-[#FF4D4D]">Oops!</h1>
+                            <h2 className="text-xl font-bold mb-2">Something went wrong</h2>
                             <p className="text-slate-400 text-center mb-8 text-xs bg-slate-800 p-4 rounded-xl">{this.state.error?.toString()}</p>
-                            <button onClick={()=>window.location.reload()} className="px-8 py-4 bg-[#F472B6] text-white rounded-full font-black shadow-lg active:scale-95">โหลดแอปใหม่ (Reload)</button>
+                            <button onClick={()=>window.location.reload()} className="px-8 py-4 bg-[#3B82F6] text-white sticker-btn-blue font-black">Reload App</button>
                         </div>
                     );
                 }
@@ -304,53 +337,53 @@
         }
 
         const SwitchToggle = ({ isOn, onToggle }) => (
-            <div onClick={onToggle} className={`w-12 h-7 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${isOn ? 'bg-[#56CC9D]' : 'bg-slate-200'}`}>
-                <div className={`bg-white w-5 h-5 rounded-full shadow-sm transform transition-transform duration-300 ${isOn ? 'translate-x-5' : ''}`}></div>
+            <div onClick={onToggle} className={`w-12 h-7 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 sticker-border ${isOn ? 'bg-[#3B82F6]' : 'bg-slate-200'}`}>
+                <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${isOn ? 'translate-x-5' : ''}`}></div>
             </div>
         );
 
         const PocketIcon = ({ pocket, size = 20 }) => {
             if (!pocket) return null;
             const isHex = pocket.colorType === 'hex';
-            const style = isHex ? { backgroundColor: `${pocket.color}33`, color: pocket.color } : {};
-            const className = `flex items-center justify-center shrink-0 ${isHex ? '' : (pocket.color || 'bg-blue-50 text-blue-500')}`;
-            return <div className={className} style={{...style, width: size*2.5, height: size*2.5, borderRadius: size}}><Icon name={pocket.icon || 'wallet'} size={size} /></div>;
+            const style = isHex ? { backgroundColor: pocket.color, color: '#fff' } : {};
+            const className = `flex items-center justify-center shrink-0 sticker-icon ${isHex ? '' : 'bg-[#3B82F6] text-white'}`;
+            return <div className={className} style={{...style, width: size*2.5, height: size*2.5}}><Icon name={pocket.icon || 'wallet'} size={size} /></div>;
         };
 
         const defaultPocketIcons = [
-            { type: 'lucide', icon: 'plane', colorType: 'tailwind', color: 'bg-[#E2F0E5] text-[#4A7D59]' },
-            { type: 'lucide', icon: 'car', colorType: 'tailwind', color: 'bg-[#FCEAEF] text-[#9D4D63]' },
-            { type: 'lucide', icon: 'gift', colorType: 'tailwind', color: 'bg-[#EAE4F2] text-[#6B5A82]' },
-            { type: 'lucide', icon: 'home', colorType: 'tailwind', color: 'bg-[#FFF5D1] text-[#B89B2B]' },
-            { type: 'lucide', icon: 'coffee', colorType: 'tailwind', color: 'bg-[#F2F2F2] text-[#666666]' },
-            { type: 'lucide', icon: 'piggy-bank', colorType: 'tailwind', color: 'bg-[#FCEAEF] text-[#9D4D63]' },
-            { type: 'lucide', icon: 'shopping-bag', colorType: 'tailwind', color: 'bg-[#E2F0E5] text-[#4A7D59]' }
+            { type: 'lucide', icon: 'plane', colorType: 'hex', color: '#00bcd4' },
+            { type: 'lucide', icon: 'car', colorType: 'hex', color: '#ff9800' },
+            { type: 'lucide', icon: 'gift', colorType: 'hex', color: '#e91e63' },
+            { type: 'lucide', icon: 'home', colorType: 'hex', color: '#8bc34a' },
+            { type: 'lucide', icon: 'coffee', colorType: 'hex', color: '#795548' },
+            { type: 'lucide', icon: 'piggy-bank', colorType: 'hex', color: '#ff4d4d' },
+            { type: 'lucide', icon: 'shopping-bag', colorType: 'hex', color: '#3b82f6' }
         ];
 
         const lineIconsList = ['wallet', 'plane', 'car', 'gift', 'home', 'coffee', 'piggy-bank', 'shopping-bag', 'heart', 'star', 'music', 'book', 'smartphone', 'monitor', 'camera', 'zap', 'umbrella', 'scissors', 'trending-up', 'award'];
         
-        const CustomIconModal = ({ onClose, onSelect, t }) => {
-            const [hex, setHex] = useState('#2F80ED');
+        const CustomIconModal = ({ onClose, onSelect, Icon, t }) => {
+            const [hex, setHex] = useState('#3B82F6');
             return (
                 <div className="absolute inset-0 bg-black/60 z-[100] flex flex-col justify-end fade-in">
-                    <div className="bg-white w-full rounded-t-[40px] p-6 pb-12 flex flex-col slide-up shadow-[0_-20px_50px_rgba(0,0,0,0.5)] h-[70vh]">
+                    <div className="bg-[#FFD84D] w-full rounded-t-[40px] p-6 pb-12 flex flex-col slide-up shadow-[0_-20px_50px_rgba(0,0,0,0.5)] h-[70vh] border-t-4 border-white">
                         <div className="flex justify-between items-center w-full mb-6">
-                            <h3 className="font-black text-slate-800 text-lg">{t('chooseIcon')}</h3>
-                            <button onClick={onClose} className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500"><Icon name="x" size={16}/></button>
+                            <h3 className="font-black text-[#1F1F1F] text-xl">{t('chooseIcon')}</h3>
+                            <button onClick={onClose} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#1F1F1F] sticker-border"><Icon name="x" size={20}/></button>
                         </div>
                         <div className="flex-1 overflow-y-auto no-scrollbar space-y-6">
-                            <div>
-                                <label className="text-[10px] font-bold text-slate-400 mb-3 block">{t('pickColor')}</label>
+                            <div className="sticker-card p-5">
+                                <label className="text-xs font-bold text-slate-500 mb-3 block">{t('pickColor')}</label>
                                 <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 rounded-full overflow-hidden border-4 border-slate-100 shadow-sm relative shrink-0"><input type="color" value={hex} onChange={e=>setHex(e.target.value)} /></div>
-                                    <div className="flex-1 h-14 rounded-2xl flex items-center justify-center font-black" style={{backgroundColor: `${hex}33`, color: hex}}>Preview</div>
+                                    <div className="w-14 h-14 rounded-full overflow-hidden sticker-border relative shrink-0"><input type="color" value={hex} onChange={e=>setHex(e.target.value)} /></div>
+                                    <div className="flex-1 h-14 rounded-2xl flex items-center justify-center font-black text-white sticker-border" style={{backgroundColor: hex}}>Preview</div>
                                 </div>
                             </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-slate-400 mb-3 block">{t('customIcon')}</label>
-                                <div className="grid grid-cols-5 gap-3">
+                            <div className="sticker-card p-5">
+                                <label className="text-xs font-bold text-slate-500 mb-3 block">{t('customIcon')}</label>
+                                <div className="grid grid-cols-5 gap-4">
                                     {lineIconsList.map((iconName, i) => (
-                                        <div key={i} onClick={() => { onSelect({ type: 'lucide', icon: iconName, colorType: 'hex', color: hex }); onClose(); }} className="aspect-square rounded-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-transform" style={{backgroundColor: `${hex}33`, color: hex}}>
+                                        <div key={i} onClick={() => { onSelect({ type: 'lucide', icon: iconName, colorType: 'hex', color: hex }); onClose(); }} className="aspect-square rounded-2xl flex items-center justify-center cursor-pointer hover:scale-110 transition-transform sticker-icon text-white" style={{backgroundColor: hex}}>
                                             <Icon name={iconName} size={24} />
                                         </div>
                                     ))}
@@ -362,16 +395,16 @@
             )
         };
 
-        const AddCategoryModal = ({ onClose, onAdd, t }) => {
+        const AddCategoryModal = ({ onClose, onAdd, t, Icon }) => {
             const [newCat, setNewCat] = useState('');
             return (
                 <div className="absolute inset-0 bg-black/60 z-[100] flex items-center justify-center fade-in p-6">
-                    <div className="bg-white w-full rounded-[32px] p-6 slide-up shadow-2xl">
-                        <h3 className="font-black text-slate-800 text-lg mb-4">{t('addCategory')}</h3>
-                        <input autoFocus value={newCat} onChange={e=>setNewCat(e.target.value)} className="w-full bg-slate-50 p-4 rounded-2xl font-bold text-sm outline-none focus:ring-2 ring-[#F472B6] mb-6" placeholder={t('categoryName')} />
+                    <div className="bg-[#FFD84D] w-full rounded-[32px] p-6 slide-up shadow-2xl border-4 border-white">
+                        <h3 className="font-black text-[#1F1F1F] text-xl mb-4">{t('addCategory')}</h3>
+                        <input autoFocus value={newCat} onChange={e=>setNewCat(e.target.value)} className="w-full input-box p-4 font-bold text-sm text-[#1F1F1F] mb-6" placeholder={t('categoryName')} />
                         <div className="flex gap-4">
-                            <button onClick={onClose} className="flex-1 bg-slate-100 text-slate-500 font-bold py-3 rounded-xl">{t('cancel')}</button>
-                            <button onClick={()=>onAdd(newCat)} disabled={!newCat} className="flex-1 bg-[#F472B6] text-white font-bold py-3 rounded-xl disabled:opacity-50">{t('add')}</button>
+                            <button onClick={onClose} className="flex-1 bg-white text-[#1F1F1F] font-black py-4 rounded-full sticker-border">{t('cancel')}</button>
+                            <button onClick={()=>onAdd(newCat)} disabled={!newCat} className="flex-1 sticker-btn-blue py-4 font-black disabled:opacity-50 disabled:active:scale-100">{t('add')}</button>
                         </div>
                     </div>
                 </div>
@@ -379,71 +412,77 @@
         };
 
         const Section = ({ title, children }) => (
-            <div className="mb-6"><h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-4">{title}</h4><div className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">{children}</div></div>
+            <div className="mb-6"><h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 ml-4">{title}</h4><div className="sticker-card overflow-hidden">{children}</div></div>
         );
 
-        const PinPadModal = ({ onClose, onSave, isSet, t }) => {
+        const PinPadModal = ({ onClose, onSave, isSet, t, Icon }) => {
             const [pin, setPin] = useState('');
             const press = (n) => { if(pin.length < 6) setPin(p => p + n); };
             const del = () => setPin(p => p.slice(0, -1));
-            useEffect(() => { if(pin.length === 6) setTimeout(()=>{ onSave(pin); onClose(); }, 200); }, [pin]);
+            useEffect(() => { if(pin.length === 6) setTimeout(()=>{ onSave(pin); onClose(); }, 200); }, [pin, onSave, onClose]);
             return (
                 <div className="absolute inset-0 bg-black/60 z-[100] flex flex-col justify-end fade-in">
-                    <div className="bg-white w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center slide-up shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
-                        <div className="flex justify-between w-full mb-8"><div className="w-8"></div><h3 className="font-black text-slate-800 text-lg">{isSet?t('changePin'):t('setPin')}</h3><button onClick={onClose} className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500"><Icon name="x" size={16}/></button></div>
-                        <div className="flex gap-4 mb-10">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? 'bg-[#F472B6]' : 'bg-slate-200'}`}></div>)}</div>
+                    <div className="bg-[#FFD84D] w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center slide-up shadow-[0_-20px_50px_rgba(0,0,0,0.5)] border-t-4 border-white">
+                        <div className="flex justify-between w-full mb-8"><div className="w-10"></div><h3 className="font-black text-[#1F1F1F] text-xl">{isSet?t('changePin'):t('setPin')}</h3><button onClick={onClose} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#1F1F1F] sticker-border"><Icon name="x" size={20}/></button></div>
+                        <div className="flex gap-4 mb-10">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-5 h-5 rounded-full sticker-border transition-colors ${pin.length >= i ? 'bg-[#3B82F6]' : 'bg-white'}`}></div>)}</div>
                         <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
-                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200">{n}</button>)}
-                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200">0</button><button onClick={del} className="h-16 flex items-center justify-center text-slate-500 active:bg-slate-100 rounded-full"><Icon name="delete" size={28}/></button>
+                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-white text-[#1F1F1F] text-2xl font-black sticker-border active:scale-95 transition-transform">{n}</button>)}
+                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-white text-[#1F1F1F] text-2xl font-black sticker-border active:scale-95 transition-transform">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-white text-[#1F1F1F] sticker-border active:scale-95 transition-transform rounded-full"><Icon name="delete" size={28}/></button>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        const LockScreen = ({ correctPin, onUnlock }) => {
+        // ==========================================
+        // 5. SCREENS
+        // ==========================================
+        const LockScreen = ({ Icon, correctPin, onUnlock }) => {
             const [pin, setPin] = useState(''); const [err, setErr] = useState('');
             const press = (n) => { if(pin.length < 6) { setPin(p => p + n); setErr(''); } };
             const del = () => setPin(p => p.slice(0, -1));
-            useEffect(() => { if(pin.length === 6) { if(pin === correctPin) onUnlock(); else { setErr('Error'); setTimeout(()=>setPin(''), 500); } } }, [pin]);
+            useEffect(() => { if(pin.length === 6) { if(pin === correctPin) onUnlock(); else { setErr('Error'); setTimeout(()=>setPin(''), 500); } } }, [pin, correctPin, onUnlock]);
+
             return (
-                <div className="flex-1 flex flex-col justify-end bg-[#0f172a] fade-in">
-                    <div className="flex-1 flex flex-col items-center justify-center pt-20"><div className="w-20 h-20 bg-[#F472B6] rounded-[28px] text-white flex items-center justify-center mb-6 shadow-xl"><Icon name="lock" size={40}/></div><h2 className="text-white text-2xl font-black mb-2">QR Scanner</h2><p className="text-slate-400 text-sm">Enter PIN to unlock</p></div>
-                    <div className="bg-white w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
-                        <div className="flex gap-4 mb-8">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? (err?'bg-red-500':'bg-[#F472B6]') : 'bg-slate-200'}`}></div>)}</div>
+                <div className="flex-1 flex flex-col justify-end bg-[#3B82F6] fade-in">
+                    <div className="flex-1 flex flex-col items-center justify-center pt-20"><div className="w-24 h-24 bg-[#FFD84D] sticker-border text-[#1F1F1F] flex items-center justify-center mb-6 shadow-xl"><Icon name="lock" size={48}/></div><h2 className="text-white text-3xl font-black mb-2 tracking-wide">LOCKED</h2></div>
+                    <div className="bg-[#FFD84D] w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center border-t-8 border-white shadow-[0_-20px_50px_rgba(0,0,0,0.3)]">
+                        <div className="flex gap-4 mb-8">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-5 h-5 rounded-full sticker-border transition-colors ${pin.length >= i ? (err?'bg-[#FF4D4D]':'bg-[#3B82F6]') : 'bg-white'}`}></div>)}</div>
+                        {err && <p className="text-[#FF4D4D] text-xs font-bold mb-4 bg-white px-3 py-1 rounded-full">{err}</p>}
                         <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
-                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200">{n}</button>)}
-                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 text-slate-800 text-2xl font-black active:bg-slate-200">0</button><button onClick={del} className="h-16 flex items-center justify-center text-slate-500 active:bg-slate-100 rounded-full"><Icon name="delete" size={28}/></button>
+                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-white text-[#1F1F1F] text-2xl font-black sticker-border active:scale-95 transition-transform">{n}</button>)}
+                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-white text-[#1F1F1F] text-2xl font-black sticker-border active:scale-95 transition-transform">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-white text-[#1F1F1F] sticker-border active:scale-95 transition-transform rounded-full"><Icon name="delete" size={28}/></button>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        const MainLayout = ({ children, tab, go, t }) => (
+        const MainLayout = ({ children, tab, go, t, Icon }) => (
             <div className="flex flex-col h-full relative fade-in">
                 <div className="flex-1 overflow-y-auto pb-24 no-scrollbar">{children}</div>
-                <div className="absolute bottom-0 w-full bg-white/95 backdrop-blur-xl border-t border-slate-100 px-6 py-4 flex justify-between items-center z-50 rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
-                    <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} />
-                    <NavBtn icon="layout-grid" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} />
-                    <div className="relative -top-8"><button onClick={()=>go('SCAN')} className="bg-[#2F80ED] text-white p-4 rounded-full shadow-lg active:scale-95 transition-transform border-4 border-[#FCFBFA]"><Icon name="scan-line" size={28} /></button></div>
-                    <NavBtn icon="clock" label={t('history')} active={tab==='HISTORY'} onClick={()=>go('MAIN','HISTORY')} />
-                    <NavBtn icon="user" label={t('profile')} active={tab==='PROFILE'} onClick={()=>go('MAIN','PROFILE')} />
+                <div className="absolute bottom-0 w-full bg-white border-t-4 border-white rounded-t-[32px] px-6 py-4 flex justify-between items-center z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
+                    <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} Icon={Icon} />
+                    <NavBtn icon="layout-grid" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} Icon={Icon} />
+                    <div className="relative -top-8"><button onClick={()=>go('SCAN')} className="bg-[#FF4D4D] text-white w-16 h-16 flex items-center justify-center rounded-full sticker-border hover:scale-105 active:scale-95 transition-transform"><Icon name="scan-line" size={28} /></button></div>
+                    <NavBtn icon="clock" label={t('history')} active={tab==='HISTORY'} onClick={()=>go('MAIN','HISTORY')} Icon={Icon} />
+                    <NavBtn icon="user" label={t('profile')} active={tab==='PROFILE'} onClick={()=>go('MAIN','PROFILE')} Icon={Icon} />
                 </div>
             </div>
         );
-        const NavBtn = ({ icon, label, active, onClick }) => (<button onClick={onClick} className={`flex flex-col items-center gap-1 w-12 transition-colors ${active?'text-[#2F80ED]':'text-slate-400'}`}><Icon name={icon} size={24} strokeWidth={active?2.5:2} /><span className="text-[9px] font-bold tracking-wide">{label}</span></button>);
+        const NavBtn = ({ icon, label, active, onClick, Icon }) => (<button onClick={onClick} className={`flex flex-col items-center gap-1 w-12 transition-colors ${active?'text-[#3B82F6]':'text-slate-400'}`}><Icon name={icon} size={24} strokeWidth={active?3:2} /><span className="text-[9px] font-black tracking-wide">{label}</span></button>);
 
-        const LoginScreen = ({ go, setUser, t }) => {
+        const LoginScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
             const [email, setEmail] = useState(''); const [password, setPassword] = useState('');
             const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
+
             const handleLogin = async (e) => {
                 e.preventDefault(); if(!email || !password) return setErr(t('fillAll')); setLoading(true); setErr('');
                 try { await auth.signInWithEmailAndPassword(email, password); } 
                 catch (e) {
                     if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
                         setTimeout(() => {
-                            const guest = { uid: 'mock-uid', email, displayName: 'ผู้ใช้งานทั่วไป', photoURL: 'https://ui-avatars.com/api/?name=User&background=F472B6&color=fff' };
+                            const guest = { uid: 'mock-uid', email, displayName: 'Guest User', photoURL: 'https://ui-avatars.com/api/?name=U&background=3B82F6&color=fff' };
                             localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
                         }, 1000);
                     } else { setErr(translateAuthError(e.code)); setLoading(false); }
@@ -455,33 +494,45 @@
                 catch (e) {
                     if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
                         setTimeout(() => {
-                            const guest = { uid: 'mock-uid', email: 'guest@google.com', displayName: 'Google User', photoURL: 'https://ui-avatars.com/api/?name=G&background=F472B6&color=fff' };
-                            localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
+                            const guest = { uid: 'mock-uid', email: 'guest@google.com', displayName: 'Google User', photoURL: 'https://ui-avatars.com/api/?name=G&background=3B82F6&color=fff' };
+                            localStorage.setItem('cozy_guest', JSON.stringify(guestGoogle)); setUser(guestGoogle); go('MAIN', 'HOME');
                         }, 1000);
                     } else { setErr(e.message); setLoading(false); }
                 }
             };
+            const guestLogin = () => {
+                setLoading(true);
+                setTimeout(() => {
+                    const guest = { uid: 'mock-uid', email: 'guest@app.com', displayName: 'ผู้ใช้งานทั่วไป', photoURL: 'https://ui-avatars.com/api/?name=User&background=2F80ED&color=fff' };
+                    localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
+                }, 1000);
+            };
+
             return (
                 <div className="flex-1 p-8 flex flex-col justify-center fade-in bg-white relative">
                     {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <div className="text-center mb-10"><div className="w-20 h-20 bg-blue-50 text-[#2F80ED] rounded-[24px] flex items-center justify-center mx-auto mb-6"><Icon name="scan" size={40}/></div><h1 className="text-3xl font-black text-slate-800">QR Scanner</h1><p className="text-slate-400 text-sm mt-2 font-medium">{t('subWelcome')}</p></div>
+                    <div className="text-center mb-10"><div className="w-24 h-24 bg-[#3B82F6] text-white rounded-3xl sticker-border flex items-center justify-center mx-auto mb-6"><Icon name="scan-face" size={48}/></div><h1 className="text-4xl font-black text-[#1F1F1F]">QR Scanner</h1><p className="text-slate-600 font-bold mt-2">{t('subWelcome')}</p></div>
                     <form onSubmit={handleLogin} className="space-y-4">
-                        <div className="bg-slate-50 p-4 rounded-2xl flex items-center border border-transparent focus-within:border-[#2F80ED]"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('email')} /></div>
-                        <div className="bg-slate-50 p-4 rounded-2xl flex items-center border border-transparent focus-within:border-[#2F80ED]"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('password')} /></div>
-                        <div className="text-right"><button type="button" onClick={()=>go('FORGOT_PASS')} className="text-sm font-bold text-[#2F80ED]">{t('forgotPass')}</button></div>
-                        <button type="submit" className="w-full bg-[#2F80ED] text-white font-black py-4 rounded-[20px] shadow-lg active:scale-95 transition-transform uppercase tracking-widest">{t('login')}</button>
+                        <div className="input-box p-4 flex items-center bg-white"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold text-[#1F1F1F]" placeholder={t('email')} /></div>
+                        <div className="input-box p-4 flex items-center bg-white"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="bg-transparent w-full font-bold text-[#1F1F1F]" placeholder={t('password')} /></div>
+                        <div className="text-right"><button type="button" onClick={()=>go('FORGOT_PASS')} className="text-xs font-black text-[#FF4D4D]">{t('forgotPass')}</button></div>
+                        <button type="submit" className="w-full sticker-btn-blue text-white font-black py-4 mt-2 uppercase tracking-widest">{t('login')}</button>
                     </form>
-                    {err && <div className="bg-red-50 text-red-500 p-3 rounded-xl text-xs font-bold text-center mt-4">{err}</div>}
-                    <div className="flex items-center gap-4 my-8"><div className="h-px bg-slate-100 flex-1"/><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">OR</span><div className="h-px bg-slate-100 flex-1"/></div>
-                    <button onClick={googleLogin} className="w-full border border-slate-200 py-4 rounded-[20px] flex items-center justify-center gap-3 font-bold text-slate-700 active:scale-95 mb-4"><svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>{t('loginGoogle')}</button>
-                    <button onClick={()=>go('SIGN_UP')} className="mt-8 text-sm font-bold text-slate-500 text-center w-full">{t('noAccount')} <span className="text-[#2F80ED] underline">{t('signUp')}</span></button>
+                    {err && <div className="bg-white border-4 border-[#FF4D4D] text-[#FF4D4D] p-3 rounded-2xl text-xs font-black text-center mt-4">{err}</div>}
+                    <div className="flex items-center gap-4 my-8"><div className="h-1 bg-white border-2 border-slate-200 flex-1 rounded-full"/><span className="text-xs font-black text-slate-500 uppercase tracking-widest">OR</span><div className="h-1 bg-white border-2 border-slate-200 flex-1 rounded-full"/></div>
+                    <button onClick={googleLogin} className="w-full bg-white sticker-border text-[#1F1F1F] font-black py-4 flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4">
+                        <Icon name="chrome" size={20}/> {t('loginGoogle')}
+                    </button>
+                    <button onClick={guestLogin} className="w-full bg-white sticker-border text-[#1F1F1F] font-black py-4 flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4"><Icon name="user" size={20} /> {t('guestLogin')}</button>
+                    <button onClick={()=>go('SIGN_UP')} className="mt-8 text-sm font-bold text-slate-600 text-center w-full">{t('noAccount')} <span className="text-[#3B82F6] underline black">{t('signUp')}</span></button>
                 </div>
             );
         };
 
-        const SignUpScreen = ({ go, setUser, t }) => {
+        const SignUpScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
             const [name, setName] = useState(''); const [email, setEmail] = useState(''); const [pass, setPass] = useState(''); const [confirm, setConfirm] = useState('');
             const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
+
             const handleSignUp = async (e) => {
                 e.preventDefault(); if(pass !== confirm) return setErr(t('passMismatch')); if(!name || !email || !pass) return setErr(t('fillAll'));
                 setLoading(true); setErr('');
@@ -491,72 +542,77 @@
                 } catch(error) {
                     if(error.code.includes('operation-not-supported') || error.code.includes('operation-not-allowed')) {
                         setTimeout(() => {
-                            const guest = { uid: 'mock-uid', email, displayName: name, photoURL: 'https://ui-avatars.com/api/?name='+name+'&background=F472B6&color=fff' };
+                            const guest = { uid: 'mock-uid', email, displayName: name, photoURL: 'https://ui-avatars.com/api/?name='+name+'&background=3B82F6&color=fff' };
                             localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
                         }, 1000);
                     } else { setErr(translateAuthError(error.code)); setLoading(false); }
                 }
             };
             return (
-                <div className="flex-1 p-8 flex flex-col bg-white fade-in relative">
+                <div className="flex-1 p-8 flex flex-col relative fade-in bg-white">
                     {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <button onClick={()=>go('SIGN_IN')} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center mb-8"><Icon name="chevron-left"/></button>
-                    <h1 className="text-3xl font-black text-slate-800 mb-8">{t('createAccount')}</h1>
+                    <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center mb-8 active:scale-95"><Icon name="chevron-left"/></button>
+                    <h1 className="text-3xl font-black text-[#1F1F1F] mb-8">{t('createAccount')}</h1>
                     <form onSubmit={handleSignUp} className="space-y-4">
-                        <div className="bg-slate-50 p-4 rounded-2xl flex items-center"><Icon name="user" size={20} className="text-slate-400 mr-3"/><input required value={name} onChange={e=>setName(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('name')} /></div>
-                        <div className="bg-slate-50 p-4 rounded-2xl flex items-center"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('email')} /></div>
-                        <div className="bg-slate-50 p-4 rounded-2xl flex items-center"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input required type="password" value={pass} onChange={e=>setPass(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={`${t('password')} (min 6)`} /></div>
-                        <div className={`bg-slate-50 p-4 rounded-2xl flex items-center border ${(pass&&confirm&&pass!==confirm)?'border-red-500':'border-transparent'}`}><Icon name="lock" size={20} className={(pass&&confirm&&pass!==confirm)?'text-red-500 mr-3':'text-slate-400 mr-3'}/><input required type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('confirmPass')} /></div>
-                        {err && <p className="text-[10px] font-bold text-red-500 text-center bg-red-50 p-2 rounded-xl">{err}</p>}
-                        <button type="submit" className="w-full bg-[#2F80ED] text-white font-black py-4 rounded-[20px] mt-8 shadow-lg active:scale-95">{t('createAccount')}</button>
+                        <div className="input-box p-4 flex items-center"><Icon name="user" size={20} className="text-slate-400 mr-3"/><input required value={name} onChange={e=>setName(e.target.value)} className="bg-transparent w-full font-bold text-[#1F1F1F]" placeholder={t('name')} /></div>
+                        <div className="input-box p-4 flex items-center"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold text-[#1F1F1F]" placeholder={t('email')} /></div>
+                        <div className="input-box p-4 flex items-center"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input required type="password" value={pass} onChange={e=>setPass(e.target.value)} className="bg-transparent w-full font-bold text-[#1F1F1F]" placeholder={`${t('password')} (min 6)`} /></div>
+                        <div className={`input-box p-4 flex items-center ${(pass&&confirm&&pass!==confirm)?'!border-[#FF4D4D]':''}`}><Icon name="lock" size={20} className={(pass&&confirm&&pass!==confirm)?'text-[#FF4D4D] mr-3':'text-slate-400 mr-3'}/><input required type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} className="bg-transparent w-full font-bold text-[#1F1F1F]" placeholder={t('confirmPass')} /></div>
+                        {err && <p className="text-[10px] font-black text-[#FF4D4D] text-center bg-white border-2 border-[#FF4D4D] p-2 rounded-xl">{err}</p>}
+                        <button type="submit" className="w-full sticker-btn-blue py-4 mt-8 uppercase tracking-widest">{t('createAccount')}</button>
                     </form>
                 </div>
             );
         };
 
-        const ForgotScreen = ({ go, t }) => {
-            const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [err, setErr] = useState('');
+        const ForgotScreen = ({ go, t, Icon, LoadingOverlay, translateAuthError }) => {
+            const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
             const handleReset = async (e) => {
-                e.preventDefault(); if(!email) return setErr(t('fillAll'));
+                e.preventDefault(); if(!email) return setErr(t('fillAll')); setLoading(true); setErr('');
                 try { await auth.sendPasswordResetEmail(email); setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); } 
-                catch(error) { if(error.code.includes('operation-not-supported')) { setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); } else { setErr(translateAuthError(error.code)); } }
+                catch(error) { if(error.code.includes('operation-not-supported')) { setTimeout(() => { setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); }, 1000); } else { setErr(translateAuthError(error.code)); setLoading(false); } }
             };
             return (
-                <div className="flex-1 p-8 flex flex-col bg-white fade-in text-center relative">
-                    <button onClick={()=>go('SIGN_IN')} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center mb-8 absolute"><Icon name="chevron-left"/></button>
-                    <div className="w-24 h-24 bg-blue-50 text-[#2F80ED] rounded-full flex items-center justify-center mx-auto mt-16 mb-8"><Icon name="key" size={40}/></div>
-                    <h1 className="text-3xl font-black text-slate-800 mb-2">{t('forgotPass')}</h1>
-                    {sent ? <div className="bg-green-50 text-green-600 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 animate-pulse mt-10"><Icon name="check-circle"/> ส่งลิงก์ไปยังอีเมลแล้ว!</div> : 
+                <div className="flex-1 p-8 flex flex-col text-center relative fade-in bg-white">
+                    {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center mb-8 absolute active:scale-95"><Icon name="chevron-left"/></button>
+                    <div className="w-24 h-24 bg-white sticker-border text-[#FF4D4D] rounded-3xl flex items-center justify-center mx-auto mt-20 mb-8"><Icon name="key" size={40}/></div>
+                    <h1 className="text-3xl font-black text-[#1F1F1F] mb-2">{t('forgotPass')}</h1>
+                    {sent ? <div className="bg-white border-4 border-[#56CC9D] text-[#56CC9D] p-4 rounded-2xl font-black flex items-center justify-center gap-2 animate-pulse mt-10"><Icon name="check-circle"/> Email Sent!</div> : 
                     <form onSubmit={handleReset} className="space-y-6 mt-10">
-                        <div className="bg-slate-50 p-4 rounded-2xl flex items-center text-left"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('email')} /></div>
-                        {err && <p className="text-[10px] font-bold text-red-500 bg-red-50 p-2 rounded-xl">{err}</p>}
-                        <button type="submit" className="w-full bg-[#2F80ED] text-white font-black py-4 rounded-[20px] shadow-lg active:scale-95">{t('sendLink')}</button>
+                        <div className="input-box p-4 flex items-center text-left bg-white"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold text-[#1F1F1F]" placeholder={t('email')} /></div>
+                        {err && <p className="text-[10px] font-black text-[#FF4D4D] bg-white border-2 border-[#FF4D4D] p-2 rounded-xl">{err}</p>}
+                        <button type="submit" className="w-full sticker-btn-red py-4 uppercase tracking-widest">{t('sendLink')}</button>
                     </form>}
                 </div>
             );
         };
 
-        const HomeScreen = ({ user, txs, pockets, safeToSpend, visibleNotifications, go, t }) => {
+        const HomeScreen = ({ user, txs, pockets, safeToSpend, visibleNotifications, go, t, Icon }) => {
             const totalSpend = txs.reduce((a,c) => a + Number(c.amount), 0);
             return (
                 <div className="p-6 pt-10 fade-in">
-                    <div className="flex justify-end items-center mb-6">
-                        <button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-[#F472B6] relative active:scale-95">
-                            <Icon name="bell" size={20}/>{visibleNotifications.length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="sticker-border rounded-full overflow-hidden"><img src={user?.photoURL} className="w-12 h-12 object-cover"/></div>
+                            <div><p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{t('welcome')},</p><h2 className="text-xl font-black leading-none">{user?.displayName}</h2></div>
+                        </div>
+                        <button onClick={()=>go('NOTIFICATIONS')} className="w-12 h-12 bg-white rounded-full flex items-center justify-center sticker-border text-[#FF4D4D] relative active:scale-95">
+                            <Icon name="bell" size={22}/>{visibleNotifications.length > 0 && <span className="absolute top-2 right-2 w-3 h-3 bg-[#FF4D4D] rounded-full border-2 border-white"></span>}
                         </button>
                     </div>
-                    <div className="bg-[#2F80ED] p-8 rounded-[36px] text-white shadow-[0_15px_30px_rgba(47,128,237,0.2)] mb-8 relative overflow-hidden">
-                        <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                        <p className="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1">{t('totalSpend')}</p><h1 className="text-3xl font-black">฿{formatMoney(totalSpend)}</h1>
-                        <div className="mt-8"><p className="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1 flex items-center gap-1"><Icon name="wallet" size={12}/> {t('safeSpend')}</p><h2 className="text-4xl font-black mb-4">฿{formatMoney(Math.max(safeToSpend, 0))}</h2></div>
+                    <div className="bg-[#3B82F6] p-8 rounded-[36px] text-white sticker-border mb-8 relative overflow-hidden">
+                        <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
+                        <p className="text-xs font-black text-blue-100 uppercase tracking-widest mb-1">{t('totalSpend')}</p><h1 className="text-4xl font-black">฿{formatMoney(totalSpend)}</h1>
+                        <div className="mt-8"><p className="text-xs font-black text-blue-100 uppercase tracking-widest mb-1 flex items-center gap-1"><Icon name="wallet" size={14}/> {t('safeSpend')}</p><h2 className="text-3xl font-black mb-4">฿{formatMoney(Math.max(safeToSpend, 0))}</h2></div>
                     </div>
-                    <div className="flex justify-between items-end mb-4"><h3 className="text-xl font-black text-slate-800">{t('recent')}</h3><button onClick={()=>go('MAIN','HISTORY')} className="text-xs font-black text-[#2F80ED] uppercase tracking-widest hover:underline">{t('seeAll')}</button></div>
-                    <div className="space-y-3">
-                        {txs.length === 0 ? <div className="text-center p-8 bg-white rounded-3xl border border-dashed border-slate-200"><p className="font-bold text-slate-400 text-sm">{t('noData')}</p></div> : 
+                    <div className="flex justify-between items-end mb-4"><h3 className="text-xl font-black text-[#1F1F1F]">{t('recent')}</h3><button onClick={()=>go('MAIN','HISTORY')} className="text-xs font-black text-[#3B82F6] uppercase tracking-widest hover:underline bg-white px-3 py-1 rounded-full sticker-border">{t('seeAll')}</button></div>
+                    <div className="space-y-4">
+                        {txs.length === 0 ? <div className="sticker-card text-center p-8"><p className="font-black text-slate-400">{t('noData')}</p></div> : 
                         txs.slice(0,4).map(tx => (
-                            <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white p-4 rounded-3xl flex justify-between items-center shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98] transition-all">
-                                <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20} /><div><h4 className="font-black text-slate-800 text-sm leading-tight">{tx.title}</h4><p className="text-[10px] font-bold text-slate-400 mt-1">{tx.category}</p></div></div>
-                                <div className="font-black text-slate-800 text-sm">฿{formatMoney(tx.amount)}</div>
+                            <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="sticker-card p-4 flex justify-between items-center cursor-pointer active:scale-95 transition-transform">
+                                <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={24} /><div><h4 className="font-black text-sm">{tx.title}</h4><p className="text-[10px] font-bold text-slate-500 mt-1">{tx.category}</p></div></div>
+                                <div className="font-black text-sm">฿{formatMoney(tx.amount)}</div>
                             </div>
                         ))}
                     </div>
@@ -564,27 +620,27 @@
             );
         };
 
-        const NotificationsScreen = ({ go, user, t, visibleNotifications, clearAllNotifs }) => (
-            <div className="flex-1 bg-[#FAFAF9] flex flex-col h-full fade-in relative overflow-hidden">
+        const NotificationsScreen = ({ go, user, t, Icon, visibleNotifications, clearAllNotifs }) => (
+            <div className="flex-1 flex flex-col h-full fade-in relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-[#E2F0E5]/60 via-[#FCEAEF]/60 to-transparent z-0 pointer-events-none"></div>
                 <div className="px-6 pt-12 flex justify-between items-center relative z-10 mb-8">
-                    <button onClick={() => go('MAIN', 'HOME')} className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center shadow-sm text-slate-600 active:scale-95"><Icon name="arrow-left" size={20}/></button>
-                    <h2 className="font-bold text-slate-800 text-lg">{t('notifications')}</h2>
-                    <img src={user?.photoURL} className="w-10 h-10 rounded-full border border-white shadow-sm object-cover"/>
+                    <button onClick={() => go('MAIN', 'HOME')} className="w-12 h-12 bg-white rounded-full flex items-center justify-center sticker-border active:scale-95"><Icon name="arrow-left" size={24}/></button>
+                    <h2 className="font-black text-2xl">{t('notifications')}</h2>
+                    <div className="w-12 h-12 rounded-full overflow-hidden sticker-border"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
                 </div>
                 <div className="px-6 flex-1 overflow-y-auto no-scrollbar relative z-10 pb-10">
-                    <div className="flex justify-between items-center mb-8">
-                        <div><h1 className="text-3xl font-black text-slate-900 mb-1 tracking-tight">{t('recentAlerts')}</h1><p className="text-sm text-slate-500 font-medium leading-tight pr-4">{t('caughtUp')}</p></div>
-                        {visibleNotifications.length > 0 && (<button onClick={clearAllNotifs} className="bg-[#EFEFEF] text-slate-600 w-14 h-14 rounded-full text-[10px] font-bold active:scale-95 shrink-0 flex flex-col items-center justify-center leading-tight">ล้าง</button>)}
+                    <div className="flex justify-between items-end mb-8">
+                        <div><h1 className="text-4xl font-black mb-1">{t('recentAlerts')}</h1><p className="text-sm font-bold text-slate-600">{t('caughtUp')}</p></div>
+                        {visibleNotifications.length > 0 && (<button onClick={clearAllNotifs} className="bg-[#FF4D4D] text-white px-4 py-2 rounded-full font-black sticker-border active:scale-95">ล้าง</button>)}
                     </div>
                     <div className="space-y-4">
-                        {visibleNotifications.length === 0 ? (<div className="text-center p-8 text-slate-400 font-bold border border-dashed border-slate-200 rounded-3xl mt-10">{t('caughtUp')}</div>) : (
+                        {visibleNotifications.length === 0 ? (<div className="sticker-card text-center p-8"><p className="font-black text-slate-400">{t('caughtUp')}</p></div>) : (
                             visibleNotifications.map(notif => (
-                                <div key={notif.id} className="bg-white/80 backdrop-blur-md p-5 rounded-[32px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.06)] border border-white flex gap-4 relative">
-                                    <div className="w-14 h-14 rounded-[20px] bg-[#FADDE5] text-[#9D4D63] flex items-center justify-center shrink-0"><Icon name={notif.type==='alert'?'alert-triangle':'calendar'} size={24} /></div>
+                                <div key={notif.id} className="sticker-card p-5 flex gap-4">
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 sticker-border text-white ${notif.type==='alert'?'bg-[#FF4D4D]':'bg-[#3B82F6]'}`}><Icon name={notif.type==='alert'?'alert-triangle':'calendar'} size={24} /></div>
                                     <div className="flex-1 pt-1">
-                                        <div className="flex justify-between items-start mb-1"><h3 className="font-bold text-slate-800 text-base">{notif.title}</h3><span className="text-[10px] font-bold text-slate-400 mt-1">{notif.time}</span></div>
-                                        <p className="text-xs text-slate-500 font-medium leading-relaxed pr-2">{notif.desc}</p>
+                                        <div className="flex justify-between items-start mb-1"><h3 className="font-black text-base">{notif.title}</h3><span className="text-[10px] font-black text-slate-400 bg-white border-2 border-slate-200 px-2 py-1 rounded-full">{notif.time}</span></div>
+                                        <p className="text-xs font-bold text-slate-600">{notif.desc}</p>
                                     </div>
                                 </div>
                             ))
@@ -594,170 +650,253 @@
             </div>
         );
 
-        const PocketsScreen = ({ pockets, go, t }) => (
-            <div className="p-6 pt-12 fade-in flex flex-col h-full bg-[#FCFBFA]">
-                <div className="flex justify-between items-center mb-8"><h2 className="text-3xl font-black text-slate-800 leading-none">{t('yourPockets')}</h2><button onClick={()=>go('NOTIFICATIONS')} className="text-slate-400"><Icon name="bell" size={20}/></button></div>
+        const PocketsScreen = ({ pockets, go, t, Icon }) => (
+            <div className="p-6 pt-12 fade-in flex flex-col h-full">
+                <div className="flex justify-between items-center mb-8"><h2 className="text-4xl font-black leading-none">{t('yourPockets')}</h2><button onClick={()=>go('NOTIFICATIONS')} className="w-12 h-12 bg-white rounded-full flex items-center justify-center sticker-border text-[#FF4D4D] active:scale-95"><Icon name="bell" size={24}/></button></div>
                 <div className="grid grid-cols-2 gap-4 mb-6 flex-1 overflow-y-auto no-scrollbar">
-                    {pockets.length===0 ? <div className="col-span-2 text-center p-8 text-slate-400 font-bold border border-dashed border-slate-200 rounded-3xl h-fit">{t('noData')}</div> : pockets.map(p => {
+                    {pockets.length===0 ? <div className="col-span-2 sticker-card text-center p-8"><p className="font-black text-slate-400">{t('noData')}</p></div> : pockets.map(p => {
                         const pct = p.hasTarget && p.target > 0 ? Math.min((p.balance / p.target) * 100, 100) : 0;
-                        const barColor = p.colorType === 'hex' ? p.color : (p.color.match(/text-\[(#[0-9A-F]{6})\]/i)?.[1] || '#2F80ED');
                         return (
-                            <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 active:scale-[0.98] transition-transform cursor-pointer h-fit relative overflow-hidden">
-                                <div className={`absolute -top-4 -right-4 w-16 h-16 rounded-full opacity-20 ${p.colorType === 'hex' ? '' : p.color.split(' ')[0]}`} style={p.colorType === 'hex' ? {backgroundColor: p.color} : {}}></div>
-                                <div className="mb-4 relative z-10"><PocketIcon pocket={p} size={18} /></div>
-                                <h4 className="font-bold text-slate-800 text-sm mb-1 relative z-10 truncate">{p.name}</h4>
-                                <div className="flex items-baseline gap-1 mb-4 relative z-10"><p className="text-xl font-black text-slate-800">฿{formatMoney(p.balance)}</p></div>
-                                {p.hasTarget && (<div className="relative z-10"><div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{width:`${pct}%`, backgroundColor: barColor}}></div></div></div>)}
+                            <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="sticker-card p-6 active:scale-95 transition-transform cursor-pointer h-fit">
+                                <div className="mb-4"><PocketIcon pocket={p} size={24} /></div>
+                                <h4 className="font-black text-sm mb-2 truncate">{p.name}</h4>
+                                <div className="flex items-baseline gap-1 mb-4"><p className="text-2xl font-black">฿{formatMoney(p.balance)}</p></div>
+                                {p.hasTarget && (<div><div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden sticker-border"><div className="h-full rounded-full" style={{width:`${pct}%`, backgroundColor: p.colorType==='hex'?p.color:'#3B82F6'}}></div></div><div className="text-right text-[10px] font-black mt-2 text-slate-500">{Math.round(pct)}%</div></div>)}
                             </div>
                         )
                     })}
                 </div>
-                <button onClick={()=>go('ADD_POCKET')} className="w-full bg-[#FCEAEF] text-[#9D4D63] font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-95 transition-transform shrink-0"><Icon name="plus" size={18}/> {t('createNewPocket')}</button>
+                <button onClick={()=>go('ADD_POCKET')} className="w-full bg-white text-[#1F1F1F] font-black py-5 rounded-full sticker-border flex items-center justify-center gap-2 active:scale-95 transition-transform shrink-0"><Icon name="plus" size={24}/> {t('createNewPocket')}</button>
             </div>
         );
 
-        const AddPocketScreen = ({ go, onSave, t }) => {
-            const [name, setName] = useState(''); const [balance, setBalance] = useState(''); const [hasTarget, setHasTarget] = useState(false); const [target, setTarget] = useState('');
-            const [selectedIcon, setSelectedIcon] = useState(defaultPocketIcons[0]); const [showCustomModal, setShowCustomModal] = useState(false);
-            const handleSave = () => { setTimeout(() => onSave({ id: Date.now().toString(), name, balance: Number(balance||0), hasTarget, target: hasTarget ? Number(target) : 0, iconType: selectedIcon.type || 'lucide', icon: selectedIcon.icon || 'wallet', colorType: selectedIcon.colorType || 'tailwind', color: selectedIcon.color || 'bg-blue-50 text-blue-500' }), 500); };
+        const AddPocketScreen = ({ go, onSave, t, Icon, LoadingOverlay }) => {
+            const [name, setName] = useState(''); const [balance, setBalance] = useState(''); 
+            const [hasTarget, setHasTarget] = useState(false); const [target, setTarget] = useState('');
+            const [selectedIcon, setSelectedIcon] = useState(defaultPocketIcons[0]);
+            const [saving, setSaving] = useState(false); const [showCustomModal, setShowCustomModal] = useState(false);
+            
+            const handleSave = async () => {
+                setSaving(true);
+                try {
+                    await onSave({ id: Date.now().toString(), name, balance: Number(balance||0), hasTarget, target: hasTarget ? Number(target) : 0, iconType: selectedIcon.type || 'lucide', icon: selectedIcon.icon || 'wallet', colorType: selectedIcon.colorType || 'hex', color: selectedIcon.color || '#3B82F6' });
+                } catch(e) { console.error(e); } finally { setSaving(false); }
+            };
 
             return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[#FAFAF9] relative">
-                    {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={setSelectedIcon} t={t} />}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24} /></button><h2 className="font-bold text-slate-800 text-lg">{t('newPocket')}</h2><div className="w-6"></div></div>
+                <div className="p-6 pt-12 h-full flex flex-col fade-in relative">
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={setSelectedIcon} t={t} Icon={Icon} />}
+                    
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24} /></button><h2 className="font-black text-2xl">{t('newPocket')}</h2><div className="w-12"></div></div>
+
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div><label className="text-[10px] font-bold text-slate-400 ml-4 mb-2 block">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full p-5 rounded-3xl bg-white shadow-sm border border-slate-100 font-bold outline-none text-slate-800" /></div>
-                        <div><label className="text-[10px] font-bold text-slate-400 ml-4 mb-2 block">{t('initialAmount')}</label><div className="w-full p-5 rounded-3xl bg-white shadow-sm border border-slate-100 flex items-center"><span className="text-2xl font-black text-slate-800 mr-2">฿</span><input type="number" value={balance} onChange={e=>setBalance(e.target.value)} className="w-full bg-transparent font-black text-3xl outline-none text-slate-800" placeholder="0.00"/></div></div>
-                        <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
-                            <div className="flex justify-between items-center mb-1"><h4 className="font-bold text-sm text-slate-800">{t('setMonthlyTarget')}</h4><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>
-                            {hasTarget && (<div className="pt-4 mt-4 border-t border-slate-50 fade-in"><div className="flex items-center"><span className="text-lg font-bold text-slate-800 mr-2">฿</span><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-transparent font-bold text-xl outline-none text-slate-800" placeholder="0.00"/></div></div>)}
+                        <div className="sticker-card p-5"><label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full input-box p-4 font-bold" placeholder="e.g. Holiday Fund"/></div>
+                        <div className="sticker-card p-5"><label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">{t('initialAmount')}</label><div className="w-full input-box p-4 flex items-center"><span className="text-2xl font-black mr-2">฿</span><input type="number" value={balance} onChange={e=>setBalance(e.target.value)} className="w-full bg-transparent font-black text-3xl outline-none" placeholder="0.00"/></div></div>
+                        <div className="sticker-card p-5">
+                            <div className="flex justify-between items-center mb-2"><h4 className="font-black">{t('setMonthlyTarget')}</h4><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>
+                            {hasTarget && (<div className="pt-4 border-t-2 border-slate-100 fade-in"><div className="w-full input-box p-4 flex items-center"><span className="text-xl font-black mr-2">฿</span><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-transparent font-black text-2xl outline-none" placeholder="0.00"/></div></div>)}
                         </div>
-                        <div>
-                            <label className="text-[10px] font-bold text-slate-400 ml-4 mb-3 block">{t('chooseIcon')}</label>
+                        <div className="sticker-card p-5">
+                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 block">{t('chooseIcon')}</label>
                             <div className="grid grid-cols-4 gap-4 px-2">
-                                {defaultPocketIcons.map((ic, i) => (<div key={i} onClick={()=>setSelectedIcon(ic)} className={`cursor-pointer transition-transform flex items-center justify-center ${selectedIcon.icon === ic.icon ? 'ring-4 ring-offset-2 ring-slate-200 scale-110 rounded-2xl' : 'hover:scale-105'}`}><PocketIcon pocket={ic} size={20} /></div>))}
-                                <div onClick={()=>setShowCustomModal(true)} className="aspect-square rounded-2xl flex items-center justify-center cursor-pointer hover:scale-105 bg-white text-slate-400 border-2 border-dashed border-slate-200"><Icon name="plus" size={20} /></div>
+                                {defaultPocketIcons.map((ic, i) => (<div key={i} onClick={()=>setSelectedIcon(ic)} className={`cursor-pointer transition-transform flex items-center justify-center ${selectedIcon.icon === ic.icon ? 'scale-110' : 'hover:scale-105'}`}><PocketIcon pocket={ic} size={24} /></div>))}
+                                <div onClick={()=>setShowCustomModal(true)} className="aspect-square rounded-[20px] flex items-center justify-center cursor-pointer hover:scale-105 bg-white text-[#1F1F1F] sticker-border"><Icon name="plus" size={24} /></div>
                             </div>
                         </div>
                     </div>
-                    <button disabled={!name} onClick={handleSave} className="mt-4 w-full bg-[#FCEAEF] text-[#9D4D63] font-bold p-5 rounded-full shadow-sm active:scale-95 disabled:opacity-50">{t('savePocket')}</button>
+                    <button disabled={!name || (hasTarget && !target)} onClick={handleSave} className="w-full sticker-btn-blue py-5 mt-4 text-xl tracking-widest disabled:opacity-50">{t('savePocket')}</button>
                 </div>
             );
         };
 
-        const PocketDetailsScreen = ({ go, pocket, t }) => {
+        const PocketDetailsScreen = ({ go, pocket, t, Icon }) => {
             if(!pocket) return null;
-            const pct = pocket.hasTarget && pocket.target > 0 ? Math.min((pocket.balance / pocket.target) * 100, 100) : 0;
-            const barColor = pocket.colorType === 'hex' ? pocket.color : (pocket.color?.match(/text-\[(#[0-9A-F]{6})\]/)?.[1] || '#2F80ED');
+            const pct = pocket.hasTarget ? Math.min((pocket.balance / pocket.target) * 100, 100) : 0;
+            const barColor = pocket.colorType === 'hex' ? pocket.color : '#3B82F6';
+            const chartData = [30, 40, 80, 20, 50]; 
+
             return (
-                <div className="p-6 pt-12 h-full flex flex-col bg-[#FAFAF9] fade-in">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="text-slate-600"><Icon name="arrow-left" size={24} /></button><h2 className="font-bold text-slate-800 text-lg">{t('pocketDetails')}</h2><button onClick={()=>go('POCKET_SETTINGS', null, pocket)} className="text-slate-600"><Icon name="more-vertical" size={24} /></button></div>
+                <div className="p-6 pt-12 h-full flex flex-col fade-in">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24} /></button><h2 className="font-black text-2xl">{t('pocketDetails')}</h2><button onClick={()=>go('POCKET_SETTINGS', null, pocket)} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="settings" size={24} /></button></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div className="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-30 -mr-10 -mt-10" style={{backgroundColor: barColor}}></div>
-                            <div className="flex items-center gap-3 mb-6 relative z-10"><PocketIcon pocket={pocket} size={18} /><h3 className="font-bold text-slate-800 text-lg">{pocket.name}</h3></div>
-                            <h1 className="text-5xl font-black text-slate-800 mb-1 relative z-10">฿{formatMoney(pocket.balance)}</h1>
-                            {pocket.hasTarget && <p className="text-xs font-bold text-slate-400 mb-6 relative z-10">Goal: ฿{formatMoney(pocket.target)}</p>}
-                            {pocket.hasTarget && (<div className="relative z-10"><div className="flex justify-between text-[10px] font-bold text-slate-500 mb-2"><span>{Math.round(pct)}% {t('saved')}</span><span>฿{formatMoney(pocket.target - pocket.balance)} {t('left')}</span></div><div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{width:`${pct}%`, backgroundColor: barColor}}></div></div></div>)}
+                        <div className="sticker-card p-8 relative overflow-hidden" style={{backgroundColor: barColor}}>
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                            <div className="flex items-center gap-4 mb-6 relative z-10"><div className="bg-white sticker-border rounded-[20px] w-16 h-16 flex items-center justify-center" style={{color:barColor}}><Icon name={pocket.icon} size={32}/></div><h3 className="font-black text-white text-2xl">{pocket.name}</h3></div>
+                            <h1 className="text-5xl font-black text-white mb-2 relative z-10">฿{formatMoney(pocket.balance)}</h1>
+                            {pocket.hasTarget && <p className="text-sm font-black text-white/80 mb-6 relative z-10">Goal: ฿{formatMoney(pocket.target)}</p>}
+                            {pocket.hasTarget && (<div className="relative z-10 bg-white/20 p-4 rounded-3xl sticker-border"><div className="flex justify-between text-xs font-black text-white mb-2"><span>{Math.round(pct)}% {t('saved')}</span><span>฿{formatMoney(pocket.target - pocket.balance)} {t('left')}</span></div><div className="h-3 w-full bg-black/20 rounded-full overflow-hidden sticker-border"><div className="h-full rounded-full bg-white" style={{width:`${pct}%`}}></div></div></div>)}
                         </div>
+                        <div className="sticker-card p-6"><h3 className="font-black text-xl mb-4">{t('spendingTrend')}</h3><div className="flex items-end justify-between gap-3 h-32">{chartData.map((h, i) => (<div key={i} className="flex flex-col items-center gap-2 flex-1"><div className="w-full rounded-t-xl sticker-border" style={{height: `${h}%`, backgroundColor: i===2 ? barColor : '#FFFFFF'}}></div><span className="text-xs font-black text-slate-500">W{i+1}</span></div>))}</div></div>
                     </div>
                 </div>
             );
         };
 
-        const PocketSettingsScreen = ({ go, pocket, onUpdate, onDelete, t }) => {
+        const PocketSettingsScreen = ({ go, pocket, onUpdate, onDelete, t, Icon }) => {
             const [name, setName] = useState(pocket?.name || ''); const [hasTarget, setHasTarget] = useState(pocket?.hasTarget || false); const [target, setTarget] = useState(pocket?.target || '');
-            const [selectedIcon, setSelectedIcon] = useState({ type: pocket?.iconType || 'lucide', icon: pocket?.icon || 'wallet', colorType: pocket?.colorType || 'tailwind', color: pocket?.color || 'bg-slate-100 text-slate-500' });
+            const [selectedIcon, setSelectedIcon] = useState({ type: pocket?.iconType || 'lucide', icon: pocket?.icon || 'wallet', colorType: pocket?.colorType || 'hex', color: pocket?.color || '#3B82F6' });
             const [showCustomModal, setShowCustomModal] = useState(false);
             if(!pocket) return null;
 
             return (
-                <div className="p-6 pt-12 h-full flex flex-col bg-[#FAFAF9] fade-in relative">
-                    {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={setSelectedIcon} t={t} />}
-                    <div className="flex items-center justify-between mb-6"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24} /></button><h2 className="font-bold text-slate-800 text-lg">{t('pocketSettings')}</h2><div className="w-6"></div></div>
-                    <div className="flex flex-col items-center mb-8"><div className="mb-3"><PocketIcon pocket={selectedIcon} size={28} /></div><h2 className="text-xl font-bold text-slate-800">{pocket.name}</h2></div>
+                <div className="p-6 pt-12 h-full flex flex-col fade-in relative">
+                    {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={setSelectedIcon} t={t} Icon={Icon} />}
+                    <div className="flex items-center justify-between mb-6"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24} /></button><h2 className="font-black text-2xl">{t('pocketSettings')}</h2><div className="w-12"></div></div>
+                    <div className="flex flex-col items-center mb-8"><div className="mb-4"><PocketIcon pocket={selectedIcon} size={36} /></div><h2 className="text-2xl font-black">{pocket.name}</h2></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <Section title={t('general')}><div className="p-4 border-b border-slate-50"><label className="text-[10px] font-bold text-slate-400 mb-1 block">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 p-3 rounded-xl font-bold text-sm outline-none"/></div><div onClick={()=>setShowCustomModal(true)} className="p-4 flex justify-between items-center cursor-pointer"><span className="font-bold text-sm">{t('iconColor')}</span><Icon name="edit-2" size={14}/></div></Section>
-                        <Section title={t('budgeting')}><div className="p-4 flex justify-between items-center"><span className="font-bold text-sm">{t('monthlyGoal')}</span><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>{hasTarget && <div className="p-4"><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-slate-50 p-3 rounded-xl font-bold text-sm outline-none" placeholder="0.00"/></div>}</Section>
-                        <div className="flex flex-col gap-3 pt-4"><button onClick={()=>onDelete(pocket.id)} className="bg-[#FCEAEF] p-4 rounded-2xl text-[#9D4D63] font-bold text-sm flex justify-center gap-2"><Icon name="trash-2" size={16}/> {t('deletePocket')}</button></div>
+                        <Section title={t('general')}><div className="p-5 border-b-2 border-slate-100"><label className="text-xs font-black text-slate-500 block mb-2">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full input-box p-4 font-bold text-sm"/></div><div onClick={()=>setShowCustomModal(true)} className="p-5 flex justify-between items-center cursor-pointer bg-slate-50"><span className="font-black text-lg">{t('iconColor')}</span><div className="bg-white p-2 rounded-full sticker-border"><Icon name="edit-2" size={16}/></div></div></Section>
+                        <Section title={t('budgeting')}><div className="p-5 flex justify-between items-center"><span className="font-black text-lg">{t('monthlyGoal')}</span><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>{hasTarget && <div className="p-5 border-t-2 border-slate-100"><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full input-box p-4 font-bold text-xl" placeholder="0.00"/></div>}</Section>
+                        <div className="pt-4"><button onClick={()=>onDelete(pocket.id)} className="w-full bg-white text-[#FF4D4D] font-black py-4 rounded-full sticker-border flex items-center justify-center gap-2 active:scale-95"><Icon name="trash-2" size={20}/> {t('deletePocket')}</button></div>
                     </div>
-                    <button onClick={()=>onUpdate(pocket.id, {name, hasTarget, target: Number(target)||0, iconType: selectedIcon.type, icon: selectedIcon.icon, colorType: selectedIcon.colorType, color: selectedIcon.color})} className="w-full bg-[#2F80ED] text-white font-bold py-4 rounded-full shadow-lg active:scale-95">{t('saveChanges')}</button>
+                    <button onClick={()=>onUpdate(pocket.id, {name, hasTarget, target: Number(target)||0, iconType: selectedIcon.type, icon: selectedIcon.icon, colorType: selectedIcon.colorType, color: selectedIcon.color})} className="w-full sticker-btn-blue py-5 text-xl tracking-widest">{t('saveChanges')}</button>
                 </div>
             );
         };
 
-        const ProfileScreen = ({ user, go, t, onLogout, themeMode }) => {
-            const MenuItem = ({ icon, label, onClick, value }) => (<div onClick={onClick} className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 border-b border-slate-50 last:border-0"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-[#F7F9FC] rounded-full flex items-center justify-center text-slate-600"><Icon name={icon} size={18}/></div><span className="font-bold text-slate-700 text-sm">{label}</span></div><div className="flex items-center gap-2">{value && <span className="text-xs font-bold text-slate-400">{value}</span>}<Icon name="chevron-right" size={18} className="text-slate-300"/></div></div>);
+        const ProfileScreen = ({ user, go, t, onLogout, Icon, LoadingOverlay, themeMode, onResetData }) => {
+            const [loading, setLoading] = useState(false);
+            const doLogout = () => { setLoading(true); setTimeout(() => onLogout(), 1000); };
+            const MenuItem = ({ icon, label, onClick, value }) => (<div onClick={onClick} className="flex items-center justify-between p-5 cursor-pointer hover:bg-slate-50 border-b-2 border-slate-100 last:border-0"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center text-[#3B82F6]"><Icon name={icon} size={20}/></div><span className="font-black text-lg">{label}</span></div><div className="flex items-center gap-3">{value && <span className="text-xs font-black px-3 py-1 bg-slate-100 rounded-full sticker-border">{value}</span>}<div className="bg-white p-2 rounded-full sticker-border"><Icon name="chevron-right" size={16}/></div></div></div>);
             return (
-                <div className="p-6 pt-12 fade-in bg-[#FAFAF9] h-full overflow-y-auto no-scrollbar">
-                    <div className="flex flex-col items-center mb-10 relative">
-                        <div className="relative mb-4"><img src={user?.photoURL || 'https://ui-avatars.com/api/?name=User&background=F472B6&color=fff'} className="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover"/><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-[#FCEAEF] rounded-full flex items-center justify-center text-[#F472B6] shadow-sm cursor-pointer"><Icon name="edit-2" size={14}/></div></div>
-                        <h1 className="text-2xl font-black text-slate-800">{user?.displayName || 'ผู้ใช้งาน'}</h1><p className="text-xs font-bold text-slate-400 mt-1">{user?.email || ''}</p>
+                <div className="p-6 pt-12 fade-in relative h-full overflow-y-auto no-scrollbar">
+                    {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <div className="flex flex-col items-center mb-10 mt-4 relative">
+                        <button onClick={()=>go('NOTIFICATIONS')} className="absolute top-0 right-0 text-[#FF4D4D] w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="bell" size={24}/></button>
+                        <div className="relative mb-6"><div className="w-32 h-32 rounded-full sticker-border overflow-hidden"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-10 h-10 bg-[#3B82F6] sticker-border rounded-full flex items-center justify-center text-white cursor-pointer hover:scale-110"><Icon name="edit-2" size={16}/></div></div>
+                        <h1 className="text-3xl font-black mb-1">{user?.displayName}</h1><p className="text-sm font-black text-slate-500 bg-white px-4 py-1 rounded-full sticker-border">{user?.email}</p>
                     </div>
-                    <div className="space-y-6 mb-10">
+                    <div className="space-y-8 mb-10">
                         <Section title={t('accountTitle')}><MenuItem icon="user" label={t('accountSettings')} onClick={()=>go('EDIT_PROFILE')} /><MenuItem icon="shield" label={t('security')} onClick={()=>go('SECURITY')} /></Section>
-                        <Section title={t('preferencesTitle')}><MenuItem icon="globe" label={t('language')} onClick={()=>go('LANGUAGE')} /><MenuItem icon="palette" label={t('appTheme')} value={t(themeMode)} onClick={()=>go('THEME')} /></Section>
+                        <Section title={t('preferencesTitle')}><MenuItem icon="globe" label={t('language')} onClick={()=>go('LANGUAGE')} /><MenuItem icon="palette" label={t('appTheme')} onClick={()=>go('THEME')} /></Section>
+                        <Section title="Data Management">
+                            <div onClick={onResetData} className="flex items-center justify-between p-5 cursor-pointer hover:bg-red-50 transition-colors">
+                                <div className="flex items-center gap-4"><div className="w-12 h-12 bg-[#FF4D4D] sticker-border rounded-full flex items-center justify-center text-white"><Icon name="trash-2" size={20}/></div><span className="font-black text-lg text-[#FF4D4D]">{t('resetData')}</span></div>
+                            </div>
+                        </Section>
                     </div>
-                    <button onClick={onLogout} className="w-full bg-[#FCEAEF] text-[#9D4D63] font-bold py-4 rounded-[24px] flex items-center justify-center gap-2 active:scale-95 shadow-sm mb-10"><Icon name="log-out" size={20}/> {t('logout')}</button>
+                    <button onClick={doLogout} className="w-full sticker-btn-red py-5 flex items-center justify-center gap-3 text-xl tracking-widest mb-10"><Icon name="log-out" size={24}/> {t('logout')}</button>
                 </div>
             );
         };
 
-        const EditProfileScreen = ({ go, user, setUser, t }) => {
+        const EditProfileScreen = ({ go, user, setUser, t, Icon, LoadingOverlay }) => {
             const [name, setName] = useState(user?.displayName || ''); const [bio, setBio] = useState(user?.bio || '');
+            const [saving, setSaving] = useState(false); const fileInputRef = useRef(null);
             const handleUpdate = () => {
-                if(user && user.uid !== 'mock-uid') { try { user.updateProfile({ displayName: name }); db.collection('users').doc(user.uid).set({ displayName: name, bio }, { merge: true }); } catch(e) {} } 
-                else { const guestData = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...guestData, displayName: name, bio})); }
-                setUser(prev => ({...prev, displayName: name, bio})); go('MAIN','PROFILE');
+                setSaving(true);
+                setTimeout(async () => {
+                    if(user && user.uid !== 'mock-uid') { try { await user.updateProfile({ displayName: name }); await db.collection('users').doc(user.uid).set({ displayName: name, bio }, { merge: true }); } catch(e) {} } 
+                    else { const guestData = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...guestData, displayName: name, bio})); }
+                    setUser(prev => ({...prev, displayName: name, bio})); go('MAIN','PROFILE');
+                }, 1000);
+            };
+            const handleAvatarUpload = (e) => {
+                const file = e.target.files[0];
+                if(file) {
+                    setSaving(true); const reader = new FileReader(); reader.readAsDataURL(file);
+                    reader.onload = (event) => {
+                        const img = new Image(); img.src = event.target.result;
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas'); const scaleSize = 300 / img.width; canvas.width = 300; canvas.height = img.height * scaleSize;
+                            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); const b64 = canvas.toDataURL('image/jpeg', 0.8);
+                            if(user && user.uid !== 'mock-uid') { db.collection('users').doc(user.uid).set({ photoURL: b64 }, { merge: true }); } 
+                            else { const g = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...g, photoURL: b64})); }
+                            setUser(prev => ({...prev, photoURL: b64})); setSaving(false);
+                        }
+                    }
+                }
             };
             return (
-                <div className="p-6 pt-12 flex flex-col h-full bg-[#FAFAF9] fade-in relative">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('editProfile')}</h2><div className="w-6"></div></div>
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative">
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24}/></button><h2 className="font-black text-2xl">{t('editProfile')}</h2><div className="w-12"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
-                        <div><label className="text-[10px] font-bold text-slate-400 ml-4 mb-2 block uppercase">{t('name')}</label><div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100"><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none" /></div></div>
-                        <div><label className="text-[10px] font-bold text-slate-400 ml-4 mb-2 block uppercase">{t('bio')}</label><div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100"><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none h-24 resize-none" placeholder="Add bio..." /></div></div>
+                        <div className="flex flex-col items-center mb-8 relative"><div className="relative"><div className="w-32 h-32 rounded-full sticker-border overflow-hidden"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><button onClick={()=>fileInputRef.current.click()} className="absolute bottom-0 right-0 w-10 h-10 bg-[#3B82F6] text-white rounded-full sticker-border flex items-center justify-center hover:scale-110"><Icon name="camera" size={16}/></button></div><input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} /></div>
+                        <div className="sticker-card p-6"><label className="text-xs font-black text-slate-500 mb-2 block uppercase tracking-widest">{t('name')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full input-box p-4 font-bold text-lg" /></div>
+                        <div className="sticker-card p-6"><label className="text-xs font-black text-slate-500 mb-2 block uppercase tracking-widest">{t('bio')}</label><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full input-box p-4 font-bold text-lg h-32 resize-none" placeholder="Add bio..." /></div>
                     </div>
-                    <button onClick={handleUpdate} className="w-full bg-[#FCEAEF] text-[#9D4D63] font-bold py-5 rounded-[24px] active:scale-95">{t('saveChanges')}</button>
+                    <button onClick={handleUpdate} className="w-full sticker-btn-blue py-5 text-xl tracking-widest mt-4">{t('saveChanges')}</button>
                 </div>
             );
         };
 
-        const SecuritySettingsScreen = ({ go, pinCode, setPinCode, setShowPinModal, t }) => {
+        const SecuritySettingsScreen = ({ go, pinCode, setPinCode, setShowPinModal, t, Icon, user }) => {
+            const deviceName = useMemo(() => getDeviceName(), []);
             const handleTogglePin = () => { if (pinCode) { setPinCode(''); localStorage.removeItem('cozy_pin'); } else { setShowPinModal(true); } };
+            const [msg, setMsg] = useState('');
+            const handleResetPass = async () => { if(user && user.uid !== 'mock-uid') { try { await auth.sendPasswordResetEmail(user.email); setMsg('Sent!'); } catch(e) { setMsg('Error'); } } else setMsg('Not supported in Guest'); setTimeout(()=>setMsg(''), 3000); };
             return (
-                <div className="p-6 pt-12 flex flex-col h-full bg-[#FAFAF9] fade-in">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('security')}</h2><div className="w-6"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6">
-                        <Section title="Security">
-                            <div className="p-4 flex justify-between items-center"><div className="flex items-center gap-4"><Icon name="layout-grid" size={18}/><div><span className="font-bold text-sm text-slate-800 block mb-1">{t('pinCode')}</span><span className="text-[10px] text-slate-400">{pinCode ? t('pinStatusSet') : t('pinStatusNotSet')}</span></div></div><div className="flex items-center gap-2">{pinCode && (<button onClick={()=>setShowPinModal(true)} className="text-[10px] font-black px-3 py-1.5 bg-slate-100 rounded-xl">{t('changePin')}</button>)}<SwitchToggle isOn={!!pinCode} onToggle={handleTogglePin} /></div></div>
+                <div className="p-6 pt-12 flex flex-col h-full fade-in">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24}/></button><h2 className="font-black text-2xl">{t('security')}</h2><div className="w-12"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <Section title="Account Security">
+                            <div onClick={handleResetPass} className="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 border-b-2 border-slate-100"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-[#3B82F6] sticker-border rounded-full flex items-center justify-center text-white"><Icon name="lock" size={20}/></div><h4 className="font-black text-lg">{t('changePass')}</h4></div><button className="bg-white sticker-border px-4 py-2 rounded-full text-xs font-black">Update</button></div>
+                            <div className="p-5 flex justify-between items-center"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center text-slate-500"><Icon name="layout-grid" size={20}/></div><div><span className="font-black text-lg block leading-none mb-1">{t('pinCode')}</span><span className="text-[10px] font-black text-slate-400 uppercase">{pinCode ? t('pinStatusSet') : t('pinStatusNotSet')}</span></div></div><div className="flex items-center gap-3">{pinCode && (<button onClick={()=>setShowPinModal(true)} className="text-xs font-black px-4 py-2 bg-white sticker-border rounded-full">{t('changePin')}</button>)}<SwitchToggle isOn={!!pinCode} onToggle={handleTogglePin} /></div></div>
                         </Section>
-                        <Section title={t('yourDevices')}><div className="p-4 flex justify-between items-center bg-[#E2F0E5]/10"><div className="flex items-center gap-4"><Icon name="smartphone" size={18} className="text-[#4A7D59]"/><div><h4 className="font-bold text-sm">{getDeviceName()}</h4><p className="text-[10px] text-slate-400">{t('activeNow')}</p></div></div></div></Section>
+                        <Section title={t('yourDevices')}><div className="p-5 flex justify-between items-center bg-white"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-[#56CC9D] sticker-border rounded-full flex items-center justify-center text-white"><Icon name="smartphone" size={20}/></div><div><h4 className="font-black text-lg">{deviceName}</h4><p className="text-[10px] font-black text-slate-400 uppercase">{t('activeNow')}</p></div></div><span className="bg-white sticker-border text-[#56CC9D] px-4 py-2 rounded-full text-xs font-black">THIS DEVICE</span></div></Section>
+                    </div>
+                    {msg && <div className="bg-white sticker-border text-center font-black p-4 mt-4 text-[#3B82F6]">{msg}</div>}
+                </div>
+            );
+        };
+
+        const NotificationSettingsScreen = ({ go, t, Icon }) => {
+            const [opts, setOpts] = useState({ p: true, bw: true, ms: false, nl: true, pc: true });
+            const toggle = (k) => setOpts({...opts, [k]: !opts[k]});
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24}/></button><h2 className="font-black text-2xl">{t('notifications')}</h2><div className="w-12"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <Section title={t('transactionAlerts')}><div className="p-5 flex justify-between items-center"><h4 className="font-black text-lg">{t('everyPurchase')}</h4><SwitchToggle isOn={opts.p} onToggle={()=>toggle('p')} /></div></Section>
+                        <Section title={t('budgetAlerts')}>
+                            <div className="p-5 flex justify-between items-center border-b-2 border-slate-100"><h4 className="font-black text-lg">{t('budgetWarnings')}</h4><SwitchToggle isOn={opts.bw} onToggle={()=>toggle('bw')} /></div>
+                            <div className="p-5 flex justify-between items-center"><h4 className="font-black text-lg">{t('monthlySummaries')}</h4><SwitchToggle isOn={opts.ms} onToggle={()=>toggle('ms')} /></div>
+                        </Section>
+                        <Section title="Security Alerts">
+                            <div className="p-5 flex justify-between items-center border-b-2 border-slate-100"><h4 className="font-black text-lg">{t('newLogins')}</h4><SwitchToggle isOn={opts.nl} onToggle={()=>toggle('nl')} /></div>
+                            <div className="p-5 flex justify-between items-center"><h4 className="font-bold text-lg">{t('passwordChanges')}</h4><SwitchToggle isOn={opts.pc} onToggle={()=>toggle('pc')} /></div>
+                        </Section>
                     </div>
                 </div>
             );
         };
 
-        const ThemeSettingsScreen = ({ themeMode, setThemeMode, go, t }) => (
-            <div className="p-6 pt-12 flex flex-col h-full bg-[#FAFAF9] fade-in">
-                <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('theme')}</h2><div className="w-6"></div></div>
-                <div className="flex justify-between gap-4">
-                    {['Light', 'Dark', 'System'].map(mode => (
-                        <div key={mode} onClick={()=>setThemeMode(mode)} className={`flex-1 p-4 rounded-2xl text-center cursor-pointer font-bold text-sm border-2 ${themeMode===mode?'border-[#F472B6] text-[#F472B6] bg-white':'border-slate-100 text-slate-400 bg-white'}`}>{t(mode.toLowerCase())}</div>
+        const ThemeSettingsScreen = ({ themeMode, setThemeMode, reduceMotion, setReduceMotion, go, t, Icon }) => (
+            <div className="p-6 pt-12 flex flex-col h-full fade-in">
+                <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24}/></button><h2 className="font-black text-2xl">{t('theme')}</h2><div className="w-12"></div></div>
+                <div className="flex-1 overflow-y-auto no-scrollbar space-y-8 pb-6">
+                    <div>
+                        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 ml-4">{t('themeMode')}</h4>
+                        <div className="flex justify-between gap-4 px-2">
+                            <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Light')} className={`w-full aspect-[1/1.5] rounded-3xl border-4 cursor-pointer flex flex-col p-2 gap-2 bg-white ${themeMode === 'Light' ? 'border-[#3B82F6]' : 'border-slate-100 hover:border-slate-200'}`}><div className="w-full h-1/4 bg-slate-100 rounded-lg"></div><div className="w-full flex-1 bg-slate-50 rounded-lg flex flex-col gap-1.5 p-1.5"><div className="w-full h-2 bg-white rounded-sm"></div><div className="w-2/3 h-2 bg-white rounded-sm"></div></div></div><span className={`text-xs font-bold ${themeMode==='Light' ? 'text-[#3B82F6]' : 'text-slate-400'}`}>{t('light')}</span></div>
+                            <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Dark')} className={`w-full aspect-[1/1.5] rounded-3xl border-4 cursor-pointer flex flex-col p-2 gap-2 bg-slate-800 ${themeMode === 'Dark' ? 'border-[#3B82F6]' : 'border-slate-100 hover:border-slate-200'}`}><div className="w-full h-1/4 bg-slate-700 rounded-lg"></div><div className="w-full flex-1 bg-slate-900 rounded-lg flex flex-col gap-1.5 p-1.5"><div className="w-full h-2 bg-slate-700 rounded-sm"></div><div className="w-2/3 h-2 bg-slate-700 rounded-sm"></div></div></div><span className={`text-xs font-bold ${themeMode==='Dark' ? 'text-[#3B82F6]' : 'text-slate-400'}`}>{t('dark')}</span></div>
+                            <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('System')} className={`w-full aspect-[1/1.5] rounded-3xl border-4 cursor-pointer flex flex-col bg-white overflow-hidden relative ${themeMode === 'System' ? 'border-[#3B82F6]' : 'border-slate-100 hover:border-slate-200'}`}><div className="absolute top-0 right-0 bottom-0 w-1/2 bg-slate-800"></div><div className="relative w-full h-full p-2 flex flex-col gap-2 z-10"><div className="w-full h-1/4 bg-slate-200/50 rounded-lg backdrop-blur-sm"></div><div className="w-full flex-1 bg-slate-200/30 rounded-lg flex flex-col gap-1.5 p-1.5 backdrop-blur-sm"><div className="w-full h-2 bg-white/50 rounded-sm"></div></div></div></div><span className={`text-xs font-bold ${themeMode==='System' ? 'text-[#3B82F6]' : 'text-slate-400'}`}>{t('system')}</span></div>
+                        </div>
+                    </div>
+                    <Section title="Animations"><div className="p-5 flex justify-between items-center"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-[#FFD84D] sticker-border rounded-full flex items-center justify-center text-[#1F1F1F]"><Icon name="sparkles" size={20}/></div><span className="font-black text-lg">{t('reduceMotion')}</span></div><SwitchToggle isOn={reduceMotion} onToggle={()=>setReduceMotion(!reduceMotion)} /></div></Section>
+                </div>
+            </div>
+        );
+
+        const LanguageSettingsScreen = ({ lang, setLang, go, t, Icon }) => (
+            <div className="p-6 pt-12 flex flex-col h-full fade-in">
+                <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24}/></button><h2 className="font-black text-2xl ml-6">{t('language')}</h2></div>
+                <div className="space-y-4">
+                    {['TH', 'EN'].map(l => (
+                        <div key={l} onClick={()=>setLang(l)} className={`p-6 rounded-[32px] flex justify-between items-center cursor-pointer transition-transform hover:scale-105 ${lang===l?'bg-[#3B82F6] text-white sticker-border':'bg-white sticker-border text-[#1F1F1F]'}`}>
+                            <span className="font-black text-xl">{l === 'TH' ? 'ภาษาไทย' : 'English'}</span>
+                            {lang===l && <div className="bg-white text-[#3B82F6] rounded-full p-1"><Icon name="check" size={20} strokeWidth={4}/></div>}
+                        </div>
                     ))}
                 </div>
             </div>
         );
 
-        const LanguageSettingsScreen = ({ lang, setLang, go, t }) => (
-            <div className="p-6 pt-12 flex flex-col h-full bg-[#FAFAF9] fade-in">
-                <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="arrow-left"/></button><h2 className="font-black text-lg ml-4">{t('language')}</h2></div>
-                <div className="space-y-4">{['TH', 'EN'].map(l => (<div key={l} onClick={()=>setLang(l)} className={`p-6 rounded-[28px] border-2 flex justify-between items-center cursor-pointer transition-all ${lang===l?'border-[#F472B6] bg-[#FCEAEF]':'border-white bg-white shadow-sm'}`}><span className={`font-bold text-sm ${lang===l?'text-[#9D4D63]':'text-slate-600'}`}>{l === 'TH' ? 'ภาษาไทย' : 'English'}</span>{lang===l && <Icon name="check-circle-2" size={20} className="text-[#F472B6]"/>}</div>))}</div>
-            </div>
-        );
-
         // 🌟 HISTORY & SEARCH 🌟
-        const HistoryScreen = ({ txs, go, t, visibleNotifications, userCategories }) => {
-            const [searchQuery, setSearchQuery] = useState(''); const [activeFilter, setActiveFilter] = useState(t('all'));
+        const HistoryScreen = ({ txs, go, t, Icon, visibleNotifications, userCategories }) => {
+            const [searchQuery, setSearchQuery] = useState('');
+            const [activeFilter, setActiveFilter] = useState(t('all'));
             const filters = [t('all'), t('expense'), ...userCategories.map(c => c.id)];
 
             const filteredTxs = useMemo(() => txs.filter(tx => {
@@ -768,26 +907,28 @@
 
             const grouped = useMemo(() => {
                 const g = {}; const today = new Date().toLocaleDateString('th-TH');
-                filteredTxs.forEach(tx => { let d = tx.date === today ? t('today') : tx.date; if(!g[d]) g[d]=[]; g[d].push(tx); });
+                const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+                const yStr = yesterday.toLocaleDateString('th-TH');
+                filteredTxs.forEach(tx => { let d = tx.date === today ? t('today') : tx.date === yStr ? t('yesterday') : tx.date; if(!g[d]) g[d]=[]; g[d].push(tx); });
                 return g;
             }, [filteredTxs, t]);
 
             return (
-                <div className="p-6 pt-10 fade-in flex flex-col h-full bg-[#FAFAF9]">
+                <div className="p-6 pt-10 fade-in flex flex-col h-full">
                     <div className="shrink-0 mb-6 z-10 pb-2">
-                        <div className="flex justify-end mb-4"><button onClick={()=>go('NOTIFICATIONS')} className="relative text-[#F472B6]"><Icon name="bell" size={24}/>{visibleNotifications?.length > 0 && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#FAFAF9]"></span>}</button></div>
-                        <h2 className="text-3xl font-black text-slate-800 mb-6 leading-none">{t('transactions')}</h2>
-                        <div className="bg-white p-4 rounded-2xl flex items-center shadow-sm border border-slate-100 mb-4 focus-within:ring-2 ring-[#F472B6]"><Icon name="search" size={20} className="text-slate-400 mr-3"/><input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent w-full font-bold text-sm outline-none text-slate-800" placeholder={t('searchPlaceholder')} /></div>
-                        <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">{filters.map(cat => (<button key={cat} onClick={() => setActiveFilter(cat)} className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all border ${activeFilter === cat ? 'bg-[#E2F0E5] text-[#4A7D59]' : 'bg-white text-slate-500'}`}>{cat}</button>))}</div>
+                        <div className="flex justify-end mb-4"><button onClick={()=>go('NOTIFICATIONS')} className="relative w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center text-[#FF4D4D] active:scale-95"><Icon name="bell" size={24}/>{visibleNotifications?.length > 0 && <span className="absolute top-0 right-0 w-3 h-3 bg-[#FF4D4D] rounded-full border-2 border-white"></span>}</button></div>
+                        <h2 className="text-4xl font-black mb-6 leading-none">{t('transactions')}</h2>
+                        <div className="input-box p-4 flex items-center mb-6 bg-white"><Icon name="search" size={24} className="text-slate-400 mr-3"/><input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent w-full font-black text-lg" placeholder={t('searchPlaceholder')} />{searchQuery && (<button onClick={() => setSearchQuery('')} className="text-slate-400 bg-slate-100 rounded-full p-1"><Icon name="x" size={16} /></button>)}</div>
+                        <div className="flex overflow-x-auto no-scrollbar gap-3 pb-2">{filters.map(cat => (<button key={cat} onClick={() => setActiveFilter(cat)} className={`whitespace-nowrap px-6 py-3 rounded-full text-sm font-black transition-transform active:scale-95 sticker-border ${activeFilter === cat ? 'bg-[#3B82F6] text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>{cat}</button>))}</div>
                     </div>
                     <div className="space-y-6 pb-24 overflow-y-auto flex-1 no-scrollbar -mx-6 px-6">
-                        {Object.keys(grouped).length === 0 ? <div className="text-center text-slate-400 font-bold p-8 border border-dashed border-slate-200 rounded-3xl mt-4">{t('noData')}</div> : Object.keys(grouped).map(dateLabel => (
+                        {Object.keys(grouped).length === 0 ? <div className="sticker-card text-center p-10 font-black text-slate-400 text-lg">{t('noData')}</div> : Object.keys(grouped).map(dateLabel => (
                             <div key={dateLabel}>
-                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-2">{dateLabel}</h4>
-                                <div className="space-y-3">{grouped[dateLabel].map(tx => (
-                                    <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white p-4 rounded-[24px] flex justify-between items-center shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98]">
-                                        <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20}/><div><h4 className="font-bold text-slate-800 text-sm leading-tight mb-1">{tx.title}</h4><p className="text-[10px] font-bold text-slate-400 tracking-wider">{tx.category}</p></div></div>
-                                        <div className="font-black text-slate-800 text-sm">-{tx.amount > 0 ? '' : ''}฿{formatMoney(Math.abs(tx.amount))}</div>
+                                <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4 ml-2 bg-white px-4 py-2 inline-block rounded-full sticker-border">{dateLabel}</h4>
+                                <div className="space-y-4">{grouped[dateLabel].map(tx => (
+                                    <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="sticker-card p-5 flex justify-between items-center cursor-pointer active:scale-95 transition-transform hover:-translate-y-1">
+                                        <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={24}/><div><h4 className="font-black text-lg leading-tight mb-1">{tx.title}</h4><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-100 px-2 py-1 rounded-md inline-block">{tx.category}</p></div></div>
+                                        <div className="font-black text-xl">-{tx.amount > 0 ? '' : ''}฿{formatMoney(Math.abs(tx.amount))}</div>
                                     </div>
                                 ))}</div>
                             </div>
@@ -797,9 +938,9 @@
             );
         };
 
-        const ScanScreen = ({ go, onNext, t }) => {
+        const ScanScreen = ({ go, onNext, t, Icon, LoadingOverlay }) => {
             const videoRef = useRef(null); const fileInputRef = useRef(null); const streamRef = useRef(null);
-            const [flash, setFlash] = useState(false); const [scanning, setScanning] = useState(false);
+            const [isTorchOn, setIsTorchOn] = useState(false); const [scanning, setScanning] = useState(false);
 
             useEffect(() => {
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(s => { streamRef.current = s; if(videoRef.current) { videoRef.current.srcObject = s; videoRef.current.setAttribute('playsinline', true); videoRef.current.play().catch(()=>{}); } }).catch(()=>{});
@@ -807,132 +948,163 @@
             }, []);
 
             const toggleFlash = async () => {
-                if (streamRef.current) { try { const track = streamRef.current.getVideoTracks()[0]; await track.applyConstraints({ advanced: [{ torch: !flash }] }); setFlash(!flash); return; } catch (e) {} }
-                setFlash(true); setTimeout(()=>setFlash(false), 150);
+                if (streamRef.current) {
+                    try {
+                        const track = streamRef.current.getVideoTracks()[0];
+                        const capabilities = track.getCapabilities();
+                        if (capabilities.torch) {
+                            const newTorchState = !isTorchOn;
+                            await track.applyConstraints({ advanced: [{ torch: newTorchState }] });
+                            setIsTorchOn(newTorchState);
+                        } else { console.warn("Torch not supported"); }
+                    } catch (e) { console.error("Torch error:", e); }
+                }
             };
 
             const capture = () => { 
-                setFlash(true); 
-                setTimeout(() => { 
-                    setFlash(false); setScanning(true);
-                    if (videoRef.current) {
-                        const canvas = document.createElement('canvas'); canvas.width = videoRef.current.videoWidth; canvas.height = videoRef.current.videoHeight;
-                        const ctx = canvas.getContext('2d'); ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-                        setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใช้จ่ายใหม่', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', iconType: 'lucide', icon: 'camera', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: canvas.toDataURL('image/jpeg', 0.8) }); }, 1500);
-                    } else { setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใช้จ่ายใหม่', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', iconType: 'lucide', icon: 'camera', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: null }); }, 1500); }
-                }, 300); 
+                setScanning(true);
+                if (videoRef.current) {
+                    const canvas = document.createElement('canvas'); canvas.width = videoRef.current.videoWidth; canvas.height = videoRef.current.videoHeight;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+                    setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใหม่', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', iconType: 'lucide', icon: 'camera', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: canvas.toDataURL('image/jpeg', 0.8) }); }, 1500);
+                } else { setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใหม่', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', iconType: 'lucide', icon: 'camera', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: null }); }, 1500); }
             };
 
             if(scanning) return <LoadingOverlay text={t('loading')} Icon={Icon} />;
 
             return (
                 <div className="flex-1 bg-black relative flex flex-col h-full fade-in">
-                    <div className="absolute top-10 left-0 w-full px-6 flex justify-between items-center z-40"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white"><Icon name="x" size={20}/></button><button onClick={toggleFlash} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white"><Icon name={flash ? 'zap' : 'zap-off'} size={20}/></button></div>
-                    <div className="flex-1 relative overflow-hidden flex items-center justify-center"><video ref={videoRef} playsInline webkit-playsinline autoPlay muted className="absolute inset-0 w-full h-full object-cover opacity-90" />{flash && <div className="absolute inset-0 bg-white z-50 animate-pulse"></div>}<div className="scan-frame"><div className="scan-corner tl"></div><div className="scan-corner tr"></div><div className="scan-corner bl"></div><div className="scan-corner br"></div><div className="laser"></div></div></div>
-                    <div className="bg-white rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-2xl z-40 relative"><div className="w-12 h-1.5 bg-slate-200 rounded-full mb-6"></div><h2 className="text-xl font-bold text-slate-800">{t('scanReceipt')}</h2><p className="text-xs text-slate-400 mt-2 mb-8">{t('alignReceipt')}</p><div className="flex justify-between w-full px-8 items-center"><button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-2"><div className="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center text-slate-600 border border-slate-100"><Icon name="image" size={22}/></div></button><button onClick={capture} className="relative w-20 h-20 flex items-center justify-center"><div className="absolute inset-0 border-4 border-[#FCEAEF] rounded-full"></div><div className="w-14 h-14 bg-[#F472B6] rounded-full shadow-lg border-2 border-white flex items-center justify-center text-white"><Icon name="camera" size={24}/></div></button><button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-2"><div className="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center text-slate-600 border border-slate-100"><Icon name="edit-2" size={22}/></div></button></div></div>
-                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e=>{if(e.target.files[0]){ setScanning(true); processReceiptImage(e.target.files[0], (data)=>{ setScanning(false); onNext(data); }); }}} />
+                    <div className="absolute top-10 left-0 w-full px-6 flex justify-between items-center z-40"><button onClick={()=>go('MAIN','HOME')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="x" size={24}/></button><button onClick={toggleFlash} className={`w-12 h-12 sticker-border rounded-full flex items-center justify-center active:scale-95 ${isTorchOn ? 'bg-[#FFD84D] text-[#1F1F1F]' : 'bg-white text-[#1F1F1F]'}`}><Icon name={isTorchOn ? 'zap' : 'zap-off'} size={24}/></button></div>
+                    <div className="flex-1 relative overflow-hidden flex items-center justify-center"><video ref={videoRef} playsInline webkit-playsinline autoPlay muted className="absolute inset-0 w-full h-full object-cover opacity-90" /><div className="scan-frame"><div className="scan-corner tl"></div><div className="scan-corner tr"></div><div className="scan-corner bl"></div><div className="scan-corner br"></div><div className="laser"></div></div></div>
+                    <div className="bg-[#FFD84D] rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.5)] z-40 relative border-t-4 border-white"><div className="w-16 h-2 bg-white sticker-border rounded-full mb-6"></div><h2 className="text-2xl font-black">{t('scanReceipt')}</h2><p className="text-xs font-bold text-slate-600 mt-2 mb-8 uppercase tracking-widest">{t('alignReceipt')}</p><div className="flex justify-between w-full px-4 items-center"><button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-3"><div className="w-16 h-16 bg-white rounded-full flex items-center justify-center sticker-border active:scale-95 transition-transform"><Icon name="image" size={24}/></div><span className="text-[10px] font-black uppercase bg-white px-3 py-1 rounded-full sticker-border">{t('gallery')}</span></button><button onClick={capture} className="w-24 h-24 sticker-btn-red flex items-center justify-center"><Icon name="camera" size={32}/></button><button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-3"><div className="w-16 h-16 bg-white rounded-full flex items-center justify-center sticker-border active:scale-95 transition-transform"><Icon name="edit-2" size={24}/></div><span className="text-[10px] font-black uppercase bg-white px-3 py-1 rounded-full sticker-border">{t('manual')}</span></button></div></div>
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e=>{if(e.target.files[0]){ processReceiptImage(e.target.files[0], (data)=>{ setScanning(false); onNext(data); }); }}} />
                 </div>
             );
         };
 
-        const ReviewScreen = ({ go, screenData, onConfirm, t, pockets, userCategories, setUserCategories, defaultCatIds }) => {
+        const ReviewScreen = ({ go, screenData, onConfirm, t, Icon, pockets, LoadingOverlay, userCategories, setUserCategories, defaultCatIds }) => {
             const [amount, setAmount] = useState(screenData?.amount || ''); const [merchant, setMerchant] = useState(screenData?.merchant || ''); const [txDate, setTxDate] = useState(screenData?.date || new Date().toLocaleDateString('th-TH')); const [selectedPocket, setSelectedPocket] = useState('none'); const [activeCategory, setActiveCategory] = useState(screenData?.categoryKey || 'General'); const [saving, setSaving] = useState(false); const [showAddCat, setShowAddCat] = useState(false);
-            const handleSave = () => { setSaving(true); setTimeout(() => { const catObj = userCategories.find(c => c.id === activeCategory) || userCategories[0]; onConfirm({ title: merchant || t('manual'), amount: Number(amount), category: activeCategory, date: txDate, iconType: 'lucide', icon: catObj.icon, colorType: 'hex', color: catObj.color, pocketId: selectedPocket, imageUrl: screenData?.imageUrl || null }); }, 800); };
+            
+            const handleSave = async () => { 
+                setSaving(true); 
+                try {
+                    const catObj = userCategories.find(c => c.id === activeCategory) || userCategories[0]; 
+                    await onConfirm({ title: merchant || t('manual'), amount: Number(amount), category: activeCategory, date: txDate, iconType: 'lucide', icon: catObj.icon, colorType: 'hex', color: catObj.color, pocketId: selectedPocket, imageUrl: screenData?.imageUrl || null }); 
+                } catch(e) { console.error(e); } finally { setSaving(false); }
+            };
 
             return (
-                <div className="flex-1 bg-[#FAFAF9] flex flex-col h-full fade-in relative">
+                <div className="flex-1 flex flex-col h-full fade-in relative">
                     {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    {showAddCat && <AddCategoryModal onClose={()=>setShowAddCat(false)} onAdd={(cat)=>{setUserCategories([...userCategories, {id: cat, icon: 'tag', color: '#64748b'}]); setActiveCategory(cat); setShowAddCat(false);}} t={t} />}
-                    <div className="px-6 pt-12 flex items-center justify-between mb-4"><button onClick={()=>go('SCAN')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('reviewDetails')}</h2><button onClick={handleSave} disabled={!amount} className="text-[#F472B6] font-bold text-sm disabled:opacity-50">{t('save')}</button></div>
+                    {showAddCat && <AddCategoryModal onClose={()=>setShowAddCat(false)} onAdd={(cat)=>{setUserCategories([...userCategories, {id: cat, icon: 'tag', color: '#64748b'}]); setActiveCategory(cat); setShowAddCat(false);}} t={t} Icon={Icon}/>}
+                    <div className="px-6 pt-12 flex items-center justify-between mb-6"><button onClick={()=>go('SCAN')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24}/></button><h2 className="font-black text-2xl">{t('reviewDetails')}</h2><button onClick={handleSave} disabled={!amount} className="bg-white sticker-border text-[#3B82F6] px-4 py-2 rounded-full font-black text-sm disabled:opacity-50">{t('save')}</button></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-6">
-                        {screenData?.imageUrl && (<div className="w-full h-32 bg-slate-800 rounded-3xl overflow-hidden relative shadow-sm border-2 border-white"><img src={screenData.imageUrl} className="w-full h-full object-cover opacity-60" /><div className="absolute right-3 bottom-3 w-8 h-8 bg-[#F472B6] rounded-full flex items-center justify-center text-white shadow-md"><Icon name="scan-line" size={16}/></div></div>)}
-                        <div className="bg-white p-6 rounded-[36px] shadow-sm border border-slate-100 flex flex-col items-center relative">{screenData?.isAuto && <div className="absolute top-4 right-4 bg-[#FCEAEF] text-[#F472B6] w-6 h-6 rounded-full flex items-center justify-center"><Icon name="sparkles" size={12}/></div>}<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('extractedAmount')}</p><div className="flex items-center gap-1"><span className="text-2xl font-black text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-black text-slate-800 bg-transparent text-center w-full outline-none focus:border-b-2 border-[#F472B6] transition-colors" placeholder="0.00"/></div></div>
-                        <div className="bg-white p-5 rounded-[32px] border border-slate-100 shadow-sm space-y-5">
-                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block">{t('merchant')}</label><div className="flex items-center bg-[#FCEAEF]/30 p-3.5 rounded-2xl mt-1"><Icon name="store" size={18} className="text-[#F472B6] mr-3" /><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-transparent font-bold text-slate-700 text-sm outline-none" placeholder="ระบุชื่อร้านค้า"/></div></div>
+                        {screenData?.imageUrl && (<div className="w-full h-40 bg-white sticker-border rounded-[32px] p-2 flex justify-center items-center"><img src={screenData.imageUrl} className="max-w-full max-h-full object-contain rounded-2xl" /></div>)}
+                        <div className="sticker-card p-8 flex flex-col items-center relative">{screenData?.isAuto && <div className="absolute top-4 right-4 bg-[#FFD84D] sticker-border w-10 h-10 rounded-full flex items-center justify-center"><Icon name="sparkles" size={18}/></div>}<p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t('extractedAmount')}</p><div className="flex items-center gap-2"><span className="text-3xl font-black text-slate-400">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-6xl font-black text-[#1F1F1F] bg-transparent text-center w-full outline-none border-b-4 border-dashed border-slate-200 focus:border-[#3B82F6]" placeholder="0.00"/></div></div>
+                        <div className="sticker-card p-6 space-y-6">
+                            <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchant')}</label><div className="input-box p-4 flex items-center bg-slate-50"><Icon name="store" size={20} className="text-[#3B82F6] mr-3" /><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-transparent font-black text-lg outline-none" placeholder="ระบุชื่อร้านค้า"/></div></div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block">{t('date')}</label><div className="flex items-center bg-slate-50 p-3.5 rounded-2xl mt-1"><Icon name="calendar" size={16} className="text-slate-400 mr-2" /><input value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-slate-700 text-xs outline-none"/></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block">{t('pocketDeducted')}</label><div className="flex items-center bg-slate-50 p-3.5 rounded-2xl mt-1 relative"><Icon name="wallet" size={16} className="text-[#2F80ED] mr-2" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-slate-700 text-xs outline-none appearance-none pr-4"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
+                                <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="input-box p-4 flex items-center bg-slate-50"><Icon name="calendar" size={18} className="text-slate-400 mr-2" /><input value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none"/></div></div>
+                                <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="input-box p-4 flex items-center bg-slate-50 relative"><Icon name="wallet" size={18} className="text-[#3B82F6] mr-2" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none appearance-none pr-4"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
                             </div>
                             <div>
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label>
-                                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full border shrink-0 ${activeCategory === cat.id ? 'bg-[#E2F0E5] text-[#4A7D59]' : 'bg-white text-slate-500'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{!defaultCatIds.includes(cat.id) && (<button onClick={()=>setUserCategories(userCategories.filter(c=>c.id!==cat.id))} className="pr-3 pl-1 hover:text-red-500"><Icon name="x" size={12}/></button>)}</div>))}
-                                    <button onClick={()=>setShowAddCat(true)} className="px-4 py-2 rounded-full text-xs font-bold border border-dashed text-slate-400 shrink-0"><Icon name="plus" size={14}/></button>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-3">{t('category')}</label>
+                                <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full sticker-border shrink-0 transition-transform active:scale-95 ${activeCategory === cat.id ? 'bg-[#3B82F6] text-white' : 'bg-white text-slate-500'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-5 py-3 text-sm font-black flex items-center gap-2"><Icon name={cat.icon} size={18}/> {cat.id}</button>{!defaultCatIds.includes(cat.id) && (<button onClick={()=>setUserCategories(userCategories.filter(c=>c.id!==cat.id))} className="pr-4 pl-1 hover:text-[#FF4D4D]"><Icon name="x" size={16}/></button>)}</div>))}
+                                    <button onClick={()=>setShowAddCat(true)} className="px-5 py-3 rounded-full text-sm font-black border-4 border-dashed border-slate-300 text-slate-400 hover:bg-white shrink-0"><Icon name="plus" size={18}/></button>
                                 </div>
                             </div>
                         </div>
-                        <button disabled={!amount} onClick={handleSave} className="w-full bg-[#FCEAEF] text-[#9D4D63] font-bold py-5 rounded-full shadow-sm active:scale-95 disabled:opacity-50">{t('confirmSave')}</button>
+                        <button disabled={!amount || amount==='0'} onClick={handleSave} className="w-full sticker-btn-red py-6 text-xl tracking-widest disabled:opacity-50 flex justify-center items-center gap-3">{t('confirmSave')} <Icon name="check-circle" size={24}/></button>
                     </div>
                 </div>
             );
         };
 
-        const AddTxScreen = ({ go, onSave, t, pockets, userCategories, setUserCategories, defaultCatIds }) => {
-            const [amount, setAmount] = useState(''); const [notes, setNotes] = useState(''); const [txDate, setTxDate] = useState(new Date().toLocaleDateString('th-TH')); const [activeCategory, setActiveCategory] = useState('Food & Drink'); const [showAddCat, setShowAddCat] = useState(false);
-            const handleSave = () => { const catObj = userCategories.find(c => c.id === activeCategory) || userCategories[0]; onSave({ id: Date.now().toString(), title: notes || t('manual'), amount: Number(amount), category: activeCategory, date: txDate, iconType: 'lucide', icon: catObj.icon, colorType: 'hex', color: catObj.color, notes: notes }); };
+        const AddTxScreen = ({ go, onSave, t, Icon, LoadingOverlay, pockets, userCategories, setUserCategories, defaultCatIds }) => {
+            const [amount, setAmount] = useState(''); const [notes, setNotes] = useState(''); const [txDate, setTxDate] = useState(new Date().toLocaleDateString('th-TH')); const [activeCategory, setActiveCategory] = useState('Food & Drink'); const [saving, setSaving] = useState(false); const [showAddCat, setShowAddCat] = useState(false);
+            const handleSave = async () => { 
+                setSaving(true); 
+                try {
+                    const catObj = userCategories.find(c => c.id === activeCategory) || userCategories[0]; 
+                    await onSave({ id: Date.now().toString(), title: notes || t('manual'), amount: Number(amount), category: activeCategory, date: txDate, iconType: 'lucide', icon: catObj.icon, colorType: 'hex', color: catObj.color, notes: notes }); 
+                } catch(e){ console.error(e); } finally { setSaving(false); }
+            };
 
             return (
-                <div className="flex-1 bg-[#FAFAF9] flex flex-col h-full fade-in relative">
-                    {showAddCat && <AddCategoryModal onClose={()=>setShowAddCat(false)} onAdd={(cat)=>{setUserCategories([...userCategories, {id: cat, icon: 'tag', color: '#64748b'}]); setActiveCategory(cat); setShowAddCat(false);}} t={t} />}
-                    <div className="px-6 pt-12 flex items-center justify-between mb-8"><button onClick={()=>go('SCAN')} className="text-slate-600"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('addTx')}</h2><div className="w-6"></div></div>
+                <div className="flex-1 flex flex-col h-full fade-in relative">
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    {showAddCat && <AddCategoryModal onClose={()=>setShowAddCat(false)} onAdd={(cat)=>{setUserCategories([...userCategories, {id: cat, icon: 'tag', color: '#64748b'}]); setActiveCategory(cat); setShowAddCat(false);}} t={t} Icon={Icon}/>}
+                    <div className="px-6 pt-12 flex items-center justify-between mb-8"><button onClick={()=>go('SCAN')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24}/></button><h2 className="font-black text-2xl">{t('addTx')}</h2><div className="w-12"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-6">
-                        <div className="bg-white p-8 rounded-[36px] text-center border border-slate-100 shadow-sm relative"><div className="absolute top-4 right-4 text-slate-200"><Icon name="activity" size={40}/></div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('amount')}</label><div className="flex justify-center items-center"><span className="text-3xl font-black text-slate-800 mr-1">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00" className="text-6xl font-black text-slate-800 w-48 text-center bg-transparent outline-none"/></div></div>
-                        <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-5">
+                        <div className="sticker-card p-10 text-center relative"><div className="absolute top-4 right-4 text-slate-200"><Icon name="activity" size={48}/></div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">{t('amount')}</label><div className="flex justify-center items-center"><span className="text-4xl font-black text-slate-300 mr-2">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00" className="text-7xl font-black text-[#1F1F1F] w-full max-w-[200px] text-center bg-transparent outline-none border-b-4 border-dashed border-slate-200 focus:border-[#3B82F6] pb-2"/></div></div>
+                        <div className="sticker-card p-6 space-y-6">
                             <div>
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label>
-                                <div className="flex gap-2 flex-wrap">
-                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full border ${activeCategory === cat.id ? 'bg-[#E2F0E5] text-[#4A7D59]' : 'bg-white text-slate-500'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{!defaultCatIds.includes(cat.id) && <button onClick={()=>setUserCategories(userCategories.filter(c=>c.id!==cat.id))} className="pr-3 pl-1 hover:text-red-500"><Icon name="x" size={12}/></button>}</div>))}
-                                    <button onClick={()=>setShowAddCat(true)} className="px-4 py-2 rounded-full text-xs font-bold border border-dashed text-slate-400"><Icon name="plus" size={14}/></button>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-3">{t('category')}</label>
+                                <div className="flex gap-3 flex-wrap">
+                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full sticker-border transition-transform active:scale-95 ${activeCategory === cat.id ? 'bg-[#3B82F6] text-white' : 'bg-white text-slate-500'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-sm font-black flex items-center gap-2"><Icon name={cat.icon} size={16}/> {cat.id}</button>{!defaultCatIds.includes(cat.id) && <button onClick={()=>setUserCategories(userCategories.filter(c=>c.id!==cat.id))} className="pr-3 pl-1 hover:text-[#FF4D4D]"><Icon name="x" size={14}/></button>}</div>))}
+                                    <button onClick={()=>setShowAddCat(true)} className="px-4 py-2 rounded-full text-sm font-black border-4 border-dashed border-slate-300 text-slate-400 hover:bg-white"><Icon name="plus" size={16}/></button>
                                 </div>
                             </div>
-                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block">{t('date')}</label><div className="flex items-center bg-slate-50 p-4 rounded-2xl mt-1"><Icon name="calendar" size={16} className="text-slate-400 mr-2" /><input value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-slate-700 text-sm outline-none"/></div></div>
-                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-1">{t('notes')}</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} className="w-full bg-[#FCEAEF]/30 p-4 rounded-2xl text-sm font-bold text-[#9D4D63] outline-none resize-none h-24" /></div>
+                            <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">{t('date')}</label><div className="input-box p-4 flex items-center"><Icon name="calendar" size={20} className="text-slate-400 mr-3" /><input value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-base outline-none"/></div></div>
+                            <div><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block mb-1">{t('notes')}</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="ระบุบันทึกย่อ..." className="w-full input-box bg-slate-50 p-4 text-base font-bold outline-none resize-none h-28" /></div>
                         </div>
-                        <button disabled={!amount} onClick={handleSave} className="w-full bg-[#FCEAEF] text-[#9D4D63] font-bold py-5 rounded-full shadow-sm disabled:opacity-50">{t('saveTx')}</button>
+                        <button disabled={!amount} onClick={handleSave} className="w-full sticker-btn-red py-6 text-xl tracking-widest disabled:opacity-50">{t('saveTx')}</button>
                     </div>
                 </div>
             );
         };
 
-        const TxDetailScreen = ({ tx, go, t }) => {
+        const TxDetailScreen = ({ tx, go, t, Icon }) => {
             const [viewImage, setViewImage] = useState(false);
             if(!tx) return null;
             return (
-                <div className="p-6 pt-12 flex flex-col h-full bg-[#FAFAF9] fade-in relative">
-                    {viewImage && tx.imageUrl && (<div className="absolute inset-0 bg-black/90 z-[100] flex flex-col fade-in pb-10"><div className="p-6 pt-12 flex justify-between items-center w-full"><button onClick={()=>setViewImage(false)} className="text-white bg-white/20 p-2 rounded-full"><Icon name="x" size={24}/></button></div><div className="flex-1 flex items-center justify-center p-4"><img src={tx.imageUrl} className="max-w-full max-h-full rounded-2xl object-contain shadow-2xl" /></div></div>)}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="text-[#FFB6C1]"><Icon name="arrow-left" size={24}/></button><h2 className="font-bold text-slate-800 text-lg">{t('txDetail')}</h2><div className="w-6"></div></div>
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative">
+                    {viewImage && tx.imageUrl && (<div className="absolute inset-0 bg-black/90 z-[100] flex flex-col fade-in pb-10"><div className="p-6 pt-12 flex justify-between items-center w-full"><button onClick={()=>setViewImage(false)} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center text-[#1F1F1F] active:scale-95"><Icon name="x" size={24}/></button></div><div className="flex-1 flex items-center justify-center p-4"><img src={tx.imageUrl} className="max-w-full max-h-full rounded-[32px] sticker-border object-contain" /></div></div>)}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24}/></button><h2 className="font-black text-2xl">{t('txDetail')}</h2><div className="w-12"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div className="flex flex-col items-center mb-2"><div className="mb-4 shadow-sm"><PocketIcon pocket={tx} size={36} /></div><h1 className="text-4xl font-black text-slate-800 mb-2">-฿{formatMoney(Math.abs(tx.amount))}</h1><p className="font-bold text-slate-500 text-sm text-center">{tx.title || tx.merchant}</p></div>
-                        <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm space-y-5">
-                            <div className="flex justify-between items-center border-b border-slate-50 pb-4"><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('status')}</span><span className="bg-[#E2F0E5] text-[#4A7D59] font-bold text-[10px] px-3 py-1 rounded-full">{t('completed')}</span></div>
-                            <div className="flex justify-between items-center border-b border-slate-50 pb-4"><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('date')}</span><span className="font-bold text-slate-700 text-xs">{tx.date}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('category')}</span><span className="font-bold text-[#4A7D59] bg-[#E2F0E5] px-3 py-1 rounded-full text-[10px] flex items-center gap-1.5"><Icon name={tx.icon||'coffee'} size={12}/> {tx.category}</span></div>
+                        <div className="flex flex-col items-center mb-4"><div className="mb-6"><PocketIcon pocket={tx} size={48} /></div><h1 className="text-6xl font-black mb-4">-{tx.amount > 0 ? '' : ''}฿{formatMoney(Math.abs(tx.amount))}</h1><p className="bg-white sticker-border px-6 py-2 rounded-full font-black text-lg">{tx.title || tx.merchant}</p></div>
+                        <div className="sticker-card p-6 space-y-6">
+                            <div className="flex justify-between items-center border-b-2 border-slate-100 pb-4"><span className="text-xs font-black text-slate-500 uppercase tracking-widest">{t('status')}</span><span className="bg-[#56CC9D] sticker-border text-white font-black text-xs px-4 py-2 rounded-full flex items-center gap-2"><Icon name="check" size={14}/>{t('completed')}</span></div>
+                            <div className="flex justify-between items-center border-b-2 border-slate-100 pb-4"><span className="text-xs font-black text-slate-500 uppercase tracking-widest">{t('date')}</span><span className="font-bold text-base">{tx.date}</span></div>
+                            <div className="flex justify-between items-center"><span className="text-xs font-black text-slate-500 uppercase tracking-widest">{t('category')}</span><span className="font-black bg-[#3B82F6] text-white px-4 py-2 rounded-full text-xs flex items-center gap-2 sticker-border"><Icon name={tx.icon||'coffee'} size={14}/> {tx.category}</span></div>
                         </div>
-                        {tx.notes && (<div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm"><h4 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1"><Icon name="align-left" size={14}/> {t('notes')}</h4><p className="text-sm font-bold text-slate-700">{tx.notes}</p></div>)}
-                        <div className="flex gap-4">
-                            <button onClick={()=>go('SPLIT_BILL', null, tx)} className="flex-1 bg-[#FCEAEF] text-[#9D4D63] font-bold py-4 rounded-[24px] shadow-sm flex justify-center gap-2"><Icon name="split-square-horizontal" size={18}/> {t('splitBill')}</button>
-                            {tx.imageUrl && (<button onClick={()=>setViewImage(true)} className="flex-1 bg-white border border-slate-200 text-slate-600 font-bold py-4 rounded-[24px] shadow-sm flex justify-center gap-2"><Icon name="image" size={18}/> {t('viewReceipt')}</button>)}
+                        {tx.notes && (<div className="sticker-card p-6"><h4 className="text-[10px] font-black text-slate-400 uppercase mb-3 flex items-center gap-2 tracking-widest"><Icon name="align-left" size={16}/> {t('notes')}</h4><p className="text-base font-bold bg-slate-50 p-4 rounded-2xl">{tx.notes}</p></div>)}
+                        <div className="flex gap-4 pt-4">
+                            <button onClick={()=>go('SPLIT_BILL', null, tx)} className="flex-1 bg-white text-[#1F1F1F] font-black py-5 rounded-full sticker-border flex items-center justify-center gap-3 active:scale-95 transition-transform"><Icon name="split-square-horizontal" size={20}/> {t('splitBill')}</button>
+                            {tx.imageUrl && (<button onClick={()=>setViewImage(true)} className="flex-1 sticker-btn-blue font-black py-5 rounded-full flex items-center justify-center gap-3"><Icon name="image" size={20}/> {t('viewReceipt')}</button>)}
                         </div>
                     </div>
                 </div>
             );
         };
 
-        const SplitBillScreen = ({ tx, go, t }) => {
+        const SplitBillScreen = ({ tx, go, t, Icon }) => {
             const billTotal = Number(tx?.amount || 0);
             const [friends, setFriends] = useState([{id:1, name:'ฉัน', amount:billTotal/2}, {id:2, name:'เพื่อน 1', amount:billTotal/2}]);
-            const currentSum = friends.reduce((a,c)=>a+Number(c.amount), 0); const isMatch = Math.abs(currentSum - billTotal) < 0.01;
+            const currentSum = friends.reduce((a,c)=>a+Number(c.amount), 0);
+            const isMatch = Math.abs(currentSum - billTotal) < 0.01;
+
             const updateAmount = (id, val) => setFriends(friends.map(f=>f.id===id?{...f, amount:val}:f));
 
             return (
-                <div className="p-6 pt-10 flex flex-col h-full bg-[#F7F9FC] fade-in">
-                    <div className="flex items-center mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button><h2 className="font-black text-lg ml-4">{t('splitBill')}</h2></div>
-                    <div className="bg-white p-6 rounded-[36px] shadow-sm border border-slate-100 text-center mb-6"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('totalAmount')}</p><h1 className="text-4xl font-black text-slate-800 my-2">฿{formatMoney(billTotal)}</h1><div className="flex justify-between items-center mt-4 px-4 bg-slate-50 py-3 rounded-2xl"><span className="text-xs font-bold text-slate-500">แบ่งแล้ว: ฿{formatMoney(currentSum)}</span><span className={`text-xs font-black ${isMatch?'text-green-500':'text-red-500'}`}>เหลือ: ฿{formatMoney(Math.max(billTotal-currentSum, 0))}</span></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-6">
-                        {friends.map(f => (<div key={f.id} className="bg-white p-4 rounded-[24px] border border-slate-100 flex items-center shadow-sm"><div className="flex-1 ml-3 font-bold text-slate-700 text-sm">{f.name}</div><div className="bg-slate-50 px-3 py-2 rounded-xl flex items-center"><span className="text-xs font-bold text-slate-400">฿</span><input type="number" value={f.amount} onChange={e=>updateAmount(f.id, e.target.value)} className="w-16 bg-transparent text-right font-black text-[#2F80ED] outline-none"/></div>{f.name!=='ฉัน' && <button onClick={()=>setFriends(friends.filter(x=>x.id!==f.id))} className="ml-2 text-slate-300 hover:text-red-500 p-2"><Icon name="x" size={18}/></button>}</div>))}
-                        <button onClick={()=>setFriends([...friends,{id:Date.now(), name:`เพื่อน ${friends.length+1}`, amount:0}])} className="w-full py-4 border-2 border-dashed border-[#2F80ED]/30 rounded-[24px] text-[#2F80ED] font-black flex items-center justify-center gap-2"><Icon name="plus" size={18}/> {t('addFriend')}</button>
+                <div className="p-6 pt-10 flex flex-col h-full fade-in">
+                    <div className="flex items-center mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-12 h-12 bg-white sticker-border rounded-full flex items-center justify-center active:scale-95"><Icon name="arrow-left" size={24}/></button><h2 className="font-black text-2xl ml-4">{t('splitBill')}</h2></div>
+                    <div className="sticker-card p-8 text-center mb-6">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('totalAmount')}</p><h1 className="text-5xl font-black text-[#1F1F1F] my-2">฿{formatMoney(billTotal)}</h1>
+                        <div className="flex justify-between items-center mt-4 px-4 bg-slate-50 py-4 rounded-2xl border-2 border-slate-100"><span className="text-sm font-bold text-slate-500">แบ่งแล้ว: ฿{formatMoney(currentSum)}</span><span className={`text-sm font-black ${isMatch?'text-[#56CC9D]':'text-[#FF4D4D]'}`}>เหลือ: ฿{formatMoney(Math.max(billTotal-currentSum, 0))}</span></div>
                     </div>
-                    <button disabled={!isMatch} onClick={()=>go('MAIN','HISTORY')} className={`w-full py-5 rounded-[24px] font-black text-white shadow-xl ${isMatch?'bg-[#2F80ED]':'bg-slate-300'}`}>{t('confirmSplit')}</button>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-6">
+                        {friends.map(f => (
+                            <div key={f.id} className="sticker-card p-4 flex items-center">
+                                <div className="flex-1 ml-3 font-black text-lg">{f.name}</div>
+                                <div className="input-box px-3 py-2 flex items-center"><span className="text-sm font-black text-slate-400 mr-1">฿</span><input type="number" value={f.amount} onChange={e=>updateAmount(f.id, e.target.value)} className="w-20 bg-transparent text-right font-black text-[#3B82F6] text-lg outline-none"/></div>
+                                {f.name!=='ฉัน' && <button onClick={()=>setFriends(friends.filter(x=>x.id!==f.id))} className="ml-3 text-slate-400 hover:text-[#FF4D4D]"><Icon name="x" size={20}/></button>}
+                            </div>
+                        ))}
+                        <button onClick={()=>setFriends([...friends,{id:Date.now(), name:`เพื่อน ${friends.length+1}`, amount:0}])} className="w-full py-5 border-4 border-dashed border-slate-300 rounded-[32px] text-slate-500 font-black flex items-center justify-center gap-3 hover:bg-white"><Icon name="plus" size={20}/> {t('addFriend')}</button>
+                    </div>
+                    <button disabled={!isMatch} onClick={()=>go('MAIN','HISTORY')} className={`w-full py-6 rounded-full font-black text-xl tracking-widest shadow-lg active:scale-95 transition-transform ${isMatch?'sticker-btn-blue':'bg-slate-300 text-slate-500'}`}>{t('confirmSplit')}</button>
                 </div>
             );
         };
@@ -940,7 +1112,7 @@
         const App = () => {
             const [isAuthReady, setIsAuthReady] = useState(false); const [user, setUser] = useState(null);
             const [screen, setScreen] = useState('SIGN_IN'); const [tab, setTab] = useState('HOME'); const [screenData, setScreenData] = useState(null);
-            const [lang, setLang] = useState('EN'); const [themeMode, setThemeMode] = useState('Light'); const [reduceMotion, setReduceMotion] = useState(false);
+            const [lang, setLang] = useState('TH'); const [themeMode, setThemeMode] = useState('Light'); const [reduceMotion, setReduceMotion] = useState(false);
             const [pinCode, setPinCode] = useState(localStorage.getItem('cozy_pin')); const [isLocked, setIsLocked] = useState(!!localStorage.getItem('cozy_pin')); const [showPinModal, setShowPinModal] = useState(false);
             const [txs, setTxs] = useState([]); const [pockets, setPockets] = useState([]); const [dismissedNotifs, setDismissedNotifs] = useState([]);
             const defaultCatIds = ['Food & Drink', 'Shopping', 'Transport', 'Bills'];
@@ -953,7 +1125,7 @@
                 const unsub = auth.onAuthStateChanged(u => {
                     setIsAuthReady(true);
                     if(u) {
-                        db.collection('users').doc(u.uid).onSnapshot(doc => { const d = doc.data() || {}; setUser({ uid: u.uid, email: u.email, displayName: d.displayName || u.email.split('@')[0], photoURL: d.photoURL || 'https://ui-avatars.com/api/?name=U&background=F472B6&color=fff', bio: d.bio || '' }); });
+                        db.collection('users').doc(u.uid).onSnapshot(doc => { const d = doc.data() || {}; setUser({ uid: u.uid, email: u.email, displayName: d.displayName || u.email.split('@')[0], photoURL: d.photoURL || 'https://ui-avatars.com/api/?name=U&background=3B82F6&color=fff', bio: d.bio || '' }); });
                         if(!isLocked) go('MAIN', 'HOME');
                         db.collection('users').doc(u.uid).collection('transactions').orderBy('timestamp', 'desc').onSnapshot(snap => setTxs(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
                         db.collection('users').doc(u.uid).collection('pockets').onSnapshot(snap => setPockets(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
@@ -965,6 +1137,21 @@
                 return unsub;
             }, [go, isLocked]);
 
+            const handleResetData = async () => {
+                if(!window.confirm(t('confirmReset'))) return;
+                try {
+                    if (user && user.uid !== 'mock-uid') {
+                        const tSnap = await db.collection('users').doc(user.uid).collection('transactions').get();
+                        const pSnap = await db.collection('users').doc(user.uid).collection('pockets').get();
+                        const batch = db.batch();
+                        tSnap.docs.forEach(d => batch.delete(d.ref));
+                        pSnap.docs.forEach(d => batch.delete(d.ref));
+                        await batch.commit();
+                    } else { setTxs([]); setPockets([]); }
+                    alert(t('resetSuccess')); go('MAIN', 'HOME');
+                } catch(e) { console.error(e); }
+            };
+
             const safeToSpend = useMemo(() => pockets.reduce((a,c) => a + Number(c.balance), 0), [pockets]);
             const notifications = useMemo(() => {
                 const notifs = [];
@@ -974,13 +1161,13 @@
                 return notifs.filter(n => !dismissedNotifs.includes(n.id));
             }, [safeToSpend, pockets, txs, t, dismissedNotifs]);
 
-            if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-[#0f172a] text-[#F472B6]"><Icon name="loader-2" size={48} className="animate-spin"/></div>;
-            if (isLocked) return <div className="app-container bg-[#FCFBFA]"><LockScreen Icon={Icon} correctPin={pinCode} onUnlock={()=>{ setIsLocked(false); go(user?'MAIN':'SIGN_IN', user?'HOME':null); }} /></div>;
+            if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-[#1F1F1F] text-[#FFD84D]"><Icon name="loader-2" size={48} className="animate-spin"/></div>;
+            if (isLocked) return <div className="app-container"><LockScreen Icon={Icon} correctPin={pinCode} onUnlock={()=>{ setIsLocked(false); go(user?'MAIN':'SIGN_IN', user?'HOME':null); }} /></div>;
 
-            const p = { user, setUser, go, t, lang, setLang, themeMode, setThemeMode, reduceMotion, setReduceMotion, pinCode, setPinCode, showPinModal, setShowPinModal, txs, setTxs, pockets, setPockets, screenData, Icon, LoadingOverlay, translateAuthError, visibleNotifications: notifications, clearAllNotifs: ()=>setDismissedNotifs(notifications.map(n=>n.id)), safeToSpend, db, userCategories, setUserCategories, defaultCatIds };
+            const p = { user, setUser, go, t, lang, setLang, themeMode, setThemeMode, reduceMotion, setReduceMotion, pinCode, setPinCode, showPinModal, setShowPinModal, txs, setTxs, pockets, setPockets, screenData, Icon, LoadingOverlay, translateAuthError, visibleNotifications: notifications, clearAllNotifs: ()=>setDismissedNotifs(notifications.map(n=>n.id)), safeToSpend, db, userCategories, setUserCategories, defaultCatIds, onResetData: handleResetData };
 
             return (
-                <div className={`app-container ${reduceMotion?'no-motion':''} ${themeMode==='Dark'?'theme-dark':'bg-[#FAFAF9]'}`}>
+                <div className={`app-container ${reduceMotion?'no-motion':''} ${themeMode==='Dark'?'theme-dark':''}`}>
                     {screen === 'SIGN_IN' && <LoginScreen {...p} />}
                     {screen === 'SIGN_UP' && <SignUpScreen {...p} />}
                     {screen === 'FORGOT_PASS' && <ForgotScreen {...p} />}
@@ -995,43 +1182,45 @@
                     {screen === 'NOTIFICATIONS' && <NotificationsScreen {...p} />}
                     {screen === 'SCAN' && <ScanScreen {...p} onNext={(d)=>go('REVIEW', null, d)} />}
                     {screen === 'REVIEW' && <ReviewScreen {...p} onConfirm={async (d)=>{ 
-                        if(user && user.uid !== 'mock-uid') {
-                            await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
-                            if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: pkt.balance - d.amount }); }
-                        } else {
-                            setTxs([{id: Date.now().toString(), ...d}, ...txs]);
-                            if (d.pocketId && d.pocketId !== 'none') setPockets(pockets.map(pk => pk.id === d.pocketId ? {...pk, balance: pk.balance - d.amount} : pk));
-                        }
-                        go('MAIN','HISTORY'); 
+                        try {
+                            if(user && user.uid !== 'mock-uid') {
+                                await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
+                                if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: pkt.balance - d.amount }); }
+                            } else {
+                                setTxs([{id: Date.now().toString(), ...d}, ...txs]);
+                                if (d.pocketId && d.pocketId !== 'none') setPockets(pockets.map(pk => pk.id === d.pocketId ? {...pk, balance: pk.balance - d.amount} : pk));
+                            }
+                            go('MAIN','HISTORY'); 
+                        } catch (e) { console.error(e); }
                     }} />}
                     {screen === 'ADD_TX' && <AddTxScreen {...p} onSave={async (d)=>{ 
-                        if(user && user.uid !== 'mock-uid') {
-                            await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
-                            if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: pkt.balance - d.amount }); }
-                        } else {
-                            setTxs([{id: Date.now().toString(), ...d}, ...txs]); 
-                            if (d.pocketId && d.pocketId !== 'none') setPockets(pockets.map(pk => pk.id === d.pocketId ? {...pk, balance: pk.balance - d.amount} : pk));
-                        }
-                        go('MAIN','HISTORY'); 
+                        try {
+                            if(user && user.uid !== 'mock-uid') {
+                                await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
+                                if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: pkt.balance - d.amount }); }
+                            } else {
+                                setTxs([{id: Date.now().toString(), ...d}, ...txs]); 
+                                if (d.pocketId && d.pocketId !== 'none') setPockets(pockets.map(pk => pk.id === d.pocketId ? {...pk, balance: pk.balance - d.amount} : pk));
+                            }
+                            go('MAIN','HISTORY'); 
+                        } catch(e) { console.error(e); }
                     }} />}
                     {screen === 'TX_DETAIL' && <TxDetailScreen {...p} tx={screenData || txs[0]} />}
                     {screen === 'SPLIT_BILL' && <SplitBillScreen {...p} tx={screenData || txs[0]} />}
                     {screen === 'ADD_POCKET' && <AddPocketScreen {...p} onSave={async (pData)=>{ 
-                        if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').add({...pData, timestamp: firebase.firestore.FieldValue.serverTimestamp()}); } else setPockets([...pockets, {id: Date.now().toString(), ...pData}]); 
-                        go('MAIN', 'POCKETS'); 
+                        try { if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').add({...pData, timestamp: firebase.firestore.FieldValue.serverTimestamp()}); } else setPockets([...pockets, {id: Date.now().toString(), ...pData}]); go('MAIN', 'POCKETS'); } catch(e){}
                     }} />}
                     {screen === 'POCKET_DETAILS' && <PocketDetailsScreen {...p} pocket={screenData || pockets[0]} />}
                     {screen === 'POCKET_SETTINGS' && <PocketSettingsScreen {...p} pocket={screenData} onUpdate={async (id, data)=>{
-                        if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').doc(id).set(data, {merge: true}); } else setPockets(pockets.map(p => p.id === id ? {...p, ...data} : p));
-                        go('POCKET_DETAILS', null, {...screenData, ...data});
+                        try { if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').doc(id).set(data, {merge: true}); } else setPockets(pockets.map(p => p.id === id ? {...p, ...data} : p)); go('POCKET_DETAILS', null, {...screenData, ...data}); } catch(e){}
                     }} onDelete={async (id)=>{
-                        if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').doc(id).delete(); } else setPockets(pockets.filter(p => p.id !== id));
-                        go('MAIN', 'POCKETS');
+                        try { if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').doc(id).delete(); } else setPockets(pockets.filter(p => p.id !== id)); go('MAIN', 'POCKETS'); } catch(e){}
                     }} />}
                     {screen === 'EDIT_PROFILE' && <EditProfileScreen {...p} />}
                     {screen === 'SECURITY' && <SecuritySettingsScreen {...p} />}
                     {screen === 'LANGUAGE' && <LanguageSettingsScreen {...p} />}
                     {screen === 'THEME' && <ThemeSettingsScreen {...p} />}
+                    {screen === 'NOTIFICATION_SETTINGS' && <NotificationSettingsScreen {...p} />}
                     {showPinModal && <PinPadModal onClose={()=>setShowPinModal(false)} onSave={(pin)=>{ setPinCode(pin); localStorage.setItem('cozy_pin', pin); setShowPinModal(false); }} Icon={Icon} isSet={!!pinCode} t={t} />}
                 </div>
             );
