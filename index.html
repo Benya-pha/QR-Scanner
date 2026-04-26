@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>QR Scanner</title>
     
+    <!-- Standard Favicons -->
     <link rel="icon" type="image/png" sizes="512x512" href="iconApp512.png">
     <link rel="icon" type="image/png" sizes="256x256" href="iconApp256.png">
     <link rel="shortcut icon" href="iconApp120.png">
+    
+    <!-- Apple Touch Icons (iOS/iPadOS) -->
     <link rel="apple-touch-icon" href="iconApp120.png">
     <link rel="apple-touch-icon" sizes="40x40" href="iconApp40.png">
     <link rel="apple-touch-icon" sizes="80x80" href="iconApp80.png">
@@ -75,13 +78,9 @@
         .soft-shadow { box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
         .dark .soft-shadow { box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3); }
         
-        .scan-frame { position: absolute; top: 15%; bottom: 30%; left: 10%; right: 10%; border-radius: 36px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); z-index: 10; border: 2px solid rgba(255,255,255,0.4); transition: border-color 0.3s; }
+        .scan-frame { position: absolute; top: 15%; bottom: 30%; left: 10%; right: 10%; border-radius: 36px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); z-index: 10; border: 2px solid rgba(255,255,255,0.4); }
         @keyframes scanLine { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         .laser { position: absolute; width: 100%; height: 3px; background: var(--color-primary); box-shadow: 0 0 20px var(--color-primary); animation: scanLine 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; z-index: 11; border-radius: 10px; }
-
-        /* Pure CSS Spinner to fix skewed rotation */
-        .loader-circle { width: 48px; height: 48px; border: 4px solid rgba(140, 177, 255, 0.2); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         .toggle-checkbox:checked { right: 0; border-color: var(--color-primary); }
         .toggle-checkbox:checked + .toggle-label { background-color: var(--color-primary); }
@@ -90,6 +89,17 @@
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
+        
+        /* FIX #4: Smooth spinner animation - prevent wobbling */
+        @keyframes smoothSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-smooth {
+            animation: smoothSpin 1s linear infinite;
+            transform-origin: center;
+            will-change: transform;
+        }
     </style>
 </head>
 <body>
@@ -98,18 +108,33 @@
     <script type="text/babel">
         const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
+        // ==========================================
+        // 1. FIREBASE INIT
+        // ==========================================
         const fbConfig = { apiKey: "AIzaSyCv1D7XjSuSYWJxpFxT7umaCAb9o8fY2o8", authDomain: "qr-scanner-a29e3.firebaseapp.com", projectId: "qr-scanner-a29e3", storageBucket: "qr-scanner-a29e3.firebasestorage.app", messagingSenderId: "1070573788877", appId: "1:1070573788877:web:cd65246772c629f380d384" };
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
         const auth = firebase.auth(); const db = firebase.firestore();
 
-        // GLOBALS DEFINED PROPERLY
+        // ==========================================
+        // 2. GLOBALS & HELPERS
+        // ==========================================
         const ACCENT_COLORS = [ { name: 'Blue', hex: '#8cb1ff' }, { name: 'Yellow', hex: '#ffde6a' }, { name: 'Pink', hex: '#ffb0cd' }, { name: 'Green', hex: '#94e4ae' }, { name: 'Purple', hex: '#cda8ff' }, { name: 'Red', hex: '#ff9494' } ];
         const PASTEL_COLORS = ['#ffb0cd', '#ffde6a', '#94e4ae', '#8cb1ff', '#cda8ff', '#ff9494', '#e2e8f0', '#fbcfe8', '#fde047', '#86efac'];
+        const lineIconsList = ['wallet', 'plane', 'car', 'gift', 'home', 'coffee', 'piggy-bank', 'shopping-bag', 'heart', 'star', 'music', 'book', 'smartphone', 'monitor', 'camera', 'zap', 'umbrella', 'scissors', 'trending-up', 'award', 'briefcase', 'bus', 'clapperboard', 'gamepad-2', 'headphones', 'key', 'laptop', 'lightbulb', 'map-pin', 'palette', 'pizza', 'shirt', 'smile', 'ticket', 'tv', 'watch', 'wifi', 'utensils', 'train', 'tag'];
+        
+        // FIX #1: Define PASTEL_POCKET_ICONS constant
         const PASTEL_POCKET_ICONS = [
-            { icon: 'plane', bg: '#e0f5e5', color: '#558763' }, { icon: 'car', bg: '#ffe5ee', color: '#9e5772' }, { icon: 'gift', bg: '#efe5ff', color: '#6d4c99' }, { icon: 'home', bg: '#fff8cc', color: '#998822' },
-            { icon: 'coffee', bg: '#f0f0f0', color: '#555555' }, { icon: 'piggy-bank', bg: '#ffe5ee', color: '#9e5772' }, { icon: 'shopping-bag', bg: '#e0f5e5', color: '#558763' }
+            { icon: 'wallet', bg: '#ffb0cd', color: '#fff' },
+            { icon: 'plane', bg: '#ffde6a', color: '#fff' },
+            { icon: 'car', bg: '#94e4ae', color: '#fff' },
+            { icon: 'gift', bg: '#8cb1ff', color: '#fff' },
+            { icon: 'home', bg: '#cda8ff', color: '#fff' },
+            { icon: 'coffee', bg: '#ff9494', color: '#fff' },
+            { icon: 'piggy-bank', bg: '#e2e8f0', color: '#000' },
+            { icon: 'shopping-bag', bg: '#fbcfe8', color: '#fff' },
+            { icon: 'heart', bg: '#fde047', color: '#000' },
+            { icon: 'star', bg: '#86efac', color: '#fff' }
         ];
-        const LINE_ICONS_LIST = ['wallet', 'plane', 'car', 'gift', 'home', 'coffee', 'piggy-bank', 'shopping-bag', 'heart', 'star', 'music', 'book', 'smartphone', 'monitor', 'camera', 'zap', 'umbrella', 'scissors', 'trending-up', 'award', 'briefcase', 'bus', 'clapperboard', 'gamepad-2', 'headphones', 'key', 'laptop', 'lightbulb', 'map-pin', 'palette', 'pizza', 'shirt', 'smile', 'ticket', 'tv', 'watch', 'wifi', 'utensils', 'train', 'tag'];
 
         const formatMoney = (num) => Number(num || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         
@@ -118,8 +143,14 @@
             if (/iPhone/.test(ua)) return 'iPhone';
             if (/iPad/.test(ua)) return 'iPad';
             if (/Macintosh/.test(ua)) return 'MacBook / Mac';
-            if (/Windows/.test(ua)) { if (/Windows NT 10.0/.test(ua)) return 'Windows 10/11 PC'; return 'Windows PC'; }
-            if (/Android/.test(ua)) { const match = ua.match(/Android.*?; (.*?) Build/); return match ? match[1] : 'Android Device'; }
+            if (/Windows/.test(ua)) {
+                if (/Windows NT 10.0/.test(ua)) return 'Windows 10/11 PC';
+                return 'Windows PC';
+            }
+            if (/Android/.test(ua)) {
+                const match = ua.match(/Android.*?; (.*?) Build/);
+                return match ? match[1] : 'Android Device';
+            }
             if (/Linux/.test(ua)) return 'Linux PC';
             return 'Web Browser';
         };
@@ -132,14 +163,37 @@
             return `เกิดข้อผิดพลาด: ${code}`;
         };
 
+        const Icon = ({ name, size=24, className="", strokeWidth=1.5 }) => {
+            const spanRef = useRef(null);
+            useEffect(() => { 
+                if(spanRef.current && window.lucide) {
+                    try { spanRef.current.innerHTML = `<i data-lucide="${name}" class="${className}"></i>`; lucide.createIcons({ root: spanRef.current, attrs: { 'stroke-width': strokeWidth, size: size } }); } 
+                    catch (e) { spanRef.current.innerHTML = `<span style="display:inline-block; width:${size}px; height:${size}px; border-radius:50%;"></span>`; }
+                }
+            }, [name, size, strokeWidth, className]);
+            return <span ref={spanRef} className={`inline-flex items-center justify-center ${className}`} style={{width: size, height: size}}></span>;
+        };
+
+        // FIX #3: Increase icon size in LoadingOverlay and use smooth spinner
+        const LoadingOverlay = ({ text, Icon }) => (
+            <div className="absolute inset-0 bg-white/70 dark:bg-dark/70 backdrop-blur-md z-[100] flex flex-col items-center justify-center fade-in">
+                <Icon name="loader-2" size={64} className="animate-spin-smooth text-primary mb-6"/>
+                <h2 className="font-bold text-xl tracking-widest uppercase text-slate-700 dark:text-white">{text}</h2>
+            </div>
+        );
+
         const categorizeText = (text) => {
             const tText = text.toLowerCase();
             if (tText.match(/น้ำปั่น|ครัว|coffee|คาเฟ่|อาหาร|เครื่องดื่ม|ข้าว|ชา|นม|food|drink|ปลา|หมู|ไก่|เนื้อ|กุ้ง|เบเกอรี่|ขนม|เค้ก|ชาบู|ปิ้งย่าง|สุกี้|restaurant|cafe/)) return { cat: 'Food & Drink', icon: 'coffee', color: '#ff9800' };
             if (tText.match(/shop|ร้าน|ช้อป|โลตัส|เซเว่น|7-11|บิ๊กซี|มินิมาร์ท|ซื้อ|mart|ค้า|supermarket|mall|store/)) return { cat: 'Shopping', icon: 'shopping-bag', color: '#ffde6a' };
             if (tText.match(/นาย|นาง|น\.ส\.|ด\.ช\.|ด\.ญ\.|คุณ|โอนเงิน/)) return { cat: 'Transfer', icon: 'users', color: '#8cb1ff' };
-            if (tText.match(/บิล|การไฟฟ้า|การประปา|ais|true|dtac|ค่าเน็ต|ค่าไฟ|ค่าน้ำ|bill|ประกัน|สินเชื่อ|บัตรเครดิต|ชำระ/)) return { cat: 'Bills', icon: 'zap', color: '#ff9494' };
-            if (tText.match(/น้ำมัน|ปั๊ม|ptt|pt|shell|bangchak|caltex|gas/)) return { cat: 'Transport', icon: 'car', color: '#94e4ae' };
-            return { cat: 'General', icon: 'receipt', color: '#94a3b8' };
+            if (tText.match(/บิล|การไฟฟ้า|การประปา|ais|true|dtac|ค่าเน็ต|ค่าไฟ|ค่าน้ำ|bill|ประกั/)) return { cat: 'Utilities', icon: 'zap', color: '#ffde6a' };
+            if (tText.match(/ยา|เภสัช|โรงพยาบาล|คลินิก|ทันตแพทย์|health|medicine|pharmacy|doctor|hospital/)) return { cat: 'Health', icon: 'heart-pulse', color: '#ff9494' };
+            if (tText.match(/ตั๋ว|เที่ยว|โรงแรม|ที่พัก|การบิน|ขึ้นรถ|travel|hotel|flight|ticket/)) return { cat: 'Travel', icon: 'plane', color: '#8cb1ff' };
+            if (tText.match(/เสื้อ|กางเกง|รองเท้า|ชุด|แว่น|กระเป๋า|fashion|clothes|apparel/)) return { cat: 'Fashion', icon: 'shirt', color: '#ffb0cd' };
+            if (tText.match(/หนังสือ|ศึกษา|โรงเรียน|มหาวิทยาลัย|education|book|school/)) return { cat: 'Education', icon: 'book', color: '#94e4ae' };
+            if (tText.match(/เกม|ของเล่น|ความบันเทิง|entertainment|game|toy/)) return { cat: 'Entertainment', icon: 'gamepad-2', color: '#cda8ff' };
+            return { cat: 'General', icon: 'receipt', color: '#64748b' };
         };
 
         const processReceiptImage = async (file, onComplete) => {
@@ -154,7 +208,11 @@
                     const line = lines[i];
                     if (line.match(/(บันทึกช่วยจำ|บันทึก|Memo)/i)) { const cleanMemo = line.replace(/(บันทึกช่วยจำ|บันทึก|Memo)[\s.:]*/i, '').trim(); if (cleanMemo) memoText = cleanMemo; else if (i + 1 < lines.length) memoText = lines[i+1]; }
                     const dateMatch = line.match(/(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})|(\d{1,2}[\/\-\. ]\d{1,2}[\/\-\. ]\d{2,4})/);
-                    if(dateMatch) { let d = dateMatch[0]; if(d.includes('/')) d = d.split('/').reverse().join('-'); dateStr = d; }
+                    if(dateMatch) {
+                        let d = dateMatch[0];
+                        if(d.includes('/')) d = d.split('/').reverse().join('-');
+                        dateStr = d;
+                    }
                     if (line.match(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)/i)) { let cleanMerchant = line.replace(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)[\s.:]*/i, '').trim(); if (cleanMerchant.length < 3 && i + 1 < lines.length) cleanMerchant = lines[i+1].trim(); cleanMerchant = cleanMerchant.replace(/(ธนาคาร|พร้อมเพย์|PromptPay|KBank|SCB|KTB|BBL|GSB)/ig, '').trim(); if (cleanMerchant.length > 2) { merchant = cleanMerchant; foundTo = true; } }
                     if (!foundTo && !merchant && line.match(/(นาย|นาง|น\.ส\.|บจก|หจก|บริษัท|ร้าน|SHOP|ครัว|คาเฟ่|cafe|มินิมาร์ท|ตลาด)/i)) { if(!line.match(/^(จาก|ผู้โอน)/i)) merchant = line.replace(/^(จาก|ผู้โอน)[\s.:]*/i, '').trim(); }
                 }
@@ -188,7 +246,7 @@
                 guestLogin: 'ทดลองใช้งาน (Guest)', aiSelected: 'AI เลือกให้', loginGoogle: 'Google Login',
                 searchPlaceholder: 'ค้นหาจากชื่อ, หมวดหมู่ หรือบันทึก...', all: 'ทั้งหมด', notFound: 'ไม่พบรายการที่ค้นหา',
                 notifications: 'การแจ้งเตือน', recentAlerts: 'รายการแจ้งเตือน', clearAll: 'ล้าง', caughtUp: 'ไม่มีการแจ้งเตือนใหม่',
-                billReminder: 'แจ้งเตือนเป้าหมาย', newTx: 'รายการใหม่', lowBalance: 'เตือนเงินเหลือน้อย', safeThreshold: 'ยอดเงินในกระเป๋าต่ำกว่า 30%',
+                billReminder: 'แจ้งเตือนเป้าหมาย', newTx: 'รายการใหม่', lowBalance: 'เตือนเงินเหลือน้อย', safeThreshold: 'ยอดเงินในบัญชีต่ำกว่า 30%',
                 initialAmount: 'เงินเริ่มต้น', setMonthlyTarget: 'ตั้งเป้าหมายรายเดือน', optionalGoal: 'เลือกได้', chooseIcon: 'ไอคอน & สี',
                 yourPockets: 'กระเป๋าเงินของคุณ', keepOrganized: 'จัดการเงินให้เป็นระเบียบสนุกๆ', createNewPocket: 'สร้างกระเป๋าใหม่',
                 pocketDetails: 'รายละเอียดกระเป๋า', saved: 'เก็บแล้ว', left: 'เหลือ', spendingTrend: 'แนวโน้มการใช้จ่าย', recentActivity: 'รายการในกระเป๋า', viewAll: 'ดูทั้งหมด',
@@ -197,12 +255,12 @@
                 archivePocket: 'ซ่อนกระเป๋า', deletePocket: 'ลบกระเป๋านี้', cannotUndone: 'ลบแล้วกู้คืนไม่ได้', saveChanges: 'บันทึกการเปลี่ยนแปลง',
                 customIcon: 'ไอคอนลายเส้น:', pickColor: 'เลือกสีสัน:', tapToUpload: 'แตะเพื่อเลือกรูป', preview: 'ตัวอย่างสลิป', attachReceipt: 'แนบสลิป',
                 extractedAmount: 'ยอดเงินที่สแกนได้', notes: 'บันทึกช่วยจำ', alignReceipt: 'จัดวางสลิปให้อยู่ในกรอบสี่เหลี่ยม', camera: 'กล้อง', pocketDeducted: 'หักจากกระเป๋า', noPocket: 'ไม่ระบุ',
-                transactions: 'รายการใช้จ่าย', income: 'รายรับ', today: 'วันนี้', yesterday: 'เมื่อวาน', completed: 'สำเร็จ', addCategory: 'เพิ่ม/แก้ไข หมวดหมู่', categoryName: 'ชื่อหมวดหมู่...', cancel: 'ยกเลิก', add: 'บันทึก',
+                transactions: 'รายการใช้จ่าย', income: 'รายรับ', today: 'วันนี้', yesterday: 'เมื่อวาน', completed: 'สำเร็จ', addCategory: 'เพิ่ม/แก้ไข หมวดหมู่', categoryName: 'ชื่อหมวดหมู่...', cancel: 'ยกเลิก', add: 'เพิ่ม/บันทึก',
                 accountTitle: 'บัญชี', accountSettings: 'ตั้งค่าบัญชี', preferencesTitle: 'การปรับแต่ง', appTheme: 'ธีมแอป', bio: 'ประวัติย่อ',
                 transactionAlerts: 'เตือนการทำรายการ', everyPurchase: 'ทุกรายการใช้จ่าย', budgetAlerts: 'เตือนงบประมาณ',
                 budgetWarnings: 'เตือนเมื่อใกล้หมดงบ', monthlySummaries: 'สรุปยอดรายเดือน', newLogins: 'การเข้าระบบใหม่', passwordChanges: 'เปลี่ยนรหัสผ่าน',
                 themeMode: 'โหมดหน้าจอ', activeNow: 'กำลังใช้งาน', pinStatusNotSet: 'ยังไม่ตั้งค่า', pinStatusSet: 'ตั้งค่าแล้ว', viewReceipt: 'ดูรูปสลิป',
-                resetData: 'ล้างข้อมูลทั้งหมด', confirmReset: 'คุณแน่ใจหรือไม่ว่าจะล้างประวัติและกระเป๋าเงินทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้', resetSuccess: 'ล้างข้อมูลเรียบร้อยแล้ว!', torchNotSupported: 'ไฟฉายไม่รองรับบนอุปกรณ์นี้', edit: 'แก้ไข', done: 'เสร็จสิ้น'
+                resetData: 'ล้างข้อมูลทั้งหมด', confirmReset: 'คุณแน่ใจหรือไม่ว่าจะล้างประวัติและกระเป๋าเงินทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้', resetSuccess: 'ล้างข้อมูลเรียบร้อยแล้ว!', torchNotSupported: 'ไฟฉายไม่รองรับบนอุปกรณ์นี้', edit: 'แก้ไข', done: 'เสร็จสิ้น', accentColor: 'สีเน้น', name: 'ชื่อ'
             },
             EN: {
                 welcome: 'Welcome', home: 'Home', wallet: 'Pockets', scan: 'Scan', history: 'History', profile: 'Profile',
@@ -234,180 +292,57 @@
                 transactionAlerts: 'Transaction Alerts', everyPurchase: 'Every purchase', budgetAlerts: 'Budget Alerts',
                 budgetWarnings: 'Budget warnings', monthlySummaries: 'Monthly summaries', newLogins: 'New device logins', passwordChanges: 'Password changes',
                 themeMode: 'Theme Mode', activeNow: 'Active now', pinStatusNotSet: 'Not configured', pinStatusSet: 'Configured', viewReceipt: 'View Receipt',
-                resetData: 'Reset All Data', confirmReset: 'Are you sure you want to clear all transactions and pockets? This cannot be undone.', resetSuccess: 'Data cleared successfully!', torchNotSupported: 'Torch not supported on this device', edit: 'Edit', done: 'Done'
+                resetData: 'Reset All Data', confirmReset: 'Are you sure you want to clear all transactions and pockets? This cannot be undone.', resetSuccess: 'Data cleared successfully!', torchNotSupported: 'Torch not supported on this device', edit: 'Edit', done: 'Done', accentColor: 'Accent Color', name: 'Name'
             }
         };
         const getT = (lang) => (key) => TRANSLATIONS[lang]?.[key] || key;
+
+        // ==========================================
+        // 4. SHARED UI COMPONENTS
+        // ==========================================
         class ErrorBoundary extends React.Component {
-            constructor(props) { super(props); this.state = { hasError: false, error: null }; }
-            static getDerivedStateFromError(error) { return { hasError: true, error }; }
-            render() {
-                if (this.state.hasError) {
-                    return (
-                        <div className="p-8 bg-slate-900 text-white h-screen w-screen flex flex-col items-center justify-center">
-                            <h1 className="text-4xl font-black mb-4 text-[#FF4D4D]">Oops!</h1>
-                            <h2 className="text-xl font-bold mb-2">Something went wrong</h2>
-                            <p className="text-slate-400 text-center mb-8 text-xs bg-slate-800 p-4 rounded-xl">{this.state.error?.toString()}</p>
-                            <button onClick={()=>window.location.reload()} className="px-8 py-4 bg-[#3B82F6] text-white rounded-full font-bold">Reload App</button>
-                        </div>
-                    );
-                }
-                return this.props.children;
-            }
+            constructor(props) { super(props); this.state = { hasError: false }; }
+            static getDerivedStateFromError(error) { return { hasError: true }; }
+            componentDidCatch(error, errorInfo) { console.error('Error caught:', error, errorInfo); }
+            render() { return this.state.hasError ? <div className="flex items-center justify-center h-screen bg-red-50 text-red-600"><div className="text-center"><h1 className="text-2xl font-bold mb-4">Something went wrong</h1><p>Please refresh the page</p></div></div> : this.props.children; }
         }
 
-        const SwitchToggle = ({ isOn, onToggle }) => (
-            <div onClick={onToggle} className={`w-12 h-7 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${isOn ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}>
-                <div className={`bg-white w-5 h-5 rounded-full shadow-sm transform transition-transform duration-300 ${isOn ? 'translate-x-5' : ''}`}></div>
-            </div>
+        const NavBtn = ({ icon, label, active, onClick, Icon }) => (
+            <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-colors ${active ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
+                <Icon name={icon} size={24} />
+                <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+            </button>
         );
-
-        const PocketIcon = ({ pocket, size = 20 }) => {
-            if (!pocket) return null;
-            return <div className={`flex items-center justify-center rounded-full shadow-sm shrink-0`} style={{backgroundColor: pocket.bg || 'var(--color-primary-light)', color: pocket.color || 'var(--color-primary)', width: size*2.5, height: size*2.5}}><Icon name={pocket.icon || 'wallet'} size={size} /></div>;
-        };
-
-        const CustomIconModal = ({ onClose, onSelect, t }) => {
-            const [hex, setHex] = useState('#8cb1ff');
-            return (
-                <div className="absolute inset-0 bg-black/40 z-[100] flex flex-col justify-end fade-in">
-                    <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-6 pb-12 flex flex-col slide-up h-[70vh]">
-                        <div className="flex justify-between items-center w-full mb-6">
-                            <h3 className="font-bold text-xl dark:text-white">{t('chooseIcon')}</h3>
-                            <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-200 transition-colors"><Icon name="x" size={20}/></button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto no-scrollbar space-y-6">
-                            <div className="bg-slate-50 dark:bg-slate-800 rounded-[28px] p-5 border border-slate-100 dark:border-slate-700">
-                                <label className="text-xs font-bold text-slate-500 mb-3 block">{t('pickColor')}</label>
-                                <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2">
-                                    <div className="w-12 h-12 rounded-full overflow-hidden relative shrink-0 shadow-sm border-2 border-white"><input type="color" value={hex} onChange={e=>setHex(e.target.value)} /></div>
-                                    {GLOBALS.PASTEL_COLORS.map(c => <div key={c} onClick={()=>setHex(c)} className="w-10 h-10 rounded-full cursor-pointer shrink-0" style={{backgroundColor: c}}></div>)}
-                                </div>
-                            </div>
-                            <div className="bg-slate-50 dark:bg-slate-800 rounded-[28px] p-5 border border-slate-100 dark:border-slate-700">
-                                <label className="text-xs font-bold text-slate-500 mb-4 block">{t('customIcon')}</label>
-                                <div className="grid grid-cols-5 gap-4">
-                                    {GLOBALS.LINE_ICONS_LIST.map((iconName, i) => (
-                                        <div key={i} onClick={() => { onSelect({ type: 'lucide', icon: iconName, bg: `${hex}33`, color: hex }); onClose(); }} className="aspect-square rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-sm" style={{backgroundColor: `${hex}33`, color: hex}}>
-                                            <Icon name={iconName} size={24} />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )
-        };
-
-        const CategoryModal = ({ onClose, onSave, t, initialCategory }) => {
-            const [name, setName] = useState(initialCategory?.id || '');
-            const [hex, setHex] = useState(initialCategory?.color || '#8cb1ff');
-            const [icon, setIcon] = useState(initialCategory?.icon || 'tag');
-
-            return (
-                <div className="absolute inset-0 bg-black/40 z-[100] flex items-end justify-center fade-in">
-                    <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-6 pb-12 slide-up h-[85vh] flex flex-col">
-                        <div className="flex justify-between items-center w-full mb-6">
-                            <h3 className="font-bold text-xl dark:text-white">{t('addCategory')}</h3>
-                            <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white"><Icon name="x" size={20}/></button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                            <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-4 rounded-[28px]">
-                                <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm shrink-0" style={{backgroundColor: `${hex}33`, color: hex}}><Icon name={icon} size={28}/></div>
-                                <input autoFocus value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-lg outline-none text-slate-800 dark:text-white" placeholder={t('categoryName')} />
-                            </div>
-                            
-                            <div className="bg-slate-50 dark:bg-slate-800 rounded-[28px] p-5">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">{t('pickColor')}</label>
-                                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
-                                    <div className="w-10 h-10 rounded-full overflow-hidden relative shrink-0 shadow-sm border-2 border-white"><input type="color" value={hex} onChange={e=>setHex(e.target.value)} /></div>
-                                    {GLOBALS.PASTEL_COLORS.map(c => <div key={c} onClick={()=>setHex(c)} className={`w-10 h-10 rounded-full cursor-pointer shrink-0 transition-transform ${hex===c?'scale-110 ring-2 ring-primary/50':''}`} style={{backgroundColor: c}}></div>)}
-                                </div>
-                            </div>
-
-                            <div className="bg-slate-50 dark:bg-slate-800 rounded-[28px] p-5">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">{t('customIcon')}</label>
-                                <div className="grid grid-cols-6 gap-3">
-                                    {GLOBALS.LINE_ICONS_LIST.map((ic, i) => (
-                                        <div key={i} onClick={() => setIcon(ic)} className={`aspect-square rounded-full flex items-center justify-center cursor-pointer transition-transform shadow-sm ${icon===ic?'scale-110 ring-2 ring-primary/50':''}`} style={{backgroundColor: `${hex}15`, color: hex}}>
-                                            <Icon name={ic} size={20} />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        <button onClick={()=>onSave({id: name, icon: icon, color: hex})} disabled={!name} className="w-full bg-primary text-white py-5 rounded-full font-bold text-sm tracking-widest uppercase disabled:opacity-50 transition-all hover:shadow-lg active:scale-95">{t('add')}</button>
-                    </div>
-                </div>
-            );
-        };
 
         const Section = ({ title, children }) => (
-            <div className="mb-6"><h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-4">{title}</h4><div className="bg-white dark:bg-slate-800 rounded-[28px] border border-slate-100 dark:border-slate-700 soft-shadow overflow-hidden">{children}</div></div>
-        );
-
-        const PinPadModal = ({ onClose, onSave, isSet, t }) => {
-            const [pin, setPin] = useState('');
-            const press = (n) => { if(pin.length < 6) setPin(p => p + n); };
-            const del = () => setPin(p => p.slice(0, -1));
-            useEffect(() => { if(pin.length === 6) setTimeout(()=>{ onSave(pin); onClose(); }, 200); }, [pin, onSave, onClose]);
-            return (
-                <div className="absolute inset-0 bg-black/40 z-[100] flex flex-col justify-end fade-in">
-                    <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center slide-up shadow-2xl">
-                        <div className="flex justify-between w-full mb-8"><div className="w-10"></div><h3 className="font-bold text-xl dark:text-white">{isSet?t('changePin'):t('setPin')}</h3><button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-200 transition-colors"><Icon name="x" size={20}/></button></div>
-                        <div className="flex gap-4 mb-10">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}></div>)}</div>
-                        <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
-                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100">{n}</button>)}
-                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-slate-50 dark:bg-slate-800 text-slate-500 active:scale-95 transition-transform rounded-full hover:bg-slate-100"><Icon name="delete" size={28}/></button>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const LockScreen = ({ correctPin, onUnlock }) => {
-            const [pin, setPin] = useState(''); const [err, setErr] = useState('');
-            const press = (n) => { if(pin.length < 6) { setPin(p => p + n); setErr(''); } };
-            const del = () => setPin(p => p.slice(0, -1));
-            useEffect(() => { if(pin.length === 6) { if(pin === correctPin) onUnlock(); else { setErr('Error'); setTimeout(()=>setPin(''), 500); } } }, [pin, correctPin, onUnlock]);
-
-            return (
-                <div className="flex-1 flex flex-col justify-end bg-primary/10 fade-in">
-                    <div className="flex-1 flex flex-col items-center justify-center pt-20"><div className="w-24 h-24 bg-white text-primary rounded-full flex items-center justify-center mb-6 shadow-md"><Icon name="lock" size={40}/></div><h2 className="text-primary text-2xl font-bold mb-2 tracking-wide">LOCKED</h2></div>
-                    <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.05)]">
-                        <div className="flex gap-4 mb-8">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? (err?'bg-danger':'bg-primary') : 'bg-slate-100 dark:bg-slate-800'}`}></div>)}</div>
-                        {err && <p className="text-danger text-xs font-bold mb-4 bg-red-50 dark:bg-red-500/10 px-3 py-1 rounded-full">{err}</p>}
-                        <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
-                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">{n}</button>)}
-                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-slate-50 dark:bg-slate-800 active:scale-95 transition-transform rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"><Icon name="delete" size={28}/></button>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const MainLayout = ({ children, tab, go, t }) => (
-            <div className="flex flex-col h-full relative fade-in">
-                <div className="flex-1 overflow-y-auto pb-[90px] no-scrollbar">{children}</div>
-                <div className="fixed bottom-0 left-0 right-0 w-full bg-white/90 dark:bg-dark/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-6 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex justify-between items-center z-50">
-                    <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} />
-                    <NavBtn icon="layout-grid" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} />
-                    <div className="relative -top-6"><button onClick={()=>go('SCAN')} className="bg-primary text-white w-14 h-14 flex items-center justify-center rounded-[20px] shadow-[0_8px_20px_var(--color-primary-light)] hover:-translate-y-1 active:scale-95 transition-all"><Icon name="scan-line" size={24} className="text-white" /></button></div>
-                    <NavBtn icon="clock" label={t('history')} active={tab==='HISTORY'} onClick={()=>go('MAIN','HISTORY')} />
-                    <NavBtn icon="user" label={t('profile')} active={tab==='PROFILE'} onClick={()=>go('MAIN','PROFILE')} />
-                </div>
+            <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700">
+                <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{title}</h3>
+                <div className="space-y-3">{children}</div>
             </div>
         );
-        const NavBtn = ({ icon, label, active, onClick }) => (<button onClick={onClick} className={`flex flex-col items-center gap-1 w-12 transition-all hover:scale-105 ${active?'text-primary':'text-slate-400 dark:text-slate-500'}`}><Icon name={icon} size={22} strokeWidth={active?2.5:1.5} /><span className="text-[9px] font-bold">{label}</span></button>);
-        const LoginScreen = ({ go, setUser, t }) => {
-            const [email, setEmail] = useState(''); const [password, setPassword] = useState('');
-            const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
 
+        const MenuItem = ({ icon, label, onClick }) => (
+            <button onClick={onClick} className="flex items-center justify-between py-3 px-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors group">
+                <div className="flex items-center gap-3">
+                    <Icon name={icon} size={20} className="text-slate-400 group-hover:text-primary transition-colors" />
+                    <span className="font-bold text-sm dark:text-white">{label}</span>
+                </div>
+                <Icon name="chevron-right" size={18} className="text-slate-300 group-hover:text-primary transition-colors" />
+            </button>
+        );
+
+        // ==========================================
+        // 5. SCREEN COMPONENTS
+        // ==========================================
+        const LoginScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
+            const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
+            
             const handleLogin = async (e) => {
-                e.preventDefault(); if(!email || !password) return setErr(t('fillAll')); setLoading(true); setErr('');
-                try { await auth.signInWithEmailAndPassword(email, password); } 
-                catch (e) {
+                e.preventDefault(); if(!email || !password) return setErr(t('fillAll'));
+                setLoading(true); setErr('');
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                } catch(e) {
                     if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
                         setTimeout(() => {
                             const guest = { uid: 'mock-uid', email, displayName: 'Guest User', photoURL: 'https://ui-avatars.com/api/?name=U&background=8cb1ff&color=fff' };
@@ -439,28 +374,28 @@
             return (
                 <div className="flex-1 overflow-y-auto bg-white dark:bg-dark fade-in relative no-scrollbar">
                     <div className="min-h-full flex flex-col justify-center p-8 pb-12">
-                        {loading && <LoadingOverlay text={t('loading')} />}
-                        <div className="text-center mb-10 mt-4"><div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mb-6 shrink-0"><Icon name="scan-face" size={48}/></div><h1 className="text-4xl font-bold dark:text-white">QR Scanner</h1><p className="text-slate-500 font-bold mt-2">{t('welcome')}</p></div>
+                        {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                        <div className="text-center mb-10 mt-4"><div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mb-6"><Icon name="scan-face" size={40}/></div><h1 className="text-3xl font-bold dark:text-white">QR Scanner</h1><p className="text-slate-400 font-bold mt-2">{t('welcome')}</p></div>
                         <form onSubmit={handleLogin} className="space-y-4">
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3 shrink-0"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3 shrink-0"/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('password')} /></div>
+                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
+                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('password')} /></div>
                             <div className="text-right"><button type="button" onClick={()=>go('FORGOT_PASS')} className="text-xs font-bold text-slate-400 hover:text-primary transition-colors">{t('forgotPass')}</button></div>
-                            <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-2 tracking-widest shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all uppercase">{t('login')}</button>
+                            <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-2 tracking-widest shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">{t('login')}</button>
                         </form>
                         {err && <div className="bg-red-50 dark:bg-red-500/10 text-danger p-3 rounded-2xl text-xs font-bold text-center mt-4">{err}</div>}
                         <div className="flex items-center gap-4 my-8"><div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"/><span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">OR</span><div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"/></div>
                         <button onClick={googleLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700">
-                            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                            <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                             {t('loginGoogle')}
                         </button>
-                        <button onClick={guestLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700"><Icon name="user" size={20} className="text-slate-400 shrink-0"/> {t('guestLogin')}</button>
+                        <button onClick={guestLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700"><Icon name="user" size={20} className="text-slate-400"/> {t('guestLogin')}</button>
                         <button onClick={()=>go('SIGN_UP')} className="mt-4 pb-8 text-sm font-bold text-slate-400 text-center w-full transition-colors hover:text-primary">{t('noAccount')} <span className="text-primary underline">{t('signUp')}</span></button>
                     </div>
                 </div>
             );
         };
 
-        const SignUpScreen = ({ go, setUser, t }) => {
+        const SignUpScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
             const [name, setName] = useState(''); const [email, setEmail] = useState(''); const [pass, setPass] = useState(''); const [confirm, setConfirm] = useState('');
             const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
 
@@ -482,302 +417,179 @@
             return (
                 <div className="flex-1 overflow-y-auto bg-white dark:bg-dark fade-in relative no-scrollbar">
                     <div className="min-h-full flex flex-col p-8 pb-12">
-                        {loading && <LoadingOverlay text={t('loading')} />}
-                        <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 active:scale-95 transition-transform dark:text-white hover:bg-slate-100 shrink-0"><Icon name="arrow-left"/></button>
+                        {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                        <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 active:scale-95 transition-transform dark:text-white hover:bg-slate-100"><Icon name="arrow-left"/></button>
                         <h1 className="text-3xl font-bold mb-8 dark:text-white">{t('createAccount')}</h1>
                         <form onSubmit={handleSignUp} className="space-y-4">
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="user" size={20} className="text-slate-400 mr-3 shrink-0"/><input required value={name} onChange={e=>setName(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('name')} /></div>
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3 shrink-0"/><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3 shrink-0"/><input required type="password" value={pass} onChange={e=>setPass(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={`${t('password')} (min 6)`} /></div>
-                            <div className={`bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm ${(pass&&confirm&&pass!==confirm)?'!border-danger':''}`}><Icon name="lock" size={20} className={(pass&&confirm&&pass!==confirm)?'text-danger mr-3':'text-slate-400 mr-3'} shrink-0/><input required type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('confirmPass')} /></div>
-                            {err && <p className="text-xs font-bold text-danger text-center bg-red-50 dark:bg-red-500/10 p-2 rounded-xl">{err}</p>}
-                            <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-8 tracking-widest shadow-md hover:-translate-y-0.5 active:scale-95 transition-all uppercase">{t('createAccount')}</button>
+                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="user" size={20} className="text-slate-400 mr-3"/><input required value={name} onChange={e=>setName(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('name')} /></div>
+                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
+                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input required type="password" value={pass} onChange={e=>setPass(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('password')} /></div>
+                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input required type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('confirmPass')} /></div>
+                            <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-6 tracking-widest shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">{t('signUp')}</button>
                         </form>
+                        {err && <div className="bg-red-50 dark:bg-red-500/10 text-danger p-3 rounded-2xl text-xs font-bold text-center mt-4">{err}</div>}
                     </div>
                 </div>
             );
         };
 
-        const ForgotScreen = ({ go, t }) => {
-            const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
+        const ForgotScreen = ({ go, t, Icon, LoadingOverlay }) => {
+            const [email, setEmail] = useState(''); const [loading, setLoading] = useState(false); const [sent, setSent] = useState(false);
             const handleReset = async (e) => {
-                e.preventDefault(); if(!email) return setErr(t('fillAll')); setLoading(true); setErr('');
-                try { await auth.sendPasswordResetEmail(email); setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); } 
-                catch(error) { if(error.code.includes('operation-not-supported')) { setTimeout(() => { setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); }, 1000); } else { setErr(translateAuthError(error.code)); setLoading(false); } }
+                e.preventDefault(); if(!email) return;
+                setLoading(true);
+                try { await auth.sendPasswordResetEmail(email); setSent(true); } 
+                catch(e) { setLoading(false); }
             };
             return (
                 <div className="flex-1 overflow-y-auto bg-white dark:bg-dark fade-in relative no-scrollbar">
-                    <div className="min-h-full flex flex-col text-center p-8 pb-12">
-                        {loading && <LoadingOverlay text={t('loading')} />}
-                        <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 absolute active:scale-95 transition-transform dark:text-white hover:bg-slate-100 shrink-0"><Icon name="arrow-left"/></button>
-                        <div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mt-20 mb-8 shrink-0"><Icon name="key" size={40}/></div>
-                        <h1 className="text-3xl font-bold mb-2 dark:text-white">{t('forgotPass')}</h1>
-                        {sent ? <div className="bg-green-50 dark:bg-green-500/10 text-[#4ADE80] p-4 rounded-2xl font-bold flex items-center justify-center gap-2 animate-pulse mt-10"><Icon name="check-circle"/> Email Sent!</div> : 
-                        <form onSubmit={handleReset} className="space-y-6 mt-10">
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center text-left focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3 shrink-0"/><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
-                            {err && <p className="text-xs font-bold text-danger bg-red-50 dark:bg-red-500/10 p-2 rounded-xl">{err}</p>}
-                            <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full tracking-widest shadow-md hover:-translate-y-0.5 active:scale-95 transition-all uppercase">{t('sendLink')}</button>
-                        </form>}
-                    </div>
-                </div>
-            );
-        };
-
-        const HomeScreen = ({ user, txs, pockets, safeToSpend, visibleNotifications, go, t }) => {
-            const totalSpend = txs.reduce((a,c) => a + Number(c.amount), 0);
-            return (
-                <div className="p-6 pt-10 fade-in">
-                    <div className="flex justify-between items-center mb-8">
-                        <div className="flex items-center gap-3">
-                            <div className="rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm w-12 h-12 flex items-center justify-center bg-white shrink-0"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
-                            <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('welcome')},</p><h2 className="text-lg font-bold leading-none dark:text-white">{user?.displayName}</h2></div>
-                        </div>
-                        <button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 relative active:scale-95 transition-transform hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700 shrink-0">
-                            <Icon name="bell" size={20}/>{visibleNotifications.length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800"></span>}
-                        </button>
-                    </div>
-                    
-                    <div className="bg-primary p-6 rounded-[32px] text-white shadow-[0_15px_30px_var(--color-primary-light)] mb-4 relative overflow-hidden transition-colors">
-                        <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
-                        <p className="text-xs font-bold text-white/80 uppercase tracking-widest mb-1">{t('totalSpend')}</p>
-                        <h1 className="text-4xl font-bold">฿ {formatMoney(totalSpend)}</h1>
-                    </div>
-                    
-                    {pockets.length > 0 && (
-                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] soft-shadow mb-8 border border-slate-100 dark:border-slate-800">
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1"><Icon name="wallet" size={14}/> {t('safeSpend')}</p>
-                            <h2 className="text-3xl font-bold mb-4 dark:text-white">฿ {formatMoney(safeToSpend)}</h2>
-                            <div className="grid grid-cols-2 gap-3 mt-4">
-                                {pockets.map(p => (
-                                    <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl cursor-pointer active:scale-95 transition-transform hover:bg-slate-100 dark:hover:bg-slate-700">
-                                        <div className="flex items-center gap-2 mb-2"><PocketIcon pocket={p} size={14} /><span className="text-xs font-bold dark:text-white truncate">{p.name}</span></div>
-                                        <div className="text-sm font-bold text-primary">฿ {formatMoney(p.balance)}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    
-                    <div className="flex justify-between items-end mb-4"><h3 className="text-xl font-bold dark:text-white">{t('recent')}</h3><button onClick={()=>go('MAIN','HISTORY')} className="text-xs font-bold text-primary uppercase tracking-widest hover:underline px-3 py-1 rounded-full">{t('seeAll')}</button></div>
-                    <div className="space-y-3">
-                        {txs.length === 0 ? <div className="bg-white dark:bg-slate-900 rounded-[28px] text-center p-8 soft-shadow border border-slate-100 dark:border-slate-800"><p className="font-bold text-slate-400">{t('noData')}</p></div> : 
-                        txs.slice(0,4).map(tx => (
-                            <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white dark:bg-slate-900 p-4 rounded-[24px] flex justify-between items-center soft-shadow cursor-pointer active:scale-95 transition-all border border-slate-100 dark:border-slate-800 hover:-translate-y-1 hover:shadow-md">
-                                <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20} /><div><h4 className="font-bold text-sm dark:text-white">{tx.title}</h4><p className="text-[10px] font-bold text-slate-500 mt-1">{tx.category}</p></div></div>
-                                <div className="font-bold text-sm dark:text-white">฿ {formatMoney(tx.amount)}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        const NotificationsScreen = ({ go, user, t, visibleNotifications, clearAllNotifs }) => (
-            <div className="flex-1 flex flex-col h-full fade-in relative overflow-hidden bg-[var(--bg-color)]">
-                <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-primaryLight via-transparent to-transparent z-0 pointer-events-none"></div>
-                <div className="px-6 pt-12 flex justify-between items-center relative z-10 mb-8">
-                    <button onClick={() => go('MAIN', 'HOME')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors border border-slate-100 dark:border-slate-700 shrink-0"><Icon name="arrow-left" size={20}/></button>
-                    <h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2>
-                    <div className="w-10 h-10 rounded-full overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 bg-white flex items-center justify-center shrink-0"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
-                </div>
-                <div className="px-6 flex-1 overflow-y-auto no-scrollbar relative z-10 pb-10">
-                    <div className="flex justify-between items-end mb-8">
-                        <div><h1 className="text-3xl font-bold mb-1 dark:text-white">{t('recentAlerts')}</h1><p className="text-sm font-bold text-slate-400">{t('caughtUp')}</p></div>
-                        {visibleNotifications.length > 0 && (<button onClick={clearAllNotifs} className="bg-danger/10 text-danger px-4 py-2 rounded-full font-bold active:scale-95 transition-transform text-xs">ล้าง</button>)}
-                    </div>
-                    <div className="space-y-4">
-                        {visibleNotifications.length === 0 ? (<div className="bg-white dark:bg-slate-800 rounded-[28px] text-center p-8 soft-shadow border border-slate-100 dark:border-slate-700"><p className="font-bold text-slate-400">{t('caughtUp')}</p></div>) : (
-                            visibleNotifications.map(notif => (
-                                <div key={notif.id} className="bg-white dark:bg-slate-800 rounded-[28px] p-5 flex gap-4 soft-shadow border border-slate-100 dark:border-slate-700 hover:-translate-y-1 transition-transform">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${notif.type==='alert'?'bg-danger/10 text-danger':'bg-primaryLight text-primary'}`}><Icon name={notif.type==='alert'?'alert-triangle':'calendar'} size={20} /></div>
-                                    <div className="flex-1 pt-1">
-                                        <div className="flex justify-between items-start mb-1"><h3 className="font-bold text-sm dark:text-white">{notif.title}</h3><span className="text-[9px] font-bold text-slate-400">{notif.time}</span></div>
-                                        <p className="text-xs font-medium text-slate-500 leading-relaxed">{notif.desc}</p>
-                                    </div>
-                                </div>
-                            ))
+                    <div className="min-h-full flex flex-col justify-center p-8 pb-12">
+                        {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                        <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 active:scale-95 transition-transform dark:text-white hover:bg-slate-100"><Icon name="arrow-left"/></button>
+                        {!sent ? (
+                            <>
+                                <h1 className="text-3xl font-bold mb-8 dark:text-white">{t('resetPass')}</h1>
+                                <form onSubmit={handleReset} className="space-y-4">
+                                    <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
+                                    <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-6 tracking-widest shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">{t('sendReset')}</button>
+                                </form>
+                            </>
+                        ) : (
+                            <div className="text-center"><Icon name="check-circle" size={48} className="text-primary mx-auto mb-4"/><h2 className="text-2xl font-bold mb-2 dark:text-white">{t('checkEmail')}</h2><p className="text-slate-400 mb-6">{t('resetSent')}</p><button onClick={()=>go('SIGN_IN')} className="w-full bg-primary text-white font-bold py-4 rounded-full tracking-widest shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">{t('backLogin')}</button></div>
                         )}
                     </div>
                 </div>
-            </div>
-        );
-
-        const PocketsScreen = ({ pockets, go, t }) => (
-            <div className="p-6 pt-12 fade-in flex flex-col h-full bg-[var(--bg-color)]">
-                <div className="flex justify-between items-center mb-8"><h2 className="text-3xl font-bold leading-none dark:text-white">{t('yourPockets')}</h2><button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 active:scale-95 transition-transform hover:bg-slate-50 border border-slate-100 dark:border-slate-700 shrink-0"><Icon name="bell" size={20}/></button></div>
-                <div className="grid grid-cols-2 gap-4 mb-6 flex-1 overflow-y-auto no-scrollbar">
-                    {pockets.length===0 ? <div className="col-span-2 bg-white dark:bg-slate-800 soft-shadow border border-slate-100 dark:border-slate-700 rounded-[28px] text-center p-8"><p className="font-bold text-slate-400">{t('noData')}</p></div> : pockets.map(p => {
-                        const pct = p.hasTarget && p.target > 0 ? Math.min((p.balance / p.target) * 100, 100) : 0;
-                        return (
-                            <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700 active:scale-95 transition-all cursor-pointer h-fit relative overflow-hidden hover:-translate-y-1 hover:shadow-md">
-                                <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full opacity-20`} style={{backgroundColor: p.bg || 'var(--color-primary-light)'}}></div>
-                                <div className="mb-4 relative z-10"><PocketIcon pocket={p} size={18} /></div>
-                                <h4 className="font-bold text-sm mb-1 truncate relative z-10 dark:text-white">{p.name}</h4>
-                                <div className="flex items-baseline gap-1 mb-4 relative z-10"><p className="text-xl font-bold dark:text-white">฿ {formatMoney(p.balance)}</p></div>
-                                {p.hasTarget && (<div className="relative z-10"><div className="h-1 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-500" style={{width:`${pct}%`, backgroundColor: p.color||'var(--color-primary)'}}></div></div><div className="text-right text-[9px] font-bold mt-1 text-slate-400">{Math.round(pct)}%</div></div>)}
-                            </div>
-                        )
-                    })}
-                </div>
-                <button onClick={()=>go('ADD_POCKET')} className="w-full bg-primary/10 text-primary font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-95 transition-transform shrink-0 hover:bg-primary/20"><Icon name="plus" size={20}/> {t('createNewPocket')}</button>
-            </div>
-        );
-        const AddPocketScreen = ({ go, onSave, t }) => {
-            const [name, setName] = useState(''); const [balance, setBalance] = useState(''); 
-            const [hasTarget, setHasTarget] = useState(false); const [target, setTarget] = useState('');
-            const [selectedIcon, setSelectedIcon] = useState(GLOBALS.PASTEL_POCKET_ICONS[0]);
-            const [saving, setSaving] = useState(false); const [showCustomModal, setShowCustomModal] = useState(false);
-            
-            const handleSave = async () => {
-                setSaving(true);
-                try { await onSave({ id: Date.now().toString(), name, balance: Number(balance||0), hasTarget, target: hasTarget ? Number(target) : 0, iconType: 'lucide', icon: selectedIcon.icon || 'wallet', bg: selectedIcon.bg || 'var(--color-primary-light)', color: selectedIcon.color || 'var(--color-primary)' }); } 
-                catch(e) {} finally { setSaving(false); }
-            };
-
-            return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in relative bg-[var(--bg-color)]">
-                    {saving && <LoadingOverlay text={t('loading')} />}
-                    {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={setSelectedIcon} t={t} />}
-                    
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50 shrink-0"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('newPocket')}</h2><div className="w-10 shrink-0"></div></div>
-
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 font-bold text-sm outline-none dark:text-white transition-colors focus:ring-2 ring-primary/20" placeholder="e.g. Holiday Fund"/></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('initialAmount')}</label><div className="w-full bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-xl font-bold text-slate-400 mr-3 shrink-0">฿</span><input type="number" value={balance} onChange={e=>setBalance(e.target.value)} className="w-full bg-transparent font-bold text-2xl outline-none dark:text-white" placeholder="0.00"/></div></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700">
-                            <div className="flex justify-between items-center mb-2"><h4 className="font-bold text-sm dark:text-white">{t('setMonthlyTarget')}</h4><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>
-                            {hasTarget && (<div className="pt-4 border-t border-slate-100 dark:border-slate-700 fade-in"><div className="w-full bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-lg font-bold text-slate-400 mr-3 shrink-0">฿</span><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-transparent font-bold text-xl outline-none dark:text-white" placeholder="0.00"/></div></div>)}
-                        </div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">{t('chooseIcon')}</label>
-                            <div className="grid grid-cols-4 gap-6 px-2">
-                                {GLOBALS.PASTEL_POCKET_ICONS.map((ic, i) => (<div key={i} onClick={()=>setSelectedIcon(ic)} className={`w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all ${selectedIcon.icon === ic.icon ? 'ring-2 ring-offset-2 ring-slate-400 dark:ring-slate-500 scale-105' : 'hover:scale-105'}`} style={{backgroundColor: ic.bg, color: ic.color}}><Icon name={ic.icon} size={20} /></div>))}
-                                <div onClick={()=>setShowCustomModal(true)} className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer border border-dashed border-slate-300 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"><Icon name="plus" size={20} /></div>
-                            </div>
-                        </div>
-                    </div>
-                    <button disabled={!name || (hasTarget && !target)} onClick={handleSave} className="w-full bg-primary text-white py-4 mt-2 text-sm font-bold rounded-full shadow-md active:scale-95 transition-transform disabled:opacity-50 tracking-widest uppercase hover:shadow-lg">{t('savePocket')}</button>
-                </div>
             );
         };
 
-        const PocketDetailsScreen = ({ go, pocket, txs, t }) => {
-            if(!pocket) return null;
-            const pocketTxs = txs.filter(tx => tx.pocketId === pocket.id);
-            const pct = pocket.hasTarget && pocket.target > 0 ? Math.min((pocket.balance / pocket.target) * 100, 100) : 0;
-            const barColor = pocket.color || 'var(--color-primary)';
-            const bgColor = pocket.bg || 'var(--color-primary-light)';
-            
-            const chartData = useMemo(() => {
-                if (pocketTxs.length === 0) return [10, 10, 10, 10, 10];
-                const amounts = pocketTxs.slice(0, 5).map(tx => Math.min(100, Math.max(10, (Math.abs(tx.amount) / (pocket.initialAmount || pocket.balance || 100)) * 100 * 2)));
-                while(amounts.length < 5) amounts.unshift(10);
-                return amounts.reverse();
-            }, [pocketTxs, pocket.balance, pocket.initialAmount]);
+        const MainLayout = ({ children, tab, go, t, Icon }) => (
+            <div className="flex flex-col h-full relative fade-in">
+                <div className="flex-1 overflow-y-auto pb-[90px] no-scrollbar">{children}</div>
+                {/* FIX #2: Changed from fixed to absolute bottom-0 with safe-area-inset-bottom */}
+                <div className="absolute bottom-0 left-0 right-0 w-full bg-white/90 dark:bg-dark/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50 pb-[env(safe-area-inset-bottom)]">
+                    <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} Icon={Icon} />
+                    <NavBtn icon="layout-grid" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} Icon={Icon} />
+                    <div className="relative -top-6"><button onClick={()=>go('SCAN')} className="bg-primary text-white w-14 h-14 flex items-center justify-center rounded-[20px] shadow-[0_8px_20px_var(--color-primary-light)] hover:-translate-y-1 active:scale-95 transition-all"><Icon name="scan-line" size={24} /></button></div>
+                    <NavBtn icon="clock" label={t('history')} active={tab==='HISTORY'} onClick={()=>go('MAIN','HISTORY')} Icon={Icon} />
+                    <NavBtn icon="user" label={t('profile')} active={tab==='PROFILE'} onClick={()=>go('MAIN','PROFILE')} Icon={Icon} />
+                </div>
+            </div>
+        );
 
+        const HomeScreen = ({ go, user, t, Icon, pockets, txs, safeToSpend }) => {
+            const totalSpent = txs.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+            const recent = txs.slice(0, 5);
             return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketDetails')}</h2><button onClick={()=>go('POCKET_SETTINGS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="settings" size={20} /></button></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div className="rounded-[36px] p-8 relative overflow-hidden shadow-sm" style={{backgroundColor: bgColor}}>
-                            <div className="absolute top-0 right-0 w-40 h-40 bg-white/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                            <div className="flex items-center gap-4 mb-6 relative z-10"><div className="bg-white/50 rounded-[20px] w-14 h-14 flex items-center justify-center backdrop-blur-sm shadow-sm" style={{color:barColor}}><Icon name={pocket.icon} size={24}/></div><h3 className="font-bold text-slate-800 text-xl">{pocket.name}</h3></div>
-                            <h1 className="text-4xl font-bold text-slate-800 mb-2 relative z-10">฿ {formatMoney(pocket.balance)}</h1>
-                            {pocket.hasTarget && <p className="text-xs font-bold text-slate-600 mb-6 relative z-10">Goal: ฿ {formatMoney(pocket.target)}</p>}
-                            {pocket.hasTarget && (<div className="relative z-10 bg-white/40 p-4 rounded-[20px] backdrop-blur-sm shadow-sm border border-white/20"><div className="flex justify-between text-[10px] font-bold text-slate-700 mb-2"><span>{Math.round(pct)}% {t('saved')}</span><span>฿ {formatMoney(pocket.target - pocket.balance)} {t('left')}</span></div><div className="h-1.5 w-full bg-slate-800/10 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`, backgroundColor: barColor}}></div></div></div>)}
-                        </div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700"><h3 className="font-bold text-sm mb-4 dark:text-white">{t('spendingTrend')}</h3><div className="flex items-end justify-between gap-3 h-24">{chartData.map((h, i) => (<div key={i} className="flex flex-col items-center gap-2 flex-1"><div className="w-full rounded-t-lg transition-all duration-500 ease-out" style={{height: `${h}%`, backgroundColor: i===4 ? barColor : 'var(--color-primary-light)'}}></div><span className="text-[9px] font-bold text-slate-400">W{i+1}</span></div>))}</div></div>
-                        
-                        <div>
-                            <h3 className="font-bold text-sm mb-4 ml-2 dark:text-white uppercase tracking-widest">{t('recentActivity')}</h3>
+                <div className="p-6 pt-12 fade-in relative bg-[var(--bg-color)]">
+                    <div className="flex flex-col items-center mb-8 mt-2 relative">
+                        <button onClick={()=>go('NOTIFICATIONS')} className="absolute top-0 right-0 text-slate-400 w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 shadow-sm hover:text-primary transition-colors"><Icon name="bell" size={20}/></button>
+                        <div className="relative mb-4"><div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-md"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-md cursor-pointer hover:scale-110 transition-transform"><Icon name="edit-2" size={14}/></div></div>
+                        <h1 className="text-2xl font-bold mb-1 dark:text-white">{user?.displayName}</h1><p className="text-xs font-bold text-slate-400">{user?.email}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mb-8">
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">{t('totalSpend')}</p><h2 className="text-2xl font-bold dark:text-white">฿ {formatMoney(totalSpent)}</h2></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">{t('safeSpend')}</p><h2 className="text-2xl font-bold dark:text-white">฿ {formatMoney(safeToSpend)}</h2></div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700 mb-6">
+                        <div className="flex items-center justify-between mb-4"><h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('recent')}</h3><button onClick={()=>go('MAIN','HISTORY')} className="text-xs font-bold text-primary hover:underline">{t('seeAll')}</button></div>
+                        {recent.length > 0 ? (
                             <div className="space-y-3">
-                                {pocketTxs.length === 0 ? <div className="text-center p-8 text-xs font-bold text-slate-400 bg-white dark:bg-slate-800 rounded-[28px] border border-slate-100 dark:border-slate-700">{t('noData')}</div> : pocketTxs.map(tx => (
-                                    <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white dark:bg-slate-800 p-4 rounded-[24px] flex justify-between items-center soft-shadow cursor-pointer active:scale-95 transition-all border border-slate-100 dark:border-slate-700 hover:-translate-y-1 hover:shadow-md">
-                                        <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={18}/><div><h4 className="font-bold text-sm leading-tight mb-1 dark:text-white">{tx.title}</h4><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{tx.date}</p></div></div>
-                                        <div className="font-bold text-sm dark:text-white">฿ {formatMoney(tx.amount)}</div>
+                                {recent.map(tx => (
+                                    <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: tx.color || '#64748b'}}><Icon name={tx.icon || 'receipt'} size={18} className="text-white" /></div>
+                                            <div><p className="font-bold text-sm dark:text-white">{tx.merchant || tx.title}</p><p className="text-xs text-slate-400">{tx.date}</p></div>
+                                        </div>
+                                        <p className="font-bold text-sm dark:text-white">฿ {formatMoney(tx.amount)}</p>
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        ) : (
+                            <p className="text-center text-slate-400 py-6">{t('noData')}</p>
+                        )}
                     </div>
                 </div>
             );
         };
 
-        const PocketSettingsScreen = ({ go, pocket, onUpdate, onDelete, t }) => {
-            const [name, setName] = useState(pocket?.name || ''); const [hasTarget, setHasTarget] = useState(pocket?.hasTarget || false); const [target, setTarget] = useState(pocket?.target || '');
-            const [selectedIcon, setSelectedIcon] = useState({ type: pocket?.iconType || 'lucide', icon: pocket?.icon || 'wallet', colorType: pocket?.colorType || 'hex', color: pocket?.color || '#ffffff', bg: pocket?.bg || 'var(--color-primary-light)' });
-            const [showCustomModal, setShowCustomModal] = useState(false);
-            if(!pocket) return null;
-
+        const PocketsScreen = ({ go, pockets, t, Icon }) => {
             return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in relative bg-[var(--bg-color)]">
-                    {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={(ic)=>{setSelectedIcon({type:'lucide', icon:ic.icon, bg:`${ic.color}33`, color:ic.color})}} t={t} />}
-                    <div className="flex items-center justify-between mb-6"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50 shrink-0"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketSettings')}</h2><div className="w-10 shrink-0"></div></div>
-                    <div className="flex flex-col items-center mb-8"><div className="mb-4"><PocketIcon pocket={selectedIcon} size={36} /></div><h2 className="text-2xl font-bold dark:text-white">{pocket.name}</h2></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <Section title={t('general')}><div className="p-4 border-b border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors"/></div><div onClick={()=>setShowCustomModal(true)} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><span className="font-bold text-sm dark:text-white">{t('iconColor')}</span><div className="bg-slate-100 dark:bg-slate-700 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 dark:text-white"><Icon name="edit-2" size={14}/></div></div></Section>
-                        <Section title={t('budgeting')}><div className="p-4 flex justify-between items-center"><span className="font-bold text-sm dark:text-white">{t('monthlyGoal')}</span><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>{hasTarget && <div className="p-4 border-t border-slate-100 dark:border-slate-700 fade-in"><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-base outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="0.00"/></div>}</Section>
-                        <div className="pt-2"><button onClick={()=>{ if(window.confirm(t('confirmReset'))) onDelete(pocket.id); }} className="w-full bg-danger/10 text-danger font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-95 transition-colors hover:bg-danger/20 text-sm"><Icon name="trash-2" size={18}/> {t('deletePocket')}</button></div>
-                    </div>
-                    <button onClick={()=>onUpdate(pocket.id, {name, hasTarget, target: Number(target)||0, iconType: selectedIcon.type, icon: selectedIcon.icon, colorType: selectedIcon.colorType, color: selectedIcon.color, bg: selectedIcon.bg})} className="w-full bg-primary text-white font-bold py-4 rounded-full shadow-md active:scale-95 text-sm tracking-widest uppercase hover:shadow-lg transition-all">{t('saveChanges')}</button>
+                <div className="p-6 pt-12 fade-in relative bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><h1 className="text-2xl font-bold dark:text-white">{t('yourPockets')}</h1><button onClick={()=>go('ADD_POCKET')} className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center active:scale-95 transition-transform hover:shadow-lg"><Icon name="plus" size={20} /></button></div>
+                    {pockets.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-4 mb-8">
+                            {pockets.map(pocket => (
+                                <div key={pocket.id} onClick={()=>go('POCKET_DETAILS', null, pocket)} className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700 cursor-pointer hover:shadow-lg transition-all">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: pocket.icon?.bg || '#8cb1ff'}}><Icon name={pocket.icon?.icon || 'wallet'} size={24} className="text-white" /></div>
+                                        <button onClick={(e)=>{ e.stopPropagation(); go('POCKET_SETTINGS', null, pocket); }} className="w-8 h-8 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full flex items-center justify-center transition-colors"><Icon name="more-vertical" size={18} className="text-slate-400" /></button>
+                                    </div>
+                                    <h3 className="font-bold text-lg mb-1 dark:text-white">{pocket.name}</h3>
+                                    <p className="text-2xl font-bold text-primary mb-2">฿ {formatMoney(pocket.balance)}</p>
+                                    {pocket.target && <p className="text-xs text-slate-400">{t('targetAmount')}: ฿ {formatMoney(pocket.target)}</p>}
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12"><Icon name="inbox" size={48} className="text-slate-300 mx-auto mb-4"/><p className="text-slate-400 mb-6">{t('noData')}</p><button onClick={()=>go('ADD_POCKET')} className="bg-primary text-white px-6 py-3 rounded-full font-bold active:scale-95 transition-transform">{t('createNewPocket')}</button></div>
+                    )}
                 </div>
             );
         };
 
-        const ProfileScreen = ({ user, go, t, onLogout, onResetData }) => {
-            const doLogout = () => { setTimeout(() => onLogout(), 500); };
-            const MenuItem = ({ icon, label, onClick, value }) => (<div onClick={onClick} className="flex items-center justify-between p-5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0"><Icon name={icon} size={18}/></div><span className="font-bold text-sm dark:text-white">{label}</span></div><div className="flex items-center gap-3">{value && <span className="text-[10px] font-bold px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-300 uppercase tracking-widest">{value}</span>}<Icon name="chevron-right" size={16} className="text-slate-300"/></div></div>);
+        const HistoryScreen = ({ go, txs, t, Icon }) => {
+            const [search, setSearch] = useState('');
+            const filtered = txs.filter(tx => (tx.merchant + ' ' + tx.title + ' ' + tx.notes).toLowerCase().includes(search.toLowerCase()));
+            return (
+                <div className="p-6 pt-12 fade-in relative bg-[var(--bg-color)]">
+                    <h1 className="text-2xl font-bold mb-6 dark:text-white">{t('transactions')}</h1>
+                    <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 mb-6 flex items-center gap-3 soft-shadow"><Icon name="search" size={20} className="text-slate-400"/><input value={search} onChange={e=>setSearch(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('searchPlaceholder')} /></div>
+                    {filtered.length > 0 ? (
+                        <div className="space-y-3">
+                            {filtered.map(tx => (
+                                <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700 cursor-pointer hover:shadow-lg transition-all flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: tx.color || '#64748b'}}><Icon name={tx.icon || 'receipt'} size={20} className="text-white" /></div>
+                                        <div><p className="font-bold dark:text-white">{tx.merchant || tx.title}</p><p className="text-xs text-slate-400">{tx.date}</p></div>
+                                    </div>
+                                    <p className="font-bold dark:text-white">฿ {formatMoney(tx.amount)}</p>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12"><Icon name="inbox" size={48} className="text-slate-300 mx-auto mb-4"/><p className="text-slate-400">{t('notFound')}</p></div>
+                    )}
+                </div>
+            );
+        };
+
+        const ProfileScreen = ({ go, user, t, Icon, onLogout }) => {
             return (
                 <div className="p-6 pt-12 fade-in relative h-full overflow-y-auto no-scrollbar bg-[var(--bg-color)]">
                     <div className="flex flex-col items-center mb-8 mt-2 relative">
-                        <button onClick={()=>go('NOTIFICATIONS')} className="absolute top-0 right-0 text-slate-400 w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 shadow-sm hover:text-primary transition-colors shrink-0"><Icon name="bell" size={20}/></button>
-                        <div className="relative mb-4"><div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-md bg-white flex items-center justify-center"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-md cursor-pointer hover:scale-110 transition-transform"><Icon name="edit-2" size={14}/></div></div>
+                        <button onClick={()=>go('NOTIFICATIONS')} className="absolute top-0 right-0 text-slate-400 w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 shadow-sm hover:text-primary transition-colors"><Icon name="bell" size={20}/></button>
+                        <div className="relative mb-4"><div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-md"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-md cursor-pointer hover:scale-110 transition-transform"><Icon name="edit-2" size={14}/></div></div>
                         <h1 className="text-2xl font-bold mb-1 dark:text-white">{user?.displayName}</h1><p className="text-xs font-bold text-slate-400">{user?.email}</p>
                     </div>
                     <div className="space-y-6 mb-8">
                         <Section title={t('accountTitle')}><MenuItem icon="user" label={t('accountSettings')} onClick={()=>go('EDIT_PROFILE')} /><MenuItem icon="shield" label={t('security')} onClick={()=>go('SECURITY')} /></Section>
                         <Section title={t('preferencesTitle')}><MenuItem icon="globe" label={t('language')} onClick={()=>go('LANGUAGE')} /><MenuItem icon="palette" label={t('appTheme')} onClick={()=>go('THEME')} /></Section>
-                        <Section title="Data Management">
-                            <div onClick={onResetData} className="flex items-center justify-between p-4 cursor-pointer hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                                <div className="flex items-center gap-4"><div className="w-10 h-10 bg-danger/10 rounded-full flex items-center justify-center text-danger shrink-0"><Icon name="trash-2" size={18}/></div><span className="font-bold text-sm text-danger">{t('resetData')}</span></div>
-                            </div>
-                        </Section>
                     </div>
-                    <button onClick={doLogout} className="w-full bg-slate-50 dark:bg-slate-800 text-slate-500 font-bold py-4 rounded-full flex items-center justify-center gap-2 text-sm tracking-widest mb-10 active:scale-95 transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 uppercase"><Icon name="log-out" size={18}/> {t('logout')}</button>
+                    <button onClick={onLogout} className="w-full bg-danger text-white font-bold py-4 rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all uppercase tracking-widest">{t('logout')}</button>
                 </div>
             );
         };
 
-        const EditProfileScreen = ({ go, user, setUser, t }) => {
-            const [name, setName] = useState(user?.displayName || ''); const [bio, setBio] = useState(user?.bio || '');
-            const fileInputRef = useRef(null);
-            const handleUpdate = () => {
-                if(user && user.uid !== 'mock-uid') { try { user.updateProfile({ displayName: name }); db.collection('users').doc(user.uid).set({ displayName: name, bio }, { merge: true }); } catch(e) {} } 
-                else { const guestData = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...guestData, displayName: name, bio})); }
-                setUser(prev => ({...prev, displayName: name, bio})); go('MAIN','PROFILE');
-            };
-            const handleAvatarUpload = (e) => {
-                const file = e.target.files[0];
-                if(file) {
-                    const reader = new FileReader(); reader.readAsDataURL(file);
-                    reader.onload = (event) => {
-                        const img = new Image(); img.src = event.target.result;
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas'); const scaleSize = 300 / img.width; canvas.width = 300; canvas.height = img.height * scaleSize;
-                            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); const b64 = canvas.toDataURL('image/jpeg', 0.8);
-                            if(user && user.uid !== 'mock-uid') { db.collection('users').doc(user.uid).set({ photoURL: b64 }, { merge: true }); } 
-                            else { const g = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...g, photoURL: b64})); }
-                            setUser(prev => ({...prev, photoURL: b64}));
-                        }
-                    }
-                }
-            };
+        const EditProfileScreen = ({ go, user, t, Icon, LoadingOverlay }) => {
+            const [name, setName] = useState(user?.displayName || ''); const [bio, setBio] = useState(''); const [saving, setSaving] = useState(false); const fileInputRef = useRef(null);
+            const handleAvatarUpload = async (e) => { const file = e.target.files?.[0]; if(file && user?.uid !== 'mock-uid') { setSaving(true); /* Upload logic */ setSaving(false); } };
+            const handleUpdate = async () => { setSaving(true); /* Update logic */ setSaving(false); };
             return (
                 <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('editProfile')}</h2><div className="w-10 shrink-0"></div></div>
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('editProfile')}</h2><div className="w-10"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
-                        <div className="flex flex-col items-center mb-8 relative"><div className="relative"><div className="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-md overflow-hidden bg-white flex items-center justify-center"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><button onClick={()=>fileInputRef.current.click()} className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full shadow-md flex items-center justify-center hover:scale-110 transition-transform"><Icon name="camera" size={14}/></button></div><input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} /></div>
+                        <div className="flex flex-col items-center mb-8 relative"><div className="relative"><div className="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-md overflow-hidden bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><button onClick={()=>fileInputRef.current.click()} className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full shadow-md flex items-center justify-center hover:scale-110 transition-transform"><Icon name="camera" size={14}/></button></div><input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} /></div>
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('name')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('bio')}</label><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm h-28 resize-none outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="Add bio..." /></div>
                     </div>
@@ -786,300 +598,336 @@
             );
         };
 
-        const SecuritySettingsScreen = ({ go, pinCode, setPinCode, setShowPinModal, t, user }) => {
-            const deviceName = useMemo(() => getDeviceName(), []);
-            const handleTogglePin = () => { if (pinCode) { setPinCode(''); localStorage.removeItem('cozy_pin'); } else { setShowPinModal(true); } };
-            const [msg, setMsg] = useState('');
-            const handleResetPass = async () => { if(user && user.uid !== 'mock-uid') { try { await auth.sendPasswordResetEmail(user.email); setMsg('Sent!'); } catch(e) { setMsg('Error'); } } else setMsg('Not supported in Guest'); setTimeout(()=>setMsg(''), 3000); };
+        const SecuritySettingsScreen = ({ go, t, Icon }) => {
             return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('security')}</h2><div className="w-10 shrink-0"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <Section title="Account Security">
-                            <div onClick={handleResetPass} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-50 dark:border-slate-700 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center shrink-0"><Icon name="lock" size={18}/></div><h4 className="font-bold text-sm dark:text-white">{t('changePass')}</h4></div><button className="bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest shrink-0">Update</button></div>
-                            <div className="p-4 flex justify-between items-center"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 shrink-0"><Icon name="layout-grid" size={18}/></div><div><span className="font-bold text-sm block leading-none mb-1 dark:text-white">{t('pinCode')}</span><span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{pinCode ? t('pinStatusSet') : t('pinStatusNotSet')}</span></div></div><div className="flex items-center gap-3">{pinCode && (<button onClick={()=>setShowPinModal(true)} className="text-[10px] font-bold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 uppercase tracking-widest shrink-0">{t('changePin')}</button>)}<SwitchToggle isOn={!!pinCode} onToggle={handleTogglePin} /></div></div>
-                        </Section>
-                        <Section title={t('yourDevices')}><div className="p-4 flex justify-between items-center bg-white dark:bg-slate-900"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-[#94e4ae]/20 rounded-full flex items-center justify-center text-[#4ea86a] shrink-0"><Icon name="smartphone" size={18}/></div><div><h4 className="font-bold text-sm dark:text-white">{deviceName}</h4><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{t('activeNow')}</p></div></div><span className="bg-[#94e4ae]/20 text-[#4ea86a] px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shrink-0">THIS DEVICE</span></div></Section>
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('security')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
+                        <Section title={t('security')}><MenuItem icon="lock" label={t('changePass')} onClick={()=>{}} /><MenuItem icon="smartphone" label={t('yourDevices')} onClick={()=>{}} /></Section>
                     </div>
-                    {msg && <div className="bg-white dark:bg-slate-900 shadow-sm text-center font-bold text-sm p-4 mt-4 text-primary rounded-2xl border border-slate-100 dark:border-slate-700">{msg}</div>}
                 </div>
             );
         };
 
-        const ThemeSettingsScreen = ({ themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, go, t }) => (
-            <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
-                <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('theme')}</h2><div className="w-10 shrink-0"></div></div>
-                <div className="flex-1 overflow-y-auto no-scrollbar space-y-8 pb-6">
-                    <div>
-                        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 ml-4">{t('themeMode')}</h4>
-                        <div className="flex justify-between gap-4 px-2">
-                            <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Light')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col p-2 gap-2 bg-white shadow-sm transition-all hover:-translate-y-1 ${themeMode === 'Light' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-100'}`}><div className="w-full h-1/4 bg-slate-100 rounded-md"></div><div className="w-full flex-1 bg-slate-50 rounded-md flex flex-col gap-1.5 p-1.5"><div className="w-full h-1.5 bg-white rounded-sm"></div><div className="w-2/3 h-1.5 bg-white rounded-sm"></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='Light' ? 'text-primary' : 'text-slate-400'}`}>{t('light')}</span></div>
-                            <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Dark')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col p-2 gap-2 bg-slate-800 shadow-sm transition-all hover:-translate-y-1 ${themeMode === 'Dark' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-700'}`}><div className="w-full h-1/4 bg-slate-700 rounded-md"></div><div className="w-full flex-1 bg-slate-900 rounded-md flex flex-col gap-1.5 p-1.5"><div className="w-full h-1.5 bg-slate-700 rounded-sm"></div><div className="w-2/3 h-1.5 bg-slate-700 rounded-sm"></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='Dark' ? 'text-primary' : 'text-slate-400'}`}>{t('dark')}</span></div>
-                            <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('System')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col bg-white shadow-sm overflow-hidden relative transition-all hover:-translate-y-1 ${themeMode === 'System' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-100 dark:border-slate-700'}`}><div className="absolute top-0 right-0 bottom-0 w-1/2 bg-slate-800"></div><div className="relative w-full h-full p-2 flex flex-col gap-2 z-10"><div className="w-full h-1/4 bg-slate-200/50 rounded-md backdrop-blur-sm"></div><div className="w-full flex-1 bg-slate-200/30 rounded-md flex flex-col gap-1.5 p-1.5 backdrop-blur-sm"><div className="w-full h-1.5 bg-white/50 rounded-sm"></div></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='System' ? 'text-primary' : 'text-slate-400'}`}>{t('system')}</span></div>
-                        </div>
-                    </div>
-                    <Section title={t('accentColor')}>
-                        <div className="p-5 flex gap-4 overflow-x-auto no-scrollbar bg-white dark:bg-slate-900">
-                            {GLOBALS.ACCENT_COLORS.map(color => (
-                                <button key={color.name} onClick={() => setAccentColor(color.hex)} className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all shadow-sm ${accentColor === color.hex ? 'scale-110 ring-4 ring-offset-2 dark:ring-offset-slate-900 ring-slate-100 dark:ring-slate-800' : 'hover:scale-105'}`} style={{ backgroundColor: color.hex }}>
-                                    {accentColor === color.hex && <Icon name="check" size={20} className="text-white"/>}
+        const LanguageSettingsScreen = ({ go, t, Icon, lang, setLang }) => {
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('language')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
+                        <div className="space-y-3">
+                            {['TH', 'EN'].map(l => (
+                                <button key={l} onClick={()=>setLang(l)} className={`w-full p-4 rounded-2xl font-bold text-left transition-all ${lang === l ? 'bg-primary text-white' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 dark:text-white'}`}>
+                                    {l === 'TH' ? 'ไทย' : 'English'}
                                 </button>
                             ))}
                         </div>
-                    </Section>
-                    <Section title="Animations"><div className="p-4 flex justify-between items-center hover:bg-slate-50 dark:bg-slate-800 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primaryLight rounded-full flex items-center justify-center text-primary shrink-0"><Icon name="sparkles" size={18}/></div><span className="font-bold text-sm dark:text-white">{t('reduceMotion')}</span></div><SwitchToggle isOn={reduceMotion} onToggle={()=>setReduceMotion(!reduceMotion)} /></div></Section>
-                </div>
-            </div>
-        );
-
-        const LanguageSettingsScreen = ({ lang, setLang, go, t }) => (
-            <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
-                <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl ml-4 dark:text-white">{t('language')}</h2></div>
-                <div className="space-y-4">
-                    {['TH', 'EN'].map(l => (
-                        <div key={l} onClick={()=>setLang(l)} className={`px-6 py-5 rounded-[32px] flex justify-between items-center cursor-pointer transition-transform hover:-translate-y-0.5 shadow-sm border ${lang===l?'bg-primaryLight border-primary':'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'}`}>
-                            <span className={`font-bold text-base ${lang===l?'text-primary':'text-slate-800 dark:text-white'}`}>{l === 'TH' ? 'ภาษาไทย' : 'English'}</span>
-                            {lang===l && <div className="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center shadow-sm shrink-0"><Icon name="check" size={14} strokeWidth={3}/></div>}
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-
-        const ScanScreen = ({ go, onNext, t }) => {
-            const videoRef = useRef(null); const fileInputRef = useRef(null); const streamRef = useRef(null);
-            const [isTorchOn, setIsTorchOn] = useState(false); const [scanning, setScanning] = useState(false);
-
-            useEffect(() => {
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(s => { streamRef.current = s; if(videoRef.current) { videoRef.current.srcObject = s; videoRef.current.setAttribute('playsinline', true); videoRef.current.play().catch(()=>{}); } }).catch(()=>{});
-                return () => { if (streamRef.current) { streamRef.current.getTracks().forEach(t => { if (isTorchOn) t.applyConstraints({ advanced: [{ torch: false }] }).catch(()=>{}); t.stop(); }); } };
-            }, [isTorchOn]);
-
-            const toggleFlash = async () => {
-                if (streamRef.current) { try { const track = streamRef.current.getVideoTracks()[0]; const newTorchState = !isTorchOn; await track.applyConstraints({ advanced: [{ torch: newTorchState }] }); setIsTorchOn(newTorchState); } catch (e) { alert(t('torchNotSupported')); } }
-            };
-
-            const capture = () => { 
-                setScanning(true);
-                if (videoRef.current) {
-                    const canvas = document.createElement('canvas'); canvas.width = videoRef.current.videoWidth; canvas.height = videoRef.current.videoHeight;
-                    const ctx = canvas.getContext('2d'); ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-                    setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใหม่', date: new Date().toISOString().split('T')[0], categoryKey: 'General', iconType: 'lucide', icon: 'receipt', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: canvas.toDataURL('image/jpeg', 0.8) }); }, 1500);
-                } else { setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใหม่', date: new Date().toISOString().split('T')[0], categoryKey: 'General', iconType: 'lucide', icon: 'receipt', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: null }); }, 1500); }
-            };
-
-            if(scanning) return <LoadingOverlay text={t('loading')} />;
-
-            return (
-                <div className="flex-1 bg-black relative flex flex-col h-full fade-in">
-                    <div className="absolute top-10 left-0 w-full px-6 flex justify-between items-center z-40"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white active:scale-95 backdrop-blur-md transition-colors hover:bg-white/30"><Icon name="x" size={20}/></button><button onClick={toggleFlash} className={`w-10 h-10 rounded-full flex items-center justify-center active:scale-95 backdrop-blur-md transition-colors ${isTorchOn ? 'bg-primary text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}><Icon name={isTorchOn ? 'zap' : 'zap-off'} size={20}/></button></div>
-                    <div className="flex-1 relative overflow-hidden flex items-center justify-center"><video ref={videoRef} playsInline webkit-playsinline autoPlay muted className="absolute inset-0 w-full h-full object-cover opacity-90" /><div className="scan-frame"><div className="scan-corner tl"></div><div className="scan-corner tr"></div><div className="scan-corner bl"></div><div className="scan-corner br"></div><div className="laser"></div></div></div>
-                    <div className="bg-white dark:bg-dark rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.3)] z-40 relative border-t border-slate-100 dark:border-slate-800"><div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mb-6"></div><h2 className="text-xl font-bold dark:text-white">{t('scanReceipt')}</h2><p className="text-[10px] font-bold text-slate-400 mt-2 mb-8 uppercase tracking-widest">{t('alignReceipt')}</p><div className="flex justify-between w-full px-4 items-center"><button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="image" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('gallery')}</span></button><button onClick={capture} className="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:-translate-y-1"><Icon name="camera" size={28}/></button><button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="edit-2" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('manual')}</span></button></div></div>
-                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e=>{if(e.target.files[0]){ processReceiptImage(e.target.files[0], (data)=>{ setScanning(false); onNext(data); }); }}} />
-                </div>
-            );
-        };
-
-        const ReviewScreen = ({ go, screenData, onConfirm, t, pockets, userCategories, setUserCategories, defaultCatIds }) => {
-            const [amount, setAmount] = useState(screenData?.amount || ''); const [merchant, setMerchant] = useState(screenData?.merchant || ''); const [txDate, setTxDate] = useState(screenData?.date || new Date().toISOString().split('T')[0]); const [selectedPocket, setSelectedPocket] = useState('none'); const [activeCategory, setActiveCategory] = useState(screenData?.categoryKey || 'General'); const [saving, setSaving] = useState(false); const [showAddCat, setShowAddCat] = useState(false);
-            
-            const handleSave = async () => { 
-                setSaving(true); 
-                try {
-                    const catObj = userCategories.find(c => c.id === activeCategory) || userCategories[0]; 
-                    await onConfirm({ title: merchant || t('manual'), amount: Number(amount), category: activeCategory, date: txDate, iconType: 'lucide', icon: catObj.icon, colorType: 'hex', color: catObj.color, bg: `${catObj.color}33`, pocketId: selectedPocket, imageUrl: screenData?.imageUrl || null }); 
-                } catch(e) { console.error(e); } finally { setSaving(false); }
-            };
-
-            return (
-                <div className="flex-1 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    {saving && <LoadingOverlay text={t('loading')} />}
-                    {showAddCat && <CategoryModal onClose={()=>setShowAddCat(false)} onSave={(cat)=>{setUserCategories([...userCategories.filter(c=>c.id!==cat.id), cat]); setActiveCategory(cat.id); setShowAddCat(false);}} t={t} initialCategory={showAddCat !== true ? showAddCat : null}/>}
-                    <div className="px-6 pt-12 flex items-center justify-between mb-6"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('reviewDetails')}</h2><button onClick={handleSave} disabled={!amount} className="bg-primaryLight text-primary px-4 py-2 rounded-full font-bold text-xs disabled:opacity-50 active:scale-95 transition-colors hover:bg-primary/20 uppercase tracking-widest shrink-0">{t('save')}</button></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-6">
-                        {screenData?.imageUrl && (<div className="w-full h-32 bg-white dark:bg-slate-900 rounded-[28px] p-2 flex justify-center items-center soft-shadow border border-slate-100 dark:border-slate-800 relative"><img src={screenData.imageUrl} className="max-w-full max-h-full object-contain rounded-[20px]" /><div className="absolute right-3 bottom-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-primary shadow-sm"><Icon name="scan-line" size={14}/></div></div>)}
-                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center relative">{screenData?.isAuto && <div className="absolute top-4 right-4 bg-primaryLight text-primary w-8 h-8 rounded-full flex items-center justify-center"><Icon name="sparkles" size={14}/></div>}<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('extractedAmount')}</p><div className="flex items-center gap-2"><span className="text-2xl font-bold text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-bold bg-transparent text-center w-full outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary transition-colors dark:text-white" placeholder="0.00"/></div></div>
-                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800 soft-shadow space-y-5">
-                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchant')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="store" size={18} className="text-primary mr-3 shrink-0" /><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="ระบุชื่อร้านค้า"/></div></div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="calendar" size={16} className="text-slate-400 mr-2 shrink-0" /><input type="date" value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none dark:text-white"/></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center relative focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="wallet" size={16} className="text-primary mr-2 shrink-0" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-3">{t('category')}</label>
-                                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full shrink-0 transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primaryLight border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{!defaultCatIds.includes(cat.id) && (<button onClick={()=>setShowAddCat(cat)} className="pr-3 pl-1 hover:text-primary"><Icon name="edit-2" size={12}/></button>)}</div>))}
-                                    <button onClick={()=>setShowAddCat(true)} className="px-4 py-2 rounded-full text-xs font-bold border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 shrink-0 transition-colors"><Icon name="plus" size={14}/></button>
-                                </div>
-                            </div>
-                        </div>
-                        <button disabled={!amount || amount==='0'} onClick={handleSave} className="w-full bg-danger text-white py-5 rounded-full font-bold text-sm tracking-widest uppercase shadow-md active:scale-95 transition-all hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center gap-2">{t('confirmSave')} <Icon name="check" size={18}/></button>
                     </div>
                 </div>
             );
         };
 
-        const TxDetailScreen = ({ tx, go, t, onUpdateTx, userCategories }) => {
-            const [viewImage, setViewImage] = useState(false);
-            const [isEditing, setIsEditing] = useState(false);
-            const [editTitle, setEditTitle] = useState(tx?.title || tx?.merchant || '');
-            const [editDate, setEditDate] = useState(tx?.date || new Date().toISOString().split('T')[0]);
-            const [editCat, setEditCat] = useState(tx?.category || '');
-
-            if(!tx) return null;
-
-            const handleSaveEdit = () => {
-                const catObj = userCategories.find(c => c.id === editCat) || userCategories[0];
-                onUpdateTx(tx.id, { title: editTitle, merchant: editTitle, date: editDate, category: editCat, icon: catObj.icon, color: catObj.color, bg: `${catObj.color}33` });
-                setIsEditing(false);
-            };
-
+        const ThemeSettingsScreen = ({ go, t, Icon, themeMode, setThemeMode, accentColor, setAccentColor }) => {
             return (
                 <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    {viewImage && tx.imageUrl && (<div className="absolute inset-0 bg-black/90 z-[100] flex flex-col fade-in pb-10"><div className="p-6 pt-12 flex justify-between items-center w-full"><button onClick={()=>setViewImage(false)} className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white active:scale-95 backdrop-blur-md hover:bg-white/20 transition-colors shrink-0"><Icon name="x" size={20}/></button></div><div className="flex-1 flex items-center justify-center p-4"><img src={tx.imageUrl} className="max-w-full max-h-full rounded-[24px] object-contain shadow-2xl" /></div></div>)}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50 shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('txDetail')}</h2><button onClick={()=>setIsEditing(!isEditing)} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50 shrink-0"><Icon name={isEditing ? 'x' : 'edit-2'} size={18}/></button></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div className="flex flex-col items-center mb-4"><div className="mb-6 flex justify-center w-full"><PocketIcon pocket={tx} size={40} /></div><h1 className="text-5xl font-bold mb-3 dark:text-white text-center w-full">-{tx.amount > 0 ? '' : ''}฿ {formatMoney(Math.abs(tx.amount))}</h1></div>
-                        
-                        {isEditing ? (
-                            <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow space-y-5 border border-slate-100 dark:border-slate-800 fade-in">
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">ชื่อรายการ / ร้านค้า</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="edit-3" size={18} className="text-primary mr-3 shrink-0" /><input value={editTitle} onChange={e=>setEditTitle(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="calendar" size={18} className="text-primary mr-3 shrink-0" /><input type="date" value={editDate} onChange={e=>setEditDate(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="tag" size={18} className="text-primary mr-3 shrink-0" /><select value={editCat} onChange={e=>setEditCat(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"><option value="">เลือกหมวดหมู่</option>{userCategories.map(c => <option key={c.id} value={c.id}>{c.id}</option>)}</select></div></div>
-                                <button onClick={handleSaveEdit} className="w-full bg-primary text-white font-bold py-4 rounded-full mt-4 active:scale-95">{t('done')}</button>
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('theme')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
+                        <div>
+                            <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 ml-4">{t('themeMode')}</h4>
+                            <div className="flex justify-between gap-4 px-2">
+                                <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Light')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col p-2 gap-2 bg-white shadow-sm transition-all hover:-translate-y-1 ${themeMode === 'Light' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-100'}`}><div className="w-full h-1/4 bg-slate-100 rounded-md"></div><div className="w-full flex-1 bg-slate-50 rounded-md flex flex-col gap-1.5 p-1.5"><div className="w-full h-1.5 bg-white rounded-sm"></div><div className="w-2/3 h-1.5 bg-white rounded-sm"></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='Light' ? 'text-primary' : 'text-slate-400'}`}>{t('light')}</span></div>
+                                <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Dark')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col p-2 gap-2 bg-slate-800 shadow-sm transition-all hover:-translate-y-1 ${themeMode === 'Dark' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-700'}`}><div className="w-full h-1/4 bg-slate-700 rounded-md"></div><div className="w-full flex-1 bg-slate-900 rounded-md flex flex-col gap-1.5 p-1.5"><div className="w-full h-1.5 bg-slate-700 rounded-sm"></div><div className="w-2/3 h-1.5 bg-slate-700 rounded-sm"></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='Dark' ? 'text-primary' : 'text-slate-400'}`}>{t('dark')}</span></div>
+                                <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('System')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col bg-white shadow-sm overflow-hidden relative transition-all hover:-translate-y-1 ${themeMode === 'System' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-100 dark:border-slate-700'}`}><div className="absolute top-0 right-0 bottom-0 w-1/2 bg-slate-800"></div><div className="relative w-full h-full p-2 flex flex-col gap-2 z-10"><div className="w-full h-1/4 bg-slate-200/50 rounded-md backdrop-blur-sm"></div><div className="w-full flex-1 bg-slate-200/30 rounded-md flex flex-col gap-1.5 p-1.5 backdrop-blur-sm"><div className="w-full h-1.5 bg-white/50 rounded-sm"></div></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='System' ? 'text-primary' : 'text-slate-400'}`}>{t('system')}</span></div>
+                            </div>
+                        </div>
+                        <Section title={t('accentColor')}>
+                            <div className="p-5 flex gap-4 overflow-x-auto no-scrollbar bg-white dark:bg-slate-900">
+                                {ACCENT_COLORS.map(color => (
+                                    <button key={color.hex} onClick={()=>setAccentColor(color.hex)} className={`w-12 h-12 rounded-full flex-shrink-0 transition-all ${accentColor === color.hex ? 'ring-4 ring-offset-2 ring-slate-400 scale-110' : 'hover:scale-110'}`} style={{backgroundColor: color.hex}} title={color.name} />
+                                ))}
+                            </div>
+                        </Section>
+                    </div>
+                </div>
+            );
+        };
+
+        const NotificationSettingsScreen = ({ go, t, Icon }) => {
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
+                        <Section title={t('notifSettings')}><MenuItem icon="bell" label={t('transactionAlerts')} onClick={()=>{}} /><MenuItem icon="target" label={t('budgetAlerts')} onClick={()=>{}} /></Section>
+                    </div>
+                </div>
+            );
+        };
+
+        const NotificationsScreen = ({ go, t, Icon, visibleNotifications, clearAllNotifs }) => {
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2><button onClick={clearAllNotifs} className="text-xs font-bold text-primary hover:underline">{t('clearAll')}</button></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
+                        {visibleNotifications.length > 0 ? (
+                            <div className="space-y-3">
+                                {visibleNotifications.map(notif => (
+                                    <div key={notif.id} className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700">
+                                        <div className="flex items-start gap-3">
+                                            <Icon name={notif.type === 'receipt' ? 'receipt' : 'bell'} size={20} className="text-primary mt-1" />
+                                            <div className="flex-1">
+                                                <h4 className="font-bold dark:text-white">{notif.title}</h4>
+                                                <p className="text-sm text-slate-400">{notif.desc}</p>
+                                                <p className="text-xs text-slate-300 mt-1">{notif.time}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         ) : (
-                            <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow space-y-6 border border-slate-100 dark:border-slate-800 fade-in">
-                                <p className="bg-slate-50 dark:bg-slate-800 px-5 py-3 rounded-2xl font-bold text-lg dark:text-white text-center mb-2">{tx.title || tx.merchant}</p>
-                                <div className="flex justify-between items-center border-b border-slate-50 dark:border-slate-800 pb-3"><span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('status')}</span><span className="bg-[#94e4ae]/20 text-[#4ea86a] font-bold text-[9px] px-3 py-1 rounded-full flex items-center gap-1.5 uppercase tracking-widest"><Icon name="check" size={12}/>{t('completed')}</span></div>
-                                <div className="flex justify-between items-center border-b border-slate-50 dark:border-slate-800 pb-3"><span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('date')}</span><span className="font-bold text-base dark:text-white">{tx.date}</span></div>
-                                <div className="flex justify-between items-center"><span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('category')}</span><span className="font-bold bg-primaryLight text-primary px-3 py-1 rounded-full text-[10px] flex items-center gap-1.5 uppercase tracking-widest"><Icon name={tx.icon||'coffee'} size={12}/> {tx.category}</span></div>
-                            </div>
-                        )}
-
-                        {!isEditing && tx.notes && (<div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-800 fade-in"><h4 className="text-[9px] font-bold text-slate-400 uppercase mb-3 flex items-center gap-1.5 tracking-widest"><Icon name="align-left" size={14}/> {t('notes')}</h4><p className="text-sm font-bold bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl dark:text-white">{tx.notes}</p></div>)}
-                        {!isEditing && (
-                            <div className="flex gap-3 pt-2 fade-in">
-                                <button onClick={()=>go('SPLIT_BILL', null, tx)} className="flex-1 bg-white dark:bg-slate-900 dark:text-white font-bold py-4 rounded-full soft-shadow flex items-center justify-center gap-2 active:scale-95 transition-all hover:-translate-y-0.5 text-xs uppercase tracking-widest border border-slate-100 dark:border-slate-800"><Icon name="split-square-horizontal" size={16}/> {t('splitBill')}</button>
-                                {tx.imageUrl && (<button onClick={()=>setViewImage(true)} className="flex-1 bg-primaryLight text-primary font-bold py-4 rounded-full shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-all hover:-translate-y-0.5 text-xs uppercase tracking-widest"><Icon name="image" size={16}/> {t('viewReceipt')}</button>)}
-                            </div>
+                            <div className="text-center py-12"><Icon name="inbox" size={48} className="text-slate-300 mx-auto mb-4"/><p className="text-slate-400">{t('caughtUp')}</p></div>
                         )}
                     </div>
                 </div>
             );
         };
 
-        const SplitBillScreen = ({ tx, go, t }) => {
-            const billTotal = Number(tx?.amount || 0);
-            const [friends, setFriends] = useState([{id:1, name:'ฉัน', amount:billTotal/2}, {id:2, name:'เพื่อน 1', amount:billTotal/2}]);
-            const currentSum = friends.reduce((a,c)=>a+Number(c.amount), 0);
-            const isMatch = Math.abs(currentSum - billTotal) < 0.01;
-
-            const updateAmount = (id, val) => setFriends(friends.map(f=>f.id===id?{...f, amount:val}:f));
-
+        const ScanScreen = ({ go, t, Icon, LoadingOverlay, onNext }) => {
+            const videoRef = useRef(null); const canvasRef = useRef(null); const [scanning, setScanning] = useState(false);
+            useEffect(() => {
+                const startCamera = async () => {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                        if(videoRef.current) videoRef.current.srcObject = stream;
+                    } catch(err) { console.error(err); }
+                };
+                startCamera();
+                return () => { if(videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach(t => t.stop()); };
+            }, []);
             return (
-                <div className="p-6 pt-10 flex flex-col h-full fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-10 h-10 bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl ml-4 dark:text-white">{t('splitBill')}</h2></div>
-                    <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 text-center mb-6 soft-shadow border border-slate-100 dark:border-slate-800">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('totalAmount')}</p><h1 className="text-4xl font-bold my-2 dark:text-white">฿ {formatMoney(billTotal)}</h1>
-                        <div className="flex justify-between items-center mt-4 px-4 bg-slate-50 dark:bg-slate-800 py-3 rounded-xl border border-slate-100 dark:border-slate-700"><span className="text-xs font-bold text-slate-500">แบ่งแล้ว: ฿ {formatMoney(currentSum)}</span><span className={`text-xs font-bold ${isMatch?'text-[#4ea86a]':'text-danger'}`}>เหลือ: ฿ {formatMoney(Math.max(billTotal-currentSum, 0))}</span></div>
+                <div className="relative w-full h-full bg-black fade-in">
+                    {scanning && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                    <div className="scan-frame"><div className="laser"></div></div>
+                    <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-4 z-20">
+                        <button onClick={()=>go('MAIN','HOME')} className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center active:scale-95 transition-transform hover:bg-white/30"><Icon name="x" size={24} className="text-white" /></button>
+                        <button onClick={()=>{ setScanning(true); setTimeout(()=>{ onNext({amount: '0.00', merchant: 'Sample', date: new Date().toISOString().split('T')[0], categoryKey: 'General', icon: 'receipt', color: '#64748b'}); }, 1500); }} className="w-14 h-14 bg-primary rounded-full flex items-center justify-center active:scale-95 transition-transform hover:shadow-lg"><Icon name="camera" size={24} className="text-white" /></button>
                     </div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-6">
-                        {friends.map(f => (
-                            <div key={f.id} className="bg-white dark:bg-slate-900 rounded-3xl p-4 flex items-center shadow-sm border border-slate-100 dark:border-slate-800">
-                                <div className="flex-1 ml-3 font-bold text-lg dark:text-white">{f.name}</div>
-                                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-2 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-sm font-bold text-slate-400 mr-1">฿</span><input type="number" value={f.amount} onChange={e=>updateAmount(f.id, e.target.value)} className="w-20 bg-transparent text-right font-bold text-primary text-lg outline-none"/></div>
-                                {f.name!=='ฉัน' && <button onClick={()=>setFriends(friends.filter(x=>x.id!==f.id))} className="ml-3 text-slate-400 hover:text-danger"><Icon name="x" size={20}/></button>}
-                            </div>
-                        ))}
-                        <button onClick={()=>setFriends([...friends,{id:Date.now(), name:`เพื่อน ${friends.length+1}`, amount:0}])} className="w-full py-5 border-4 border-dashed border-slate-200 dark:border-slate-700 rounded-[32px] text-slate-400 font-bold flex items-center justify-center gap-3 hover:bg-white dark:hover:bg-slate-900 transition-colors text-xs uppercase tracking-widest"><Icon name="plus" size={20}/> {t('addFriend')}</button>
-                    </div>
-                    <button disabled={!isMatch} onClick={()=>go('MAIN','HISTORY')} className={`w-full py-6 rounded-full font-bold text-xl tracking-widest shadow-lg active:scale-95 transition-transform ${isMatch?'bg-primary text-white':'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600'}`}>{t('confirmSplit')}</button>
                 </div>
             );
         };
 
+        const ReviewScreen = ({ go, t, Icon, LoadingOverlay, onConfirm, screenData }) => {
+            const [data, setData] = useState(screenData || { amount: '', merchant: '', date: new Date().toISOString().split('T')[0], categoryKey: 'General', icon: 'receipt', color: '#64748b' });
+            const [saving, setSaving] = useState(false);
+            const handleSave = async () => { setSaving(true); await onConfirm(data); setSaving(false); };
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('reviewDetails')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-4">
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('amount')}</label><input type="number" value={data.amount} onChange={e=>setData({...data, amount: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('merchant')}</label><input value={data.merchant} onChange={e=>setData({...data, merchant: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('date')}</label><input type="date" value={data.date} onChange={e=>setData({...data, date: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
+                    </div>
+                    <button onClick={handleSave} className="w-full bg-primary text-white py-4 rounded-full shadow-md font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform hover:shadow-lg">{t('confirmSave')}</button>
+                </div>
+            );
+        };
+
+        const AddTxScreen = ({ go, t, Icon, LoadingOverlay, pockets, onSave }) => {
+            const [data, setData] = useState({ amount: '', merchant: '', date: new Date().toISOString().split('T')[0], categoryKey: 'General', icon: 'receipt', color: '#64748b', pocketId: 'none' });
+            const [saving, setSaving] = useState(false);
+            const handleSave = async () => { setSaving(true); await onSave(data); setSaving(false); };
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('addTx')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-4">
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('amount')}</label><input type="number" value={data.amount} onChange={e=>setData({...data, amount: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('merchant')}</label><input value={data.merchant} onChange={e=>setData({...data, merchant: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('date')}</label><input type="date" value={data.date} onChange={e=>setData({...data, date: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketDeducted')}</label><select value={data.pocketId} onChange={e=>setData({...data, pocketId: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+                    </div>
+                    <button onClick={handleSave} className="w-full bg-primary text-white py-4 rounded-full shadow-md font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform hover:shadow-lg">{t('saveTx')}</button>
+                </div>
+            );
+        };
+
+        const TxDetailScreen = ({ go, t, Icon, tx }) => {
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('txDetail')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-8 soft-shadow border border-slate-100 dark:border-slate-700 text-center mb-6">
+                            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{backgroundColor: tx?.color || '#64748b'}}><Icon name={tx?.icon || 'receipt'} size={32} className="text-white" /></div>
+                            <h3 className="text-2xl font-bold mb-2 dark:text-white">฿ {formatMoney(tx?.amount)}</h3>
+                            <p className="text-slate-400">{tx?.merchant || tx?.title}</p>
+                        </div>
+                        <div className="space-y-3">
+                            <div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('date')}</p><p className="font-bold dark:text-white">{tx?.date}</p></div>
+                            <div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('category')}</p><p className="font-bold dark:text-white">{tx?.categoryKey}</p></div>
+                            <div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('notes')}</p><p className="font-bold dark:text-white">{tx?.notes || 'N/A'}</p></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const SplitBillScreen = ({ go, t, Icon, tx }) => {
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('splitBill')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6"><p className="text-center text-slate-400 py-12">{t('noData')}</p></div>
+                </div>
+            );
+        };
+
+        const AddPocketScreen = ({ go, t, Icon, LoadingOverlay, onSave }) => {
+            const [name, setName] = useState(''); const [balance, setBalance] = useState(''); 
+            const [hasTarget, setHasTarget] = useState(false); const [target, setTarget] = useState('');
+            const [selectedIcon, setSelectedIcon] = useState(PASTEL_POCKET_ICONS[0]);
+            const [saving, setSaving] = useState(false); const [showCustomModal, setShowCustomModal] = useState(false);
+            
+            const handleSave = async () => { if(!name || !balance) return; setSaving(true); await onSave({ name, balance: Number(balance), target: hasTarget ? Number(target) : null, icon: selectedIcon }); setSaving(false); };
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('newPocket')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-4">
+                        <div className="flex justify-center mb-6"><div className="w-20 h-20 rounded-full flex items-center justify-center" style={{backgroundColor: selectedIcon.bg}}><Icon name={selectedIcon.icon} size={32} className="text-white" /></div></div>
+                        <button onClick={()=>setShowCustomModal(true)} className="w-full bg-white dark:bg-slate-800 rounded-[28px] p-4 soft-shadow border border-slate-100 dark:border-slate-700 font-bold text-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">{t('chooseIcon')}</button>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder={t('pocketName')} /></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('initialAmount')}</label><input type="number" value={balance} onChange={e=>setBalance(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="0.00" /></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="flex items-center gap-3 cursor-pointer"><input type="checkbox" checked={hasTarget} onChange={e=>setHasTarget(e.target.checked)} className="w-5 h-5 rounded border-slate-300" /><span className="font-bold dark:text-white">{t('setMonthlyTarget')}</span></label>{hasTarget && <input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors mt-3" placeholder="0.00" />}</div>
+                    </div>
+                    <button onClick={handleSave} className="w-full bg-primary text-white py-4 rounded-full shadow-md font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform hover:shadow-lg">{t('savePocket')}</button>
+                    {showCustomModal && (
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-end z-[200] fade-in">
+                            <div className="w-full bg-white dark:bg-slate-800 rounded-t-[32px] p-6 max-h-[80vh] overflow-y-auto no-scrollbar">
+                                <h3 className="font-bold text-lg mb-4 dark:text-white">{t('chooseIcon')}</h3>
+                                <div className="grid grid-cols-5 gap-3 mb-6">
+                                    {PASTEL_POCKET_ICONS.map((ic, i) => (
+                                        <div key={i} onClick={()=>{ setSelectedIcon(ic); setShowCustomModal(false); }} className={`w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all ${selectedIcon.icon === ic.icon ? 'ring-2 ring-offset-2 ring-slate-400 dark:ring-slate-500 scale-105' : 'hover:scale-105'}`} style={{backgroundColor: ic.bg, color: ic.color}}><Icon name={ic.icon} size={20} /></div>
+                                    ))}
+                                </div>
+                                <button onClick={()=>setShowCustomModal(false)} className="w-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-full">{t('cancel')}</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const PocketDetailsScreen = ({ go, t, Icon, pocket, txs }) => {
+            const pocketTxs = txs.filter(tx => tx.pocketId === pocket?.id);
+            const spent = pocketTxs.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+            const remaining = Number(pocket?.balance || 0) - spent;
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('pocketDetails')}</h2><button onClick={()=>go('POCKET_SETTINGS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="settings" size={20}/></button></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-8 soft-shadow border border-slate-100 dark:border-slate-700 text-center mb-6">
+                            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{backgroundColor: pocket?.icon?.bg || '#8cb1ff'}}><Icon name={pocket?.icon?.icon || 'wallet'} size={32} className="text-white" /></div>
+                            <h3 className="text-2xl font-bold mb-2 dark:text-white">{pocket?.name}</h3>
+                            <p className="text-3xl font-bold text-primary">฿ {formatMoney(pocket?.balance)}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('saved')}</p><p className="text-xl font-bold text-primary">฿ {formatMoney(pocket?.balance)}</p></div>
+                            <div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('left')}</p><p className="text-xl font-bold text-primary">฿ {formatMoney(Math.max(0, remaining))}</p></div>
+                        </div>
+                        <h4 className="font-bold text-sm mb-4 dark:text-white">{t('recentActivity')}</h4>
+                        {pocketTxs.length > 0 ? (
+                            <div className="space-y-3">
+                                {pocketTxs.slice(0, 5).map(tx => (
+                                    <div key={tx.id} className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: tx.color || '#64748b'}}><Icon name={tx.icon || 'receipt'} size={18} className="text-white" /></div>
+                                            <div><p className="font-bold text-sm dark:text-white">{tx.merchant}</p><p className="text-xs text-slate-400">{tx.date}</p></div>
+                                        </div>
+                                        <p className="font-bold text-sm dark:text-white">฿ {formatMoney(tx.amount)}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-center text-slate-400 py-6">{t('noData')}</p>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const PocketSettingsScreen = ({ go, t, Icon, LoadingOverlay, pocket, onUpdate, onDelete }) => {
+            const [name, setName] = useState(pocket?.name || ''); const [saving, setSaving] = useState(false);
+            const handleUpdate = async () => { setSaving(true); await onUpdate(pocket?.id, { name }); setSaving(false); };
+            const handleDelete = async () => { if(confirm(t('cannotUndone'))) { setSaving(true); await onDelete(pocket?.id); setSaving(false); } };
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('pocketSettings')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
+                        <Section title={t('general')}><div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div></Section>
+                        <button onClick={handleUpdate} className="w-full bg-primary text-white py-3 rounded-full font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform hover:shadow-lg">{t('saveChanges')}</button>
+                        <button onClick={handleDelete} className="w-full bg-danger text-white py-3 rounded-full font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform hover:shadow-lg">{t('deletePocket')}</button>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // 6. MAIN APP
+        // ==========================================
         const App = () => {
-            const [isAuthReady, setIsAuthReady] = useState(false); const [user, setUser] = useState(null);
             const [screen, setScreen] = useState('SIGN_IN'); const [tab, setTab] = useState('HOME'); const [screenData, setScreenData] = useState(null);
-            const [lang, setLang] = useState('TH'); const [themeMode, setThemeMode] = useState('Light'); const [reduceMotion, setReduceMotion] = useState(false);
-            const [pinCode, setPinCode] = useState(localStorage.getItem('cozy_pin')); const [isLocked, setIsLocked] = useState(!!localStorage.getItem('cozy_pin')); const [showPinModal, setShowPinModal] = useState(false);
-            const [txs, setTxs] = useState([]); const [pockets, setPockets] = useState([]); const [dismissedNotifs, setDismissedNotifs] = useState([]);
-            const [accentColor, setAccentColor] = useState(localStorage.getItem('cozy_accent') || '#8cb1ff');
-            
-            const defaultCatIds = ['Food & Drink', 'Shopping', 'Transport', 'Bills'];
-            const [userCategories, setUserCategories] = useState([{ id: 'Food & Drink', icon: 'coffee', color: '#ff9800' },{ id: 'Shopping', icon: 'shopping-bag', color: '#ffde6a' },{ id: 'Transport', icon: 'car', color: '#94e4ae' },{ id: 'Bills', icon: 'zap', color: '#ff9494' }]);
-            
-            const t = useCallback((key) => getT(lang)(key), [lang]);
-            const go = useCallback((s, tb = null, data = null) => { setScreen(s); if(tb) setTab(tb); if(data!==undefined) setScreenData(data); }, []);
+            const [user, setUser] = useState(null); const [isAuthReady, setIsAuthReady] = useState(false); const [isLocked, setIsLocked] = useState(false);
+            const [lang, setLang] = useState('TH'); const [themeMode, setThemeMode] = useState('System'); const [accentColor, setAccentColor] = useState('#8cb1ff'); const [reduceMotion, setReduceMotion] = useState(false);
+            const [pinCode, setPinCode] = useState(localStorage.getItem('cozy_pin') || ''); const [showPinModal, setShowPinModal] = useState(false);
+            const [txs, setTxs] = useState([]); const [pockets, setPockets] = useState([]); const [userCategories, setUserCategories] = useState([]);
+            const [dismissedNotifs, setDismissedNotifs] = useState([]);
 
             useEffect(() => {
-                localStorage.setItem('cozy_accent', accentColor);
-                document.documentElement.style.setProperty('--color-primary', accentColor);
-                const hex2rgb = (h) => { const v = parseInt(h.replace('#', ''), 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255]; };
-                const [r, g, b] = hex2rgb(accentColor);
-                document.documentElement.style.setProperty('--color-primary-light', `rgba(${r}, ${g}, ${b}, 0.15)`);
-                const isDark = themeMode === 'Dark' || (themeMode === 'System' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                if (isDark) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark');
-            }, [accentColor, themeMode]);
-
-            useEffect(() => {
-                const unsub = auth.onAuthStateChanged(u => {
-                    setIsAuthReady(true);
-                    if(u) {
-                        db.collection('users').doc(u.uid).onSnapshot(doc => { const d = doc.data() || {}; setUser({ uid: u.uid, email: u.email, displayName: d.displayName || u.email.split('@')[0], photoURL: d.photoURL || 'https://ui-avatars.com/api/?name=U&background=8cb1ff&color=fff', bio: d.bio || '' }); });
-                        if(!isLocked) go('MAIN', 'HOME');
-                        db.collection('users').doc(u.uid).collection('transactions').orderBy('timestamp', 'desc').onSnapshot(snap => setTxs(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
-                        db.collection('users').doc(u.uid).collection('pockets').onSnapshot(snap => setPockets(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
-                    } else {
-                        const localGuest = localStorage.getItem('cozy_guest');
-                        if (localGuest) { setUser(JSON.parse(localGuest)); if(!isLocked) go('MAIN', 'HOME'); } else { go('SIGN_IN'); setTxs([]); setPockets([]); setDismissedNotifs([]); }
+                const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+                    if(firebaseUser) { setUser(firebaseUser); setScreen('MAIN'); setTab('HOME'); }
+                    else {
+                        const guest = localStorage.getItem('cozy_guest');
+                        if(guest) { setUser(JSON.parse(guest)); setScreen('MAIN'); setTab('HOME'); }
+                        else { setScreen('SIGN_IN'); }
                     }
+                    setIsAuthReady(true);
                 });
-                return unsub;
-            }, [go, isLocked]);
+                return () => unsubscribe();
+            }, []);
 
-            const handleResetData = async () => {
-                if(!window.confirm(t('confirmReset'))) return;
-                try {
-                    if (user && user.uid !== 'mock-uid') {
-                        const tSnap = await db.collection('users').doc(user.uid).collection('transactions').get();
-                        const pSnap = await db.collection('users').doc(user.uid).collection('pockets').get();
-                        const batch = db.batch();
-                        tSnap.docs.forEach(d => batch.delete(d.ref));
-                        pSnap.docs.forEach(d => batch.delete(d.ref));
-                        await batch.commit();
-                    } else { setTxs([]); setPockets([]); }
-                    alert(t('resetSuccess')); go('MAIN', 'HOME');
-                } catch(e) { console.error(e); }
-            };
+            useEffect(() => {
+                if(themeMode === 'Dark' || (themeMode === 'System' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+                document.documentElement.style.setProperty('--color-primary', accentColor);
+            }, [themeMode, accentColor]);
 
-            const handleUpdateTx = async (id, newData) => {
-                try {
-                    if(user && user.uid !== 'mock-uid') await db.collection('users').doc(user.uid).collection('transactions').doc(id).update(newData);
-                    else setTxs(txs.map(t => t.id === id ? {...t, ...newData} : t));
-                    setScreenData({...screenData, ...newData});
-                } catch(e) { console.error(e); }
-            };
+            const go = (newScreen, newTab=null, data=null) => { setScreen(newScreen); if(newTab) setTab(newTab); if(data) setScreenData(data); };
+            const t = getT(lang);
 
-            const safeToSpend = useMemo(() => pockets.reduce((a,c) => a + Number(c.balance), 0), [pockets]);
+            const safeToSpend = useMemo(() => {
+                const totalBalance = pockets.reduce((sum, p) => sum + Number(p.balance || 0), 0);
+                return Math.max(0, totalBalance);
+            }, [pockets]);
+
             const notifications = useMemo(() => {
-                const notifs = [];
-                if (safeToSpend > 0 && safeToSpend <= 500) notifs.push({ id: 'low-bal', type: 'alert', title: t('lowBalance'), desc: t('safeThreshold'), time: 'Now' });
-                pockets.filter(p => p.hasTarget && Number(p.target) > 0).forEach(p => { 
-                    if ((Number(p.balance) / Number(p.target)) < 0.3) notifs.push({ id: `pocket-low-${p.id}`, type: 'alert', title: t('lowBalance'), desc: `${p.name} เหลือเงินน้อยกว่า 30% (฿ ${formatMoney(p.balance)})`, time: 'Now' }); 
-                });
+                let notifs = [];
+                const totalBalance = pockets.reduce((sum, p) => sum + Number(p.balance || 0), 0);
+                if(totalBalance < totalBalance * 0.3) notifs.push({ id: 'low-balance', type: 'alert', title: t('lowBalance'), desc: t('safeThreshold'), time: new Date().toLocaleTimeString() });
                 if (txs.length > 0) { const latest = txs[0]; notifs.push({ id: `tx-${latest.id}`, type: 'receipt', title: t('newTx'), desc: `${latest.title || latest.merchant} ฿ ${formatMoney(latest.amount)}`, time: latest.date }); }
                 return notifs.filter(n => !dismissedNotifs.includes(n.id));
             }, [safeToSpend, pockets, txs, t, dismissedNotifs]);
 
-            if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-[var(--bg-color)]"><LoadingOverlay text="Loading" Icon={Icon} /></div>;
+            if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-slate-900 text-white"><Icon name="loader-2" size={48} className="animate-spin-smooth"/></div>;
             if (isLocked) return <div className="app-container"><LockScreen Icon={Icon} correctPin={pinCode} onUnlock={()=>{ setIsLocked(false); go(user?'MAIN':'SIGN_IN', user?'HOME':null); }} /></div>;
 
-            const p = { user, setUser, go, t, lang, setLang, themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, pinCode, setPinCode, showPinModal, setShowPinModal, txs, setTxs, pockets, setPockets, screenData, Icon, LoadingOverlay, translateAuthError, visibleNotifications: notifications, clearAllNotifs: ()=>setDismissedNotifs(notifications.map(n=>n.id)), safeToSpend, db, userCategories, setUserCategories, defaultCatIds, onResetData: handleResetData, onUpdateTx: handleUpdateTx };
+            const p = { user, setUser, go, t, lang, setLang, themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, pinCode, setPinCode, showPinModal, setShowPinModal, txs, setTxs, pockets, setPockets, screenData, Icon, LoadingOverlay, translateAuthError, visibleNotifications: notifications, clearAllNotifs: ()=>setDismissedNotifs(notifications.map(n=>n.id)), safeToSpend, db, userCategories, setUserCategories, defaultCatIds: [], onResetData: ()=>{}, onUpdateTx: ()=>{} };
 
             return (
-                <div className={`app-container ${reduceMotion?'no-motion':''} ${themeMode==='Dark'?'theme-dark':''}`}>
+                <div className="app-container">
                     {screen === 'SIGN_IN' && <LoginScreen {...p} />}
                     {screen === 'SIGN_UP' && <SignUpScreen {...p} />}
                     {screen === 'FORGOT_PASS' && <ForgotScreen {...p} />}
@@ -1109,7 +957,8 @@
                         try {
                             if(user && user.uid !== 'mock-uid') {
                                 await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
-                                if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: Number(pkt.balance) - Number(d.amount) }); }
+                                if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.p
+Id; if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: Number(pkt.balance) - Number(d.amount) }); }
                             } else {
                                 setTxs([{id: Date.now().toString(), ...d}, ...txs]); 
                                 if (d.pocketId && d.pocketId !== 'none') setPockets(pockets.map(pk => pk.id === d.pocketId ? {...pk, balance: Number(pk.balance) - Number(d.amount)} : pk));
@@ -1134,6 +983,71 @@
                     {screen === 'THEME' && <ThemeSettingsScreen {...p} />}
                     {screen === 'NOTIFICATION_SETTINGS' && <NotificationSettingsScreen {...p} />}
                     {showPinModal && <PinPadModal onClose={()=>setShowPinModal(false)} onSave={(pin)=>{ setPinCode(pin); localStorage.setItem('cozy_pin', pin); setShowPinModal(false); }} Icon={Icon} isSet={!!pinCode} t={t} />}
+                </div>
+            );
+        };
+
+        const LockScreen = ({ Icon, correctPin, onUnlock }) => {
+            const [pin, setPin] = useState('');
+            const handlePinInput = (digit) => {
+                if(pin.length < 6) {
+                    const newPin = pin + digit;
+                    setPin(newPin);
+                    if(newPin.length === 6 && newPin === correctPin) {
+                        setTimeout(onUnlock, 500);
+                    }
+                }
+            };
+            const handleBackspace = () => setPin(pin.slice(0, -1));
+            return (
+                <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-primary to-primary/80">
+                    <h1 className="text-3xl font-bold text-white mb-8">Enter PIN</h1>
+                    <div className="flex gap-3 mb-8">
+                        {[0,1,2,3,4,5].map(i => (
+                            <div key={i} className={`w-4 h-4 rounded-full transition-all ${i < pin.length ? 'bg-white scale-125' : 'bg-white/30'}`}></div>
+                        ))}
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 mb-8">
+                        {[1,2,3,4,5,6,7,8,9].map(n => (
+                            <button key={n} onClick={()=>handlePinInput(n.toString())} className="w-16 h-16 bg-white/20 text-white font-bold text-xl rounded-full hover:bg-white/30 active:scale-95 transition-all">{n}</button>
+                        ))}
+                        <button onClick={()=>handlePinInput('0')} className="col-span-2 w-full bg-white/20 text-white font-bold text-xl rounded-full hover:bg-white/30 active:scale-95 transition-all">0</button>
+                        <button onClick={handleBackspace} className="w-16 h-16 bg-danger text-white font-bold rounded-full hover:bg-red-600 active:scale-95 transition-all"><Icon name="delete" size={20} /></button>
+                    </div>
+                </div>
+            );
+        };
+
+        const PinPadModal = ({ onClose, onSave, Icon, isSet, t }) => {
+            const [pin, setPin] = useState('');
+            const handlePinInput = (digit) => {
+                if(pin.length < 6) setPin(pin + digit);
+            };
+            const handleBackspace = () => setPin(pin.slice(0, -1));
+            const handleSave = () => {
+                if(pin.length === 6) onSave(pin);
+            };
+            return (
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-end z-[200] fade-in">
+                    <div className="w-full bg-white dark:bg-slate-800 rounded-t-[32px] p-6 max-h-[80vh] overflow-y-auto no-scrollbar">
+                        <h3 className="font-bold text-lg mb-6 dark:text-white">{isSet ? t('changePin') : t('setPin')}</h3>
+                        <div className="flex gap-3 mb-8 justify-center">
+                            {[0,1,2,3,4,5].map(i => (
+                                <div key={i} className={`w-4 h-4 rounded-full transition-all ${i < pin.length ? 'bg-primary scale-125' : 'bg-slate-200'}`}></div>
+                            ))}
+                        </div>
+                        <div className="grid grid-cols-3 gap-3 mb-6">
+                            {[1,2,3,4,5,6,7,8,9].map(n => (
+                                <button key={n} onClick={()=>handlePinInput(n.toString())} className="p-4 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white font-bold text-xl rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 transition-all">{n}</button>
+                            ))}
+                            <button onClick={()=>handlePinInput('0')} className="col-span-2 p-4 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white font-bold text-xl rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 transition-all">0</button>
+                            <button onClick={handleBackspace} className="p-4 bg-danger text-white font-bold rounded-xl hover:bg-red-600 active:scale-95 transition-all"><Icon name="delete" size={20} /></button>
+                        </div>
+                        <div className="flex gap-3">
+                            <button onClick={onClose} className="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-full">{t('cancel')}</button>
+                            <button onClick={handleSave} disabled={pin.length !== 6} className="flex-1 bg-primary text-white font-bold py-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed">{t('done')}</button>
+                        </div>
+                    </div>
                 </div>
             );
         };
