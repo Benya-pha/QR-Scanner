@@ -122,7 +122,7 @@
         const PASTEL_COLORS = ['#ffb0cd', '#ffde6a', '#94e4ae', '#8cb1ff', '#cda8ff', '#ff9494', '#e2e8f0', '#fbcfe8', '#fde047', '#86efac'];
         const lineIconsList = ['wallet', 'plane', 'car', 'gift', 'home', 'coffee', 'piggy-bank', 'shopping-bag', 'heart', 'star', 'music', 'book', 'smartphone', 'monitor', 'camera', 'zap', 'umbrella', 'scissors', 'trending-up', 'award', 'briefcase', 'bus', 'clapperboard', 'gamepad-2', 'headphones', 'key', 'laptop', 'lightbulb', 'map-pin', 'palette', 'pizza', 'shirt', 'smile', 'ticket', 'tv', 'watch', 'wifi', 'utensils', 'train', 'tag'];
         
-        // FIX #1: Define PASTEL_POCKET_ICONS constant
+        // FIX #1: Define PASTEL_POCKET_ICONS constant that was missing
         const PASTEL_POCKET_ICONS = [
             { icon: 'wallet', bg: '#ffb0cd', color: '#fff' },
             { icon: 'plane', bg: '#ffde6a', color: '#fff' },
@@ -175,6 +175,7 @@
         };
 
         // FIX #3: Increase icon size in LoadingOverlay and use smooth spinner
+        // FIX #4: Use animate-spin-smooth instead of animate-spin for smooth rotation
         const LoadingOverlay = ({ text, Icon }) => (
             <div className="absolute inset-0 bg-white/70 dark:bg-dark/70 backdrop-blur-md z-[100] flex flex-col items-center justify-center fade-in">
                 <Icon name="loader-2" size={64} className="animate-spin-smooth text-primary mb-6"/>
@@ -187,13 +188,9 @@
             if (tText.match(/น้ำปั่น|ครัว|coffee|คาเฟ่|อาหาร|เครื่องดื่ม|ข้าว|ชา|นม|food|drink|ปลา|หมู|ไก่|เนื้อ|กุ้ง|เบเกอรี่|ขนม|เค้ก|ชาบู|ปิ้งย่าง|สุกี้|restaurant|cafe/)) return { cat: 'Food & Drink', icon: 'coffee', color: '#ff9800' };
             if (tText.match(/shop|ร้าน|ช้อป|โลตัส|เซเว่น|7-11|บิ๊กซี|มินิมาร์ท|ซื้อ|mart|ค้า|supermarket|mall|store/)) return { cat: 'Shopping', icon: 'shopping-bag', color: '#ffde6a' };
             if (tText.match(/นาย|นาง|น\.ส\.|ด\.ช\.|ด\.ญ\.|คุณ|โอนเงิน/)) return { cat: 'Transfer', icon: 'users', color: '#8cb1ff' };
-            if (tText.match(/บิล|การไฟฟ้า|การประปา|ais|true|dtac|ค่าเน็ต|ค่าไฟ|ค่าน้ำ|bill|ประกั/)) return { cat: 'Utilities', icon: 'zap', color: '#ffde6a' };
-            if (tText.match(/ยา|เภสัช|โรงพยาบาล|คลินิก|ทันตแพทย์|health|medicine|pharmacy|doctor|hospital/)) return { cat: 'Health', icon: 'heart-pulse', color: '#ff9494' };
-            if (tText.match(/ตั๋ว|เที่ยว|โรงแรม|ที่พัก|การบิน|ขึ้นรถ|travel|hotel|flight|ticket/)) return { cat: 'Travel', icon: 'plane', color: '#8cb1ff' };
-            if (tText.match(/เสื้อ|กางเกง|รองเท้า|ชุด|แว่น|กระเป๋า|fashion|clothes|apparel/)) return { cat: 'Fashion', icon: 'shirt', color: '#ffb0cd' };
-            if (tText.match(/หนังสือ|ศึกษา|โรงเรียน|มหาวิทยาลัย|education|book|school/)) return { cat: 'Education', icon: 'book', color: '#94e4ae' };
-            if (tText.match(/เกม|ของเล่น|ความบันเทิง|entertainment|game|toy/)) return { cat: 'Entertainment', icon: 'gamepad-2', color: '#cda8ff' };
-            return { cat: 'General', icon: 'receipt', color: '#64748b' };
+            if (tText.match(/บิล|การไฟฟ้า|การประปา|ais|true|dtac|ค่าเน็ต|ค่าไฟ|ค่าน้ำ|bill|ประกัน|สินเชื่อ|บัตรเครดิต|ชำระ/)) return { cat: 'Bills', icon: 'zap', color: '#ff9494' };
+            if (tText.match(/น้ำมัน|ปั๊ม|ptt|pt|shell|bangchak|caltex|gas/)) return { cat: 'Transport', icon: 'car', color: '#94e4ae' };
+            return { cat: 'General', icon: 'receipt', color: '#94a3b8' };
         };
 
         const processReceiptImage = async (file, onComplete) => {
@@ -260,7 +257,7 @@
                 transactionAlerts: 'เตือนการทำรายการ', everyPurchase: 'ทุกรายการใช้จ่าย', budgetAlerts: 'เตือนงบประมาณ',
                 budgetWarnings: 'เตือนเมื่อใกล้หมดงบ', monthlySummaries: 'สรุปยอดรายเดือน', newLogins: 'การเข้าระบบใหม่', passwordChanges: 'เปลี่ยนรหัสผ่าน',
                 themeMode: 'โหมดหน้าจอ', activeNow: 'กำลังใช้งาน', pinStatusNotSet: 'ยังไม่ตั้งค่า', pinStatusSet: 'ตั้งค่าแล้ว', viewReceipt: 'ดูรูปสลิป',
-                resetData: 'ล้างข้อมูลทั้งหมด', confirmReset: 'คุณแน่ใจหรือไม่ว่าจะล้างประวัติและกระเป๋าเงินทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้', resetSuccess: 'ล้างข้อมูลเรียบร้อยแล้ว!', torchNotSupported: 'ไฟฉายไม่รองรับบนอุปกรณ์นี้', edit: 'แก้ไข', done: 'เสร็จสิ้น', accentColor: 'สีเน้น', name: 'ชื่อ'
+                resetData: 'ล้างข้อมูลทั้งหมด', confirmReset: 'คุณแน่ใจหรือไม่ว่าจะล้างประวัติและกระเป๋าเงินทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้', resetSuccess: 'ล้างข้อมูลเรียบร้อยแล้ว!', torchNotSupported: 'ไฟฉายไม่รองรับบนอุปกรณ์นี้', edit: 'แก้ไข', done: 'เสร็จสิ้น', accentColor: 'สีเน้น', name: 'ชื่อ', email: 'อีเมล', password: 'รหัสผ่าน', confirmPass: 'ยืนยันรหัสผ่าน', createAccount: 'สร้างบัญชี', noAccount: 'ยังไม่มีบัญชี', signUp: 'สมัครสมาชิก', forgotPass: 'ลืมรหัสผ่าน', resetPass: 'รีเซ็ตรหัสผ่าน', checkEmail: 'ตรวจสอบอีเมล', resetSent: 'ลิงก์รีเซ็ตรหัสผ่านถูกส่งไปยังอีเมลของคุณ', sendReset: 'ส่งลิงก์รีเซ็ต', backLogin: 'กลับไปหน้าเข้าสู่ระบบ'
             },
             EN: {
                 welcome: 'Welcome', home: 'Home', wallet: 'Pockets', scan: 'Scan', history: 'History', profile: 'Profile',
@@ -292,7 +289,7 @@
                 transactionAlerts: 'Transaction Alerts', everyPurchase: 'Every purchase', budgetAlerts: 'Budget Alerts',
                 budgetWarnings: 'Budget warnings', monthlySummaries: 'Monthly summaries', newLogins: 'New device logins', passwordChanges: 'Password changes',
                 themeMode: 'Theme Mode', activeNow: 'Active now', pinStatusNotSet: 'Not configured', pinStatusSet: 'Configured', viewReceipt: 'View Receipt',
-                resetData: 'Reset All Data', confirmReset: 'Are you sure you want to clear all transactions and pockets? This cannot be undone.', resetSuccess: 'Data cleared successfully!', torchNotSupported: 'Torch not supported on this device', edit: 'Edit', done: 'Done', accentColor: 'Accent Color', name: 'Name'
+                resetData: 'Reset All Data', confirmReset: 'Are you sure you want to clear all transactions and pockets? This cannot be undone.', resetSuccess: 'Data cleared successfully!', torchNotSupported: 'Torch not supported on this device', edit: 'Edit', done: 'Done', accentColor: 'Accent Color', name: 'Name', email: 'Email', password: 'Password', confirmPass: 'Confirm Password', createAccount: 'Create Account', noAccount: 'No account yet', signUp: 'Sign Up', forgotPass: 'Forgot Password', resetPass: 'Reset Password', checkEmail: 'Check Email', resetSent: 'Password reset link has been sent to your email', sendReset: 'Send Reset Link', backLogin: 'Back to Login'
             }
         };
         const getT = (lang) => (key) => TRANSLATIONS[lang]?.[key] || key;
@@ -465,7 +462,7 @@
         const MainLayout = ({ children, tab, go, t, Icon }) => (
             <div className="flex flex-col h-full relative fade-in">
                 <div className="flex-1 overflow-y-auto pb-[90px] no-scrollbar">{children}</div>
-                {/* FIX #2: Changed from fixed to absolute bottom-0 with safe-area-inset-bottom */}
+                {/* FIX #2: Changed from fixed to absolute bottom-0 with safe-area-inset-bottom for iPhone Safe Area compatibility */}
                 <div className="absolute bottom-0 left-0 right-0 w-full bg-white/90 dark:bg-dark/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50 pb-[env(safe-area-inset-bottom)]">
                     <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} Icon={Icon} />
                     <NavBtn icon="layout-grid" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} Icon={Icon} />
@@ -476,397 +473,612 @@
             </div>
         );
 
-        const HomeScreen = ({ go, user, t, Icon, pockets, txs, safeToSpend }) => {
-            const totalSpent = txs.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
-            const recent = txs.slice(0, 5);
+        const CustomIconModal = ({ onClose, onSelect, t }) => {
+            const [hex, setHex] = useState('#8cb1ff');
             return (
-                <div className="p-6 pt-12 fade-in relative bg-[var(--bg-color)]">
-                    <div className="flex flex-col items-center mb-8 mt-2 relative">
-                        <button onClick={()=>go('NOTIFICATIONS')} className="absolute top-0 right-0 text-slate-400 w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 shadow-sm hover:text-primary transition-colors"><Icon name="bell" size={20}/></button>
-                        <div className="relative mb-4"><div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-md"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-md cursor-pointer hover:scale-110 transition-transform"><Icon name="edit-2" size={14}/></div></div>
-                        <h1 className="text-2xl font-bold mb-1 dark:text-white">{user?.displayName}</h1><p className="text-xs font-bold text-slate-400">{user?.email}</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 mb-8">
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">{t('totalSpend')}</p><h2 className="text-2xl font-bold dark:text-white">฿ {formatMoney(totalSpent)}</h2></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-widest">{t('safeSpend')}</p><h2 className="text-2xl font-bold dark:text-white">฿ {formatMoney(safeToSpend)}</h2></div>
-                    </div>
-                    <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700 mb-6">
-                        <div className="flex items-center justify-between mb-4"><h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('recent')}</h3><button onClick={()=>go('MAIN','HISTORY')} className="text-xs font-bold text-primary hover:underline">{t('seeAll')}</button></div>
-                        {recent.length > 0 ? (
-                            <div className="space-y-3">
-                                {recent.map(tx => (
-                                    <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: tx.color || '#64748b'}}><Icon name={tx.icon || 'receipt'} size={18} className="text-white" /></div>
-                                            <div><p className="font-bold text-sm dark:text-white">{tx.merchant || tx.title}</p><p className="text-xs text-slate-400">{tx.date}</p></div>
-                                        </div>
-                                        <p className="font-bold text-sm dark:text-white">฿ {formatMoney(tx.amount)}</p>
-                                    </div>
-                                ))}
+                <div className="absolute inset-0 bg-black/40 z-[100] flex flex-col justify-end fade-in">
+                    <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-6 pb-12 flex flex-col slide-up h-[70vh]">
+                        <div className="flex justify-between items-center w-full mb-6">
+                            <h3 className="font-bold text-xl dark:text-white">{t('chooseIcon')}</h3>
+                            <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-200 transition-colors"><Icon name="x" size={20}/></button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto no-scrollbar space-y-6">
+                            <div className="bg-slate-50 dark:bg-slate-800 rounded-[28px] p-5 border border-slate-100 dark:border-slate-700">
+                                <label className="text-xs font-bold text-slate-500 mb-3 block">{t('pickColor')}</label>
+                                <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2">
+                                    <div className="w-12 h-12 rounded-full overflow-hidden relative shrink-0 shadow-sm border-2 border-white"><input type="color" value={hex} onChange={e=>setHex(e.target.value)} /></div>
+                                    {PASTEL_COLORS.map(c => <div key={c} onClick={()=>setHex(c)} className="w-10 h-10 rounded-full cursor-pointer shrink-0" style={{backgroundColor: c}}></div>)}
+                                </div>
                             </div>
-                        ) : (
-                            <p className="text-center text-slate-400 py-6">{t('noData')}</p>
-                        )}
+                            <div className="bg-slate-50 dark:bg-slate-800 rounded-[28px] p-5 border border-slate-100 dark:border-slate-700">
+                                <label className="text-xs font-bold text-slate-500 mb-4 block">{t('customIcon')}</label>
+                                <div className="grid grid-cols-5 gap-4">
+                                    {lineIconsList.map((iconName, i) => (
+                                        <div key={i} onClick={() => { onSelect({ type: 'lucide', icon: iconName, bg: `${hex}33`, color: hex }); onClose(); }} className="aspect-square rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-sm" style={{backgroundColor: `${hex}33`, color: hex}}>
+                                            <Icon name={iconName} size={24} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )
+        };
+
+        const CategoryModal = ({ onClose, onSave, t, Icon, initialCategory }) => {
+            const [name, setName] = useState(initialCategory?.id || '');
+            const [hex, setHex] = useState(initialCategory?.color || '#8cb1ff');
+            const [icon, setIcon] = useState(initialCategory?.icon || 'tag');
+
+            return (
+                <div className="absolute inset-0 bg-black/40 z-[100] flex items-end justify-center fade-in">
+                    <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-6 pb-12 slide-up h-[85vh] flex flex-col">
+                        <div className="flex justify-between items-center w-full mb-6">
+                            <h3 className="font-bold text-xl dark:text-white">{t('addCategory')}</h3>
+                            <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white"><Icon name="x" size={20}/></button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                            <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-4 rounded-[24px]">
+                                <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm" style={{backgroundColor: `${hex}33`, color: hex}}><Icon name={icon} size={28}/></div>
+                                <input autoFocus value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-lg outline-none text-slate-800 dark:text-white" placeholder={t('categoryName')} />
+                            </div>
+                            
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">{t('pickColor')}</label>
+                                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
+                                    <div className="w-10 h-10 rounded-full overflow-hidden relative shrink-0 shadow-sm border-2 border-white"><input type="color" value={hex} onChange={e=>setHex(e.target.value)} /></div>
+                                    {PASTEL_COLORS.map(c => <div key={c} onClick={()=>setHex(c)} className={`w-10 h-10 rounded-full cursor-pointer shrink-0 transition-transform ${hex===c?'scale-110 ring-2 ring-primary/50':''}`} style={{backgroundColor: c}}></div>)}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">{t('customIcon')}</label>
+                                <div className="grid grid-cols-6 gap-3">
+                                    {lineIconsList.map((ic, i) => (
+                                        <div key={i} onClick={() => setIcon(ic)} className={`aspect-square rounded-full flex items-center justify-center cursor-pointer transition-transform shadow-sm ${icon===ic?'scale-110 ring-2 ring-primary/50':''}`} style={{backgroundColor: `${hex}15`, color: hex}}>
+                                            <Icon name={ic} size={20} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        <button onClick={()=>onSave({id: name, icon: icon, color: hex})} disabled={!name} className="w-full bg-primary text-white py-5 rounded-full font-bold text-lg disabled:opacity-50 transition-all hover:shadow-lg active:scale-95">{t('add')}</button>
                     </div>
                 </div>
             );
+        };
+
+        const SectionOld = ({ title, children }) => (
+            <div className="mb-6"><h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-4">{title}</h4><div className="bg-white dark:bg-slate-800 rounded-[28px] border border-slate-100 dark:border-slate-700 soft-shadow overflow-hidden">{children}</div></div>
+        );
+
+        const PinPadModalOld = ({ onClose, onSave, isSet, t, Icon }) => {
+            const [pin, setPin] = useState('');
+            const press = (n) => { if(pin.length < 6) setPin(p => p + n); };
+            const del = () => setPin(p => p.slice(0, -1));
+            useEffect(() => { if(pin.length === 6) setTimeout(()=>{ onSave(pin); onClose(); }, 200); }, [pin, onSave, onClose]);
+            return (
+                <div className="absolute inset-0 bg-black/40 z-[100] flex flex-col justify-end fade-in">
+                    <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center slide-up shadow-2xl">
+                        <div className="flex justify-between w-full mb-8"><div className="w-10"></div><h3 className="font-bold text-xl dark:text-white">{isSet?t('changePin'):t('setPin')}</h3><button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-200 transition-colors"><Icon name="x" size={20}/></button></div>
+                        <div className="flex gap-4 mb-10">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}></div>)}</div>
+                        <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
+                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100">{n}</button>)}
+                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-slate-50 dark:bg-slate-800 text-slate-500 active:scale-95 transition-transform rounded-full hover:bg-slate-100"><Icon name="delete" size={28}/></button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const LockScreen = ({ Icon, correctPin, onUnlock }) => {
+            const [pin, setPin] = useState(''); const [err, setErr] = useState('');
+            const press = (n) => { if(pin.length < 6) { setPin(p => p + n); setErr(''); } };
+            const del = () => setPin(p => p.slice(0, -1));
+            useEffect(() => { if(pin.length === 6) { if(pin === correctPin) onUnlock(); else { setErr('Error'); setTimeout(()=>setPin(''), 500); } } }, [pin, correctPin, onUnlock]);
+
+            return (
+                <div className="flex-1 flex flex-col justify-end bg-primary/10 fade-in">
+                    <div className="flex-1 flex flex-col items-center justify-center pt-20"><div className="w-24 h-24 bg-white text-primary rounded-full flex items-center justify-center mb-6 shadow-md"><Icon name="lock" size={40}/></div><h2 className="text-primary text-2xl font-bold mb-2 tracking-wide">LOCKED</h2></div>
+                    <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.05)]">
+                        <div className="flex gap-4 mb-8">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? (err?'bg-danger':'bg-primary') : 'bg-slate-100 dark:bg-slate-800'}`}></div>)}</div>
+                        {err && <p className="text-danger text-xs font-bold mb-4 bg-red-50 dark:bg-red-500/10 px-3 py-1 rounded-full">{err}</p>}
+                        <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
+                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">{n}</button>)}
+                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-slate-50 dark:bg-slate-800 active:scale-95 transition-transform rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"><Icon name="delete" size={28}/></button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // 5. SCREENS
+        // ==========================================
+        const HomeScreen = ({ user, txs, pockets, safeToSpend, visibleNotifications, go, t, Icon }) => {
+            const totalSpend = txs.reduce((a,c) => a + Number(c.amount), 0);
+            return (
+                <div className="p-6 pt-10 fade-in">
+                    <div className="flex justify-between items-center mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm w-12 h-12 flex items-center justify-center bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
+                            <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('welcome')},</p><h2 className="text-lg font-bold leading-none dark:text-white">{user?.displayName}</h2></div>
+                        </div>
+                        <button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 relative active:scale-95 transition-transform hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700">
+                            <Icon name="bell" size={20}/>{visibleNotifications.length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800"></span>}
+                        </button>
+                    </div>
+                    
+                    <div className="bg-primary p-6 rounded-[32px] text-white shadow-[0_15px_30px_var(--color-primary-light)] mb-4 relative overflow-hidden transition-colors">
+                        <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
+                        <p className="text-xs font-bold text-white/80 uppercase tracking-widest mb-1">{t('totalSpend')}</p>
+                        <h1 className="text-4xl font-bold">฿ {formatMoney(totalSpend)}</h1>
+                    </div>
+                    
+                    {pockets.length > 0 && (
+                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] soft-shadow mb-8 border border-slate-100 dark:border-slate-800">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1"><Icon name="wallet" size={14}/> {t('safeSpend')}</p>
+                            <h2 className="text-3xl font-bold mb-4 dark:text-white">฿ {formatMoney(safeToSpend)}</h2>
+                            <div className="grid grid-cols-2 gap-3 mt-4">
+                                {pockets.map(p => (
+                                    <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl cursor-pointer active:scale-95 transition-transform hover:bg-slate-100 dark:hover:bg-slate-700">
+                                        <div className="flex items-center gap-2 mb-2"><PocketIcon pocket={p} size={14} /><span className="text-xs font-bold dark:text-white truncate">{p.name}</span></div>
+                                        <div className="text-sm font-bold text-primary">฿ {formatMoney(p.balance)}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    
+                    <div className="flex justify-between items-end mb-4"><h3 className="text-xl font-bold dark:text-white">{t('recent')}</h3><button onClick={()=>go('MAIN','HISTORY')} className="text-xs font-bold text-primary uppercase tracking-widest hover:underline px-3 py-1 rounded-full">{t('seeAll')}</button></div>
+                    <div className="space-y-3">
+                        {txs.length === 0 ? <div className="bg-white dark:bg-slate-900 rounded-[28px] text-center p-8 soft-shadow border border-slate-100 dark:border-slate-800"><p className="font-bold text-slate-400">{t('noData')}</p></div> : 
+                        txs.slice(0,4).map(tx => (
+                            <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white dark:bg-slate-900 p-4 rounded-[24px] flex justify-between items-center soft-shadow cursor-pointer active:scale-95 transition-all border border-slate-100 dark:border-slate-800 hover:-translate-y-1 hover:shadow-md">
+                                <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20} /><div><h4 className="font-bold text-sm dark:text-white">{tx.title}</h4><p className="text-[10px] font-bold text-slate-500 mt-1">{tx.category}</p></div></div>
+                                <div className="font-bold text-sm dark:text-white">฿ {formatMoney(tx.amount)}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const NavBtn = ({ icon, label, active, onClick, Icon }) => (<button onClick={onClick} className={`flex flex-col items-center gap-1 w-12 transition-all hover:scale-105 ${active?'text-primary':'text-slate-400 dark:text-slate-500'}`}><Icon name={icon} size={22} strokeWidth={active?2.5:1.5} /><span className="text-[9px] font-bold">{label}</span></button>);
+
+        const PocketDetailsScreen = ({ go, pocket, txs, t, Icon }) => {
+            if(!pocket) return null;
+            const pocketTxs = txs.filter(tx => tx.pocketId === pocket.id);
+            const pct = pocket.hasTarget && pocket.target > 0 ? Math.min((pocket.balance / pocket.target) * 100, 100) : 0;
+            const barColor = pocket.color || 'var(--color-primary)';
+            const bgColor = pocket.bg || 'var(--color-primary-light)';
+            
+            const chartData = useMemo(() => {
+                if (pocketTxs.length === 0) return [10, 10, 10, 10, 10];
+                const amounts = pocketTxs.slice(0, 5).map(t => Math.min(100, Math.max(10, (Math.abs(t.amount) / (pocket.initialAmount || pocket.balance || 100)) * 100 * 2)));
+                while(amounts.length < 5) amounts.unshift(10);
+                return amounts.reverse();
+            }, [pocketTxs, pocket.balance, pocket.initialAmount]);
+
+            return (
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketDetails')}</h2><button onClick={()=>go('POCKET_SETTINGS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="settings" size={20} /></button></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <div className="rounded-[36px] p-8 relative overflow-hidden shadow-sm" style={{backgroundColor: bgColor}}>
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-white/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                            <div className="flex items-center gap-4 mb-6 relative z-10"><div className="bg-white/50 rounded-[20px] w-14 h-14 flex items-center justify-center backdrop-blur-sm shadow-sm" style={{color:barColor}}><Icon name={pocket.icon} size={24}/></div><h3 className="font-bold text-slate-800 text-xl">{pocket.name}</h3></div>
+                            <h1 className="text-4xl font-bold text-slate-800 mb-2 relative z-10">฿ {formatMoney(pocket.balance)}</h1>
+                            {pocket.hasTarget && <p className="text-xs font-bold text-slate-600 mb-6 relative z-10">Goal: ฿ {formatMoney(pocket.target)}</p>}
+                            {pocket.hasTarget && (<div className="relative z-10 bg-white/40 p-4 rounded-[20px] backdrop-blur-sm shadow-sm border border-white/20"><div className="flex justify-between text-[10px] font-bold text-slate-700 mb-2"><span>{Math.round(pct)}% {t('saved')}</span><span>฿ {formatMoney(pocket.target - pocket.balance)} {t('left')}</span></div><div className="h-1.5 w-full bg-slate-800/10 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`, backgroundColor: barColor}}></div></div></div>)}
+                        </div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700"><h3 className="font-bold text-sm mb-4 dark:text-white">{t('spendingTrend')}</h3><div className="flex items-end justify-between gap-3 h-24">{chartData.map((h, i) => (<div key={i} className="flex flex-col items-center gap-2 flex-1"><div className="w-full rounded-t-lg transition-all duration-500 ease-out" style={{height: `${h}%`, backgroundColor: i===4 ? barColor : 'var(--color-primary-light)'}}></div><span className="text-[9px] font-bold text-slate-400">W{i+1}</span></div>))}</div></div>
+                        
+                        <div>
+                            <h3 className="font-bold text-sm mb-4 ml-2 dark:text-white uppercase tracking-widest">{t('recentActivity')}</h3>
+                            <div className="space-y-3">
+                                {pocketTxs.length === 0 ? <div className="text-center p-8 text-xs font-bold text-slate-400">{t('noData')}</div> : pocketTxs.map(tx => (
+                                    <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white dark:bg-slate-800 p-4 rounded-[24px] flex justify-between items-center soft-shadow cursor-pointer active:scale-95 transition-all border border-slate-100 dark:border-slate-700 hover:-translate-y-1 hover:shadow-md">
+                                        <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={18}/><div><h4 className="font-bold text-sm leading-tight mb-1 dark:text-white">{tx.title}</h4><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{tx.date}</p></div></div>
+                                        <div className="font-bold text-sm dark:text-white">฿ {formatMoney(tx.amount)}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const PocketSettingsScreen = ({ go, pocket, onUpdate, onDelete, t, Icon }) => {
+            const [name, setName] = useState(pocket?.name || ''); const [hasTarget, setHasTarget] = useState(pocket?.hasTarget || false); const [target, setTarget] = useState(pocket?.target || '');
+            const [selectedIcon, setSelectedIcon] = useState({ type: pocket?.iconType || 'lucide', icon: pocket?.icon || 'wallet', colorType: pocket?.colorType || 'hex', color: pocket?.color || '#ffffff', bg: pocket?.bg || 'var(--color-primary-light)' });
+            const [showCustomModal, setShowCustomModal] = useState(false);
+            if(!pocket) return null;
+
+            return (
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketSettings')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
+                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('general')}</h3>
+                            <div className="space-y-4">
+                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('pocketName')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="edit-2" size={16} className="text-primary mr-3" /><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder={t('pocketName')} /></div></div>
+                                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-2xl"><div className="flex items-center gap-3"><Icon name="target" size={18} className="text-primary" /><span className="font-bold text-sm dark:text-white">{t('monthlyGoal')}</span></div><button onClick={()=>setHasTarget(!hasTarget)} className={`w-12 h-6 rounded-full transition-colors ${hasTarget ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${hasTarget ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
+                                {hasTarget && <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('targetAmount')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><span className="text-primary font-bold mr-2">฿</span><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="0.00" /></div></div>}
+                            </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
+                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('iconColor')}</h3>
+                            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-2xl mb-4 cursor-pointer" onClick={()=>setShowCustomModal(true)}>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: selectedIcon.color, color: 'white'}}><Icon name={selectedIcon.icon} size={24}/></div>
+                                    <span className="font-bold dark:text-white">{t('chooseIcon')}</span>
+                                </div>
+                                <Icon name="chevron-right" size={20} className="text-slate-400" />
+                            </div>
+                            {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={(icon)=>setSelectedIcon(icon)} t={t} />}
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
+                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('notifSettings')}</h3>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-2xl">
+                                    <span className="font-bold text-sm dark:text-white">{t('notify80')}</span>
+                                    <button className="w-12 h-6 bg-primary rounded-full flex items-center justify-center"><div className="w-5 h-5 bg-white rounded-full translate-x-3"></div></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <button onClick={()=>onUpdate(pocket.id, {name, hasTarget, target: hasTarget ? Number(target) : 0, icon: selectedIcon.icon, color: selectedIcon.color, bg: selectedIcon.bg})} className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform hover:shadow-lg">{t('saveChanges')}</button>
+                            <button onClick={()=>{ if(confirm(t('cannotUndone'))) onDelete(pocket.id); }} className="w-full bg-danger/10 text-danger font-bold py-4 rounded-full active:scale-95 transition-transform hover:bg-danger/20">{t('deletePocket')}</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const PocketIcon = ({ pocket, size=20 }) => {
+            const style = { width: size, height: size, backgroundColor: pocket?.bg || pocket?.color || 'var(--color-primary-light)', color: pocket?.color || 'var(--color-primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' };
+            return <div style={style}><Icon name={pocket?.icon || 'wallet'} size={size * 0.6} /></div>;
         };
 
         const PocketsScreen = ({ go, pockets, t, Icon }) => {
             return (
-                <div className="p-6 pt-12 fade-in relative bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><h1 className="text-2xl font-bold dark:text-white">{t('yourPockets')}</h1><button onClick={()=>go('ADD_POCKET')} className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center active:scale-95 transition-transform hover:shadow-lg"><Icon name="plus" size={20} /></button></div>
-                    {pockets.length > 0 ? (
-                        <div className="grid grid-cols-1 gap-4 mb-8">
-                            {pockets.map(pocket => (
-                                <div key={pocket.id} onClick={()=>go('POCKET_DETAILS', null, pocket)} className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700 cursor-pointer hover:shadow-lg transition-all">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: pocket.icon?.bg || '#8cb1ff'}}><Icon name={pocket.icon?.icon || 'wallet'} size={24} className="text-white" /></div>
-                                        <button onClick={(e)=>{ e.stopPropagation(); go('POCKET_SETTINGS', null, pocket); }} className="w-8 h-8 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full flex items-center justify-center transition-colors"><Icon name="more-vertical" size={18} className="text-slate-400" /></button>
-                                    </div>
-                                    <h3 className="font-bold text-lg mb-1 dark:text-white">{pocket.name}</h3>
-                                    <p className="text-2xl font-bold text-primary mb-2">฿ {formatMoney(pocket.balance)}</p>
-                                    {pocket.target && <p className="text-xs text-slate-400">{t('targetAmount')}: ฿ {formatMoney(pocket.target)}</p>}
-                                </div>
-                            ))}
+                <div className="p-6 pt-10 fade-in">
+                    <h2 className="text-2xl font-bold mb-8 dark:text-white">{t('yourPockets')}</h2>
+                    {pockets.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center p-12 text-center">
+                            <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4"><Icon name="wallet" size={32} /></div>
+                            <p className="font-bold text-slate-400 mb-4">{t('keepOrganized')}</p>
+                            <button onClick={()=>go('ADD_POCKET')} className="bg-primary text-white font-bold py-3 px-6 rounded-full active:scale-95 transition-transform">{t('createNewPocket')}</button>
                         </div>
                     ) : (
-                        <div className="text-center py-12"><Icon name="inbox" size={48} className="text-slate-300 mx-auto mb-4"/><p className="text-slate-400 mb-6">{t('noData')}</p><button onClick={()=>go('ADD_POCKET')} className="bg-primary text-white px-6 py-3 rounded-full font-bold active:scale-95 transition-transform">{t('createNewPocket')}</button></div>
+                        <div className="space-y-4 pb-24">
+                            {pockets.map(p => (
+                                <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-white dark:bg-slate-800 p-6 rounded-[28px] soft-shadow cursor-pointer active:scale-95 transition-all border border-slate-100 dark:border-slate-700 hover:-translate-y-1 hover:shadow-md">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-4">
+                                            <PocketIcon pocket={p} size={24} />
+                                            <div><h3 className="font-bold text-lg dark:text-white">{p.name}</h3><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{p.hasTarget ? `Goal: ฿${formatMoney(p.target)}` : 'No goal'}</p></div>
+                                        </div>
+                                        <Icon name="chevron-right" size={20} className="text-slate-300" />
+                                    </div>
+                                    <div className="text-2xl font-bold text-primary dark:text-white">฿ {formatMoney(p.balance)}</div>
+                                </div>
+                            ))}
+                            <button onClick={()=>go('ADD_POCKET')} className="w-full bg-white dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 p-6 rounded-[28px] font-bold text-primary flex items-center justify-center gap-2 active:scale-95 transition-transform hover:bg-slate-50 dark:hover:bg-slate-700"><Icon name="plus" size={20} /> {t('newPocket')}</button>
+                        </div>
                     )}
                 </div>
             );
         };
 
-        const HistoryScreen = ({ go, txs, t, Icon }) => {
-            const [search, setSearch] = useState('');
-            const filtered = txs.filter(tx => (tx.merchant + ' ' + tx.title + ' ' + tx.notes).toLowerCase().includes(search.toLowerCase()));
+        const AddPocketScreen = ({ go, onSave, t, Icon }) => {
+            const [name, setName] = useState(''); const [initialAmount, setInitialAmount] = useState(''); const [hasTarget, setHasTarget] = useState(false); const [target, setTarget] = useState('');
+            const [selectedIcon, setSelectedIcon] = useState(PASTEL_POCKET_ICONS[0]);
+            const [showIconModal, setShowIconModal] = useState(false);
+
+            const handleSave = async () => {
+                if(!name || !initialAmount) return;
+                await onSave({ name, initialAmount: Number(initialAmount), balance: Number(initialAmount), hasTarget, target: hasTarget ? Number(target) : 0, icon: selectedIcon.icon, color: selectedIcon.bg, bg: `${selectedIcon.bg}33`, iconType: 'lucide', colorType: 'hex' });
+            };
+
             return (
-                <div className="p-6 pt-12 fade-in relative bg-[var(--bg-color)]">
-                    <h1 className="text-2xl font-bold mb-6 dark:text-white">{t('transactions')}</h1>
-                    <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 mb-6 flex items-center gap-3 soft-shadow"><Icon name="search" size={20} className="text-slate-400"/><input value={search} onChange={e=>setSearch(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('searchPlaceholder')} /></div>
-                    {filtered.length > 0 ? (
-                        <div className="space-y-3">
-                            {filtered.map(tx => (
-                                <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700 cursor-pointer hover:shadow-lg transition-all flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: tx.color || '#64748b'}}><Icon name={tx.icon || 'receipt'} size={20} className="text-white" /></div>
-                                        <div><p className="font-bold dark:text-white">{tx.merchant || tx.title}</p><p className="text-xs text-slate-400">{tx.date}</p></div>
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('newPocket')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
+                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('general')}</h3>
+                            <div className="space-y-4">
+                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('pocketName')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="edit-2" size={16} className="text-primary mr-3" /><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder={t('pocketName')} /></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('initialAmount')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><span className="text-primary font-bold mr-2">฿</span><input type="number" value={initialAmount} onChange={e=>setInitialAmount(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="0.00" /></div></div>
+                                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-2xl"><div className="flex items-center gap-3"><Icon name="target" size={18} className="text-primary" /><span className="font-bold text-sm dark:text-white">{t('monthlyGoal')}</span></div><button onClick={()=>setHasTarget(!hasTarget)} className={`w-12 h-6 rounded-full transition-colors ${hasTarget ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${hasTarget ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
+                                {hasTarget && <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('targetAmount')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><span className="text-primary font-bold mr-2">฿</span><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="0.00" /></div></div>}
+                            </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
+                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('iconColor')}</h3>
+                            <div className="grid grid-cols-5 gap-3">
+                                {PASTEL_POCKET_ICONS.map((icon, i) => (
+                                    <div key={i} onClick={()=>setSelectedIcon(icon)} className={`aspect-square rounded-full flex items-center justify-center cursor-pointer transition-transform ${selectedIcon.icon === icon.icon ? 'scale-110 ring-2 ring-primary' : 'hover:scale-105'}`} style={{backgroundColor: icon.bg, color: icon.color}}>
+                                        <Icon name={icon.icon} size={24} />
                                     </div>
-                                    <p className="font-bold dark:text-white">฿ {formatMoney(tx.amount)}</p>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    <button onClick={handleSave} disabled={!name || !initialAmount} className="w-full bg-primary text-white font-bold py-4 rounded-full disabled:opacity-50 active:scale-95 transition-transform hover:shadow-lg">{t('savePocket')}</button>
+                </div>
+            );
+        };
+
+        const HistoryScreen = ({ go, txs, t, Icon, userCategories }) => {
+            const [searchTerm, setSearchTerm] = useState(''); const [selectedCat, setSelectedCat] = useState('All');
+            const filtered = txs.filter(tx => {
+                const matchSearch = !searchTerm || tx.title.toLowerCase().includes(searchTerm.toLowerCase()) || tx.category.toLowerCase().includes(searchTerm.toLowerCase()) || tx.merchant?.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchCat = selectedCat === 'All' || tx.category === selectedCat;
+                return matchSearch && matchCat;
+            });
+
+            return (
+                <div className="p-6 pt-10 fade-in pb-24">
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold mb-4 dark:text-white">{t('transactions')}</h2>
+                        <div className="bg-white dark:bg-slate-800 p-3.5 rounded-2xl flex items-center border border-slate-100 dark:border-slate-700 focus-within:ring-2 ring-primary/20 transition-colors">
+                            <Icon name="search" size={18} className="text-slate-400 mr-3" />
+                            <input value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder={t('searchPlaceholder')} />
+                        </div>
+                    </div>
+
+                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-4 mb-6">
+                        <button onClick={()=>setSelectedCat('All')} className={`px-4 py-2 rounded-full text-xs font-bold shrink-0 transition-colors ${selectedCat==='All'?'bg-primary text-white':'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}`}>{t('all')}</button>
+                        {userCategories.map(cat => <button key={cat.id} onClick={()=>setSelectedCat(cat.id)} className={`px-4 py-2 rounded-full text-xs font-bold shrink-0 transition-colors flex items-center gap-1.5 ${selectedCat===cat.id?'bg-primary text-white':'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}`}><Icon name={cat.icon} size={14}/>{cat.id}</button>)}
+                    </div>
+
+                    <div className="space-y-3">
+                        {filtered.length === 0 ? <div className="text-center p-8 text-xs font-bold text-slate-400">{t('notFound')}</div> :
+                        filtered.map(tx => (
+                            <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white dark:bg-slate-800 p-4 rounded-[24px] flex justify-between items-center soft-shadow cursor-pointer active:scale-95 transition-all border border-slate-100 dark:border-slate-700 hover:-translate-y-1 hover:shadow-md">
+                                <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20} /><div><h4 className="font-bold text-sm dark:text-white">{tx.title}</h4><p className="text-[10px] font-bold text-slate-500 mt-1">{tx.category}</p></div></div>
+                                <div className="font-bold text-sm dark:text-white">฿ {formatMoney(tx.amount)}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const TxDetailScreen = ({ go, tx, t, Icon, onUpdateTx }) => {
+            if(!tx) return null;
+            return (
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('txDetail')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        {tx.imageUrl && <div className="w-full h-48 bg-white dark:bg-slate-900 rounded-[28px] p-2 flex justify-center items-center soft-shadow border border-slate-100 dark:border-slate-800 relative"><img src={tx.imageUrl} className="max-w-full max-h-full object-contain rounded-[20px]" /><div className="absolute right-3 bottom-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-primary shadow-sm"><Icon name="scan-line" size={14}/></div></div>}
+                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('amount')}</p><h1 className="text-5xl font-bold text-primary">฿ {formatMoney(tx.amount)}</h1></div>
+                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800 soft-shadow space-y-5">
+                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchant')}</label><p className="font-bold text-lg dark:text-white">{tx.title}</p></div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><p className="font-bold dark:text-white">{tx.date}</p></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label><p className="font-bold dark:text-white">{tx.category}</p></div>
+                            </div>
+                            {tx.notes && <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('notes')}</label><p className="font-bold dark:text-white">{tx.notes}</p></div>}
+                        </div>
+                        <button onClick={()=>go('SPLIT_BILL', null, tx)} className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform hover:shadow-lg">{t('splitBill')}</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const SplitBillScreen = ({ go, tx, t, Icon }) => {
+            const [friends, setFriends] = useState([{ name: '', share: tx.amount / 2 }]);
+            const totalShares = friends.reduce((a, c) => a + Number(c.share), 0) + Number(tx.amount / 2);
+            
+            return (
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('splitBill')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('totalAmount')}</p><h1 className="text-5xl font-bold text-primary">฿ {formatMoney(tx.amount)}</h1></div>
+                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[28px] border border-slate-100 dark:border-slate-800 soft-shadow space-y-4">
+                            <div className="flex items-center justify-between"><p className="font-bold dark:text-white">Your share</p><p className="font-bold text-lg text-primary">฿ {formatMoney(tx.amount / 2)}</p></div>
+                            {friends.map((f, i) => (
+                                <div key={i} className="flex items-center gap-3">
+                                    <input value={f.name} onChange={e=>{ const newFriends = [...friends]; newFriends[i].name = e.target.value; setFriends(newFriends); }} className="flex-1 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg font-bold outline-none dark:text-white" placeholder={t('name')} />
+                                    <span className="font-bold dark:text-white">฿</span>
+                                    <input type="number" value={f.share} onChange={e=>{ const newFriends = [...friends]; newFriends[i].share = e.target.value; setFriends(newFriends); }} className="w-20 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg font-bold outline-none dark:text-white" />
                                 </div>
                             ))}
+                            <button onClick={()=>setFriends([...friends, {name: '', share: 0}])} className="w-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold py-2 rounded-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"><Icon name="plus" size={16}/> {t('addFriend')}</button>
                         </div>
-                    ) : (
-                        <div className="text-center py-12"><Icon name="inbox" size={48} className="text-slate-300 mx-auto mb-4"/><p className="text-slate-400">{t('notFound')}</p></div>
-                    )}
+                        <button className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform hover:shadow-lg">{t('confirmSplit')}</button>
+                    </div>
                 </div>
             );
         };
 
-        const ProfileScreen = ({ go, user, t, Icon, onLogout }) => {
-            return (
-                <div className="p-6 pt-12 fade-in relative h-full overflow-y-auto no-scrollbar bg-[var(--bg-color)]">
-                    <div className="flex flex-col items-center mb-8 mt-2 relative">
-                        <button onClick={()=>go('NOTIFICATIONS')} className="absolute top-0 right-0 text-slate-400 w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 shadow-sm hover:text-primary transition-colors"><Icon name="bell" size={20}/></button>
-                        <div className="relative mb-4"><div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-md"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-md cursor-pointer hover:scale-110 transition-transform"><Icon name="edit-2" size={14}/></div></div>
-                        <h1 className="text-2xl font-bold mb-1 dark:text-white">{user?.displayName}</h1><p className="text-xs font-bold text-slate-400">{user?.email}</p>
-                    </div>
-                    <div className="space-y-6 mb-8">
-                        <Section title={t('accountTitle')}><MenuItem icon="user" label={t('accountSettings')} onClick={()=>go('EDIT_PROFILE')} /><MenuItem icon="shield" label={t('security')} onClick={()=>go('SECURITY')} /></Section>
-                        <Section title={t('preferencesTitle')}><MenuItem icon="globe" label={t('language')} onClick={()=>go('LANGUAGE')} /><MenuItem icon="palette" label={t('appTheme')} onClick={()=>go('THEME')} /></Section>
-                    </div>
-                    <button onClick={onLogout} className="w-full bg-danger text-white font-bold py-4 rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all uppercase tracking-widest">{t('logout')}</button>
-                </div>
-            );
-        };
+        const AddTxScreen = ({ go, onSave, t, Icon, pockets, userCategories }) => {
+            const [amount, setAmount] = useState(''); const [merchant, setMerchant] = useState(''); const [txDate, setTxDate] = useState(new Date().toISOString().split('T')[0]); const [selectedPocket, setSelectedPocket] = useState('none'); const [activeCategory, setActiveCategory] = useState(userCategories[0]?.id || 'General'); const [saving, setSaving] = useState(false);
+            
+            const handleSave = async () => {
+                setSaving(true);
+                try {
+                    const catObj = userCategories.find(c => c.id === activeCategory) || userCategories[0];
+                    await onSave({ title: merchant || t('manual'), amount: Number(amount), category: activeCategory, date: txDate, iconType: 'lucide', icon: catObj.icon, colorType: 'hex', color: catObj.color, bg: `${catObj.color}33`, pocketId: selectedPocket, imageUrl: null });
+                } catch(e) { console.error(e); } finally { setSaving(false); }
+            };
 
-        const EditProfileScreen = ({ go, user, t, Icon, LoadingOverlay }) => {
-            const [name, setName] = useState(user?.displayName || ''); const [bio, setBio] = useState(''); const [saving, setSaving] = useState(false); const fileInputRef = useRef(null);
-            const handleAvatarUpload = async (e) => { const file = e.target.files?.[0]; if(file && user?.uid !== 'mock-uid') { setSaving(true); /* Upload logic */ setSaving(false); } };
-            const handleUpdate = async () => { setSaving(true); /* Update logic */ setSaving(false); };
             return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
                     {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('editProfile')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
-                        <div className="flex flex-col items-center mb-8 relative"><div className="relative"><div className="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-md overflow-hidden bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><button onClick={()=>fileInputRef.current.click()} className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full shadow-md flex items-center justify-center hover:scale-110 transition-transform"><Icon name="camera" size={14}/></button></div><input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} /></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('name')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('bio')}</label><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm h-28 resize-none outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="Add bio..." /></div>
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('addTx')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('amount')}</p><div className="flex items-center gap-2"><span className="text-2xl font-bold text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-bold bg-transparent text-center w-full outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary transition-colors dark:text-white" placeholder="0.00"/></div></div>
+                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800 soft-shadow space-y-5">
+                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchant')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="store" size={18} className="text-primary mr-3" /><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="ระบุชื่อร้านค้า"/></div></div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="calendar" size={16} className="text-slate-400 mr-2" /><input type="date" value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none dark:text-white"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center relative focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="wallet" size={16} className="text-primary mr-2" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-3">{t('category')}</label>
+                                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full shrink-0 transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primaryLight border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button></div>))}
+                                </div>
+                            </div>
+                        </div>
+                        <button onClick={handleSave} disabled={!amount} className="w-full bg-primary text-white font-bold py-4 rounded-full disabled:opacity-50 active:scale-95 transition-transform hover:shadow-lg">{t('saveTx')}</button>
                     </div>
-                    <button onClick={handleUpdate} className="w-full bg-primary text-white py-4 rounded-full shadow-md font-bold text-sm uppercase tracking-widest mt-4 active:scale-95 transition-transform hover:shadow-lg">{t('saveChanges')}</button>
+                </div>
+            );
+        };
+
+        const NotificationsScreen = ({ go, visibleNotifications, clearAllNotifs, t, Icon }) => {
+            return (
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2><button onClick={clearAllNotifs} className="text-xs font-bold text-primary uppercase tracking-widest hover:underline">{t('clearAll')}</button></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-6">
+                        {visibleNotifications.length === 0 ? <div className="text-center p-8 text-xs font-bold text-slate-400">{t('caughtUp')}</div> :
+                        visibleNotifications.map(notif => (
+                            <div key={notif.id} className="bg-white dark:bg-slate-800 p-4 rounded-[24px] flex items-start gap-4 soft-shadow border border-slate-100 dark:border-slate-700">
+                                <div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center shrink-0"><Icon name={notif.icon} size={18}/></div>
+                                <div className="flex-1"><h4 className="font-bold text-sm dark:text-white">{notif.title}</h4><p className="text-[10px] font-bold text-slate-500 mt-1">{notif.message}</p></div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const ProfileScreen = ({ go, user, t, Icon, onLogout, lang, setLang, themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, pinCode, setShowPinModal }) => {
+            return (
+                <div className="p-6 pt-10 fade-in pb-24">
+                    <h2 className="text-2xl font-bold mb-8 dark:text-white">{t('profile')}</h2>
+                    
+                    <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700 mb-8">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm w-16 h-16 flex items-center justify-center bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
+                            <div><h3 className="font-bold text-lg dark:text-white">{user?.displayName}</h3><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{user?.email}</p></div>
+                        </div>
+                        <button onClick={()=>go('EDIT_PROFILE')} className="w-full bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold py-3 rounded-full active:scale-95 transition-transform hover:bg-slate-100">{t('editProfile')}</button>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
+                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('accountTitle')}</h3>
+                            <div className="space-y-2">
+                                <MenuItem icon="shield" label={t('security')} onClick={()=>go('SECURITY')} />
+                                <MenuItem icon="lock" label={pinCode ? `${t('pinCode')}: ${t('pinStatusSet')}` : `${t('pinCode')}: ${t('pinStatusNotSet')}`} onClick={()=>setShowPinModal(true)} />
+                            </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
+                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('preferencesTitle')}</h3>
+                            <div className="space-y-2">
+                                <MenuItem icon="globe" label={t('language')} onClick={()=>go('LANGUAGE')} />
+                                <MenuItem icon="palette" label={t('theme')} onClick={()=>go('THEME')} />
+                                <MenuItem icon="bell" label={t('notifications')} onClick={()=>go('NOTIFICATION_SETTINGS')} />
+                            </div>
+                        </div>
+
+                        <button onClick={onLogout} className="w-full bg-danger/10 text-danger font-bold py-4 rounded-full active:scale-95 transition-transform hover:bg-danger/20">{t('logout')}</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const EditProfileScreen = ({ go, user, t, Icon }) => {
+            const [name, setName] = useState(user?.displayName || ''); const [bio, setBio] = useState(user?.bio || '');
+            return (
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('editProfile')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm w-16 h-16 flex items-center justify-center bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
+                                <button className="flex flex-col items-center gap-2 group"><div className="w-12 h-12 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="camera" size={18}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('tapToUpload')}</span></button>
+                            </div>
+                            <div className="space-y-4">
+                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('name')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="user" size={16} className="text-primary mr-3" /><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" /></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('bio')}</label><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl font-bold text-sm outline-none focus:ring-2 ring-primary/20 transition-colors dark:text-white resize-none h-24" placeholder="Tell us about yourself" /></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform hover:shadow-lg">{t('saveChanges')}</button>
                 </div>
             );
         };
 
         const SecuritySettingsScreen = ({ go, t, Icon }) => {
             return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('security')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
-                        <Section title={t('security')}><MenuItem icon="lock" label={t('changePass')} onClick={()=>{}} /><MenuItem icon="smartphone" label={t('yourDevices')} onClick={()=>{}} /></Section>
-                    </div>
-                </div>
-            );
-        };
-
-        const LanguageSettingsScreen = ({ go, t, Icon, lang, setLang }) => {
-            return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('language')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
-                        <div className="space-y-3">
-                            {['TH', 'EN'].map(l => (
-                                <button key={l} onClick={()=>setLang(l)} className={`w-full p-4 rounded-2xl font-bold text-left transition-all ${lang === l ? 'bg-primary text-white' : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 dark:text-white'}`}>
-                                    {l === 'TH' ? 'ไทย' : 'English'}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const ThemeSettingsScreen = ({ go, t, Icon, themeMode, setThemeMode, accentColor, setAccentColor }) => {
-            return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('theme')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
-                        <div>
-                            <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 ml-4">{t('themeMode')}</h4>
-                            <div className="flex justify-between gap-4 px-2">
-                                <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Light')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col p-2 gap-2 bg-white shadow-sm transition-all hover:-translate-y-1 ${themeMode === 'Light' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-100'}`}><div className="w-full h-1/4 bg-slate-100 rounded-md"></div><div className="w-full flex-1 bg-slate-50 rounded-md flex flex-col gap-1.5 p-1.5"><div className="w-full h-1.5 bg-white rounded-sm"></div><div className="w-2/3 h-1.5 bg-white rounded-sm"></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='Light' ? 'text-primary' : 'text-slate-400'}`}>{t('light')}</span></div>
-                                <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Dark')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col p-2 gap-2 bg-slate-800 shadow-sm transition-all hover:-translate-y-1 ${themeMode === 'Dark' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-700'}`}><div className="w-full h-1/4 bg-slate-700 rounded-md"></div><div className="w-full flex-1 bg-slate-900 rounded-md flex flex-col gap-1.5 p-1.5"><div className="w-full h-1.5 bg-slate-700 rounded-sm"></div><div className="w-2/3 h-1.5 bg-slate-700 rounded-sm"></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='Dark' ? 'text-primary' : 'text-slate-400'}`}>{t('dark')}</span></div>
-                                <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('System')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col bg-white shadow-sm overflow-hidden relative transition-all hover:-translate-y-1 ${themeMode === 'System' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-100 dark:border-slate-700'}`}><div className="absolute top-0 right-0 bottom-0 w-1/2 bg-slate-800"></div><div className="relative w-full h-full p-2 flex flex-col gap-2 z-10"><div className="w-full h-1/4 bg-slate-200/50 rounded-md backdrop-blur-sm"></div><div className="w-full flex-1 bg-slate-200/30 rounded-md flex flex-col gap-1.5 p-1.5 backdrop-blur-sm"><div className="w-full h-1.5 bg-white/50 rounded-sm"></div></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='System' ? 'text-primary' : 'text-slate-400'}`}>{t('system')}</span></div>
-                            </div>
-                        </div>
-                        <Section title={t('accentColor')}>
-                            <div className="p-5 flex gap-4 overflow-x-auto no-scrollbar bg-white dark:bg-slate-900">
-                                {ACCENT_COLORS.map(color => (
-                                    <button key={color.hex} onClick={()=>setAccentColor(color.hex)} className={`w-12 h-12 rounded-full flex-shrink-0 transition-all ${accentColor === color.hex ? 'ring-4 ring-offset-2 ring-slate-400 scale-110' : 'hover:scale-110'}`} style={{backgroundColor: color.hex}} title={color.name} />
-                                ))}
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('security')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <Section title={t('yourDevices')}>
+                            <div className="p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-700 last:border-0">
+                                <div className="flex items-center gap-3"><Icon name="smartphone" size={20} className="text-primary" /><div><p className="font-bold text-sm dark:text-white">{getDeviceName()}</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('currentDevice')}</p></div></div>
+                                <span className="text-xs font-bold text-primary">{t('activeNow')}</span>
                             </div>
                         </Section>
+                        <button className="w-full bg-danger/10 text-danger font-bold py-4 rounded-full active:scale-95 transition-transform hover:bg-danger/20">{t('changePass')}</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const LanguageSettingsScreen = ({ go, lang, setLang, t, Icon }) => {
+            const languages = [{ code: 'TH', name: 'ไทย' }, { code: 'EN', name: 'English' }];
+            return (
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('language')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-6">
+                        {languages.map(lng => (
+                            <button key={lng.code} onClick={()=>setLang(lng.code)} className={`w-full p-4 rounded-[24px] flex items-center justify-between font-bold transition-colors border ${lang===lng.code?'bg-primary/10 border-primary text-primary':'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50'}`}>
+                                <span>{lng.name}</span>
+                                {lang===lng.code && <Icon name="check" size={20} />}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const ThemeSettingsScreen = ({ go, themeMode, setThemeMode, t, Icon }) => {
+            const themes = [{ mode: 'Light', icon: 'sun' }, { mode: 'Dark', icon: 'moon' }, { mode: 'System', icon: 'monitor' }];
+            return (
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('appTheme')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-6">
+                        {themes.map(theme => (
+                            <button key={theme.mode} onClick={()=>setThemeMode(theme.mode)} className={`w-full p-4 rounded-[24px] flex items-center justify-between font-bold transition-colors border ${themeMode===theme.mode?'bg-primary/10 border-primary text-primary':'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50'}`}>
+                                <div className="flex items-center gap-3"><Icon name={theme.icon} size={20} /><span>{t(theme.mode.toLowerCase())}</span></div>
+                                {themeMode===theme.mode && <Icon name="check" size={20} />}
+                            </button>
+                        ))}
                     </div>
                 </div>
             );
         };
 
         const NotificationSettingsScreen = ({ go, t, Icon }) => {
+            const [txAlerts, setTxAlerts] = useState(true); const [budgetAlerts, setBudgetAlerts] = useState(true); const [summaries, setSummaries] = useState(true); const [logins, setLogins] = useState(false);
             return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
-                        <Section title={t('notifSettings')}><MenuItem icon="bell" label={t('transactionAlerts')} onClick={()=>{}} /><MenuItem icon="target" label={t('budgetAlerts')} onClick={()=>{}} /></Section>
-                    </div>
-                </div>
-            );
-        };
-
-        const NotificationsScreen = ({ go, t, Icon, visibleNotifications, clearAllNotifs }) => {
-            return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2><button onClick={clearAllNotifs} className="text-xs font-bold text-primary hover:underline">{t('clearAll')}</button></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
-                        {visibleNotifications.length > 0 ? (
-                            <div className="space-y-3">
-                                {visibleNotifications.map(notif => (
-                                    <div key={notif.id} className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700">
-                                        <div className="flex items-start gap-3">
-                                            <Icon name={notif.type === 'receipt' ? 'receipt' : 'bell'} size={20} className="text-primary mt-1" />
-                                            <div className="flex-1">
-                                                <h4 className="font-bold dark:text-white">{notif.title}</h4>
-                                                <p className="text-sm text-slate-400">{notif.desc}</p>
-                                                <p className="text-xs text-slate-300 mt-1">{notif.time}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-12"><Icon name="inbox" size={48} className="text-slate-300 mx-auto mb-4"/><p className="text-slate-400">{t('caughtUp')}</p></div>
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        const ScanScreen = ({ go, t, Icon, LoadingOverlay, onNext }) => {
-            const videoRef = useRef(null); const canvasRef = useRef(null); const [scanning, setScanning] = useState(false);
-            useEffect(() => {
-                const startCamera = async () => {
-                    try {
-                        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                        if(videoRef.current) videoRef.current.srcObject = stream;
-                    } catch(err) { console.error(err); }
-                };
-                startCamera();
-                return () => { if(videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach(t => t.stop()); };
-            }, []);
-            return (
-                <div className="relative w-full h-full bg-black fade-in">
-                    {scanning && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-                    <div className="scan-frame"><div className="laser"></div></div>
-                    <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-4 z-20">
-                        <button onClick={()=>go('MAIN','HOME')} className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center active:scale-95 transition-transform hover:bg-white/30"><Icon name="x" size={24} className="text-white" /></button>
-                        <button onClick={()=>{ setScanning(true); setTimeout(()=>{ onNext({amount: '0.00', merchant: 'Sample', date: new Date().toISOString().split('T')[0], categoryKey: 'General', icon: 'receipt', color: '#64748b'}); }, 1500); }} className="w-14 h-14 bg-primary rounded-full flex items-center justify-center active:scale-95 transition-transform hover:shadow-lg"><Icon name="camera" size={24} className="text-white" /></button>
-                    </div>
-                </div>
-            );
-        };
-
-        const ReviewScreen = ({ go, t, Icon, LoadingOverlay, onConfirm, screenData }) => {
-            const [data, setData] = useState(screenData || { amount: '', merchant: '', date: new Date().toISOString().split('T')[0], categoryKey: 'General', icon: 'receipt', color: '#64748b' });
-            const [saving, setSaving] = useState(false);
-            const handleSave = async () => { setSaving(true); await onConfirm(data); setSaving(false); };
-            return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('reviewDetails')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-4">
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('amount')}</label><input type="number" value={data.amount} onChange={e=>setData({...data, amount: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('merchant')}</label><input value={data.merchant} onChange={e=>setData({...data, merchant: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('date')}</label><input type="date" value={data.date} onChange={e=>setData({...data, date: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
-                    </div>
-                    <button onClick={handleSave} className="w-full bg-primary text-white py-4 rounded-full shadow-md font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform hover:shadow-lg">{t('confirmSave')}</button>
-                </div>
-            );
-        };
-
-        const AddTxScreen = ({ go, t, Icon, LoadingOverlay, pockets, onSave }) => {
-            const [data, setData] = useState({ amount: '', merchant: '', date: new Date().toISOString().split('T')[0], categoryKey: 'General', icon: 'receipt', color: '#64748b', pocketId: 'none' });
-            const [saving, setSaving] = useState(false);
-            const handleSave = async () => { setSaving(true); await onSave(data); setSaving(false); };
-            return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('addTx')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-4">
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('amount')}</label><input type="number" value={data.amount} onChange={e=>setData({...data, amount: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('merchant')}</label><input value={data.merchant} onChange={e=>setData({...data, merchant: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('date')}</label><input type="date" value={data.date} onChange={e=>setData({...data, date: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketDeducted')}</label><select value={data.pocketId} onChange={e=>setData({...data, pocketId: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
-                    </div>
-                    <button onClick={handleSave} className="w-full bg-primary text-white py-4 rounded-full shadow-md font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform hover:shadow-lg">{t('saveTx')}</button>
-                </div>
-            );
-        };
-
-        const TxDetailScreen = ({ go, t, Icon, tx }) => {
-            return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('txDetail')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-8 soft-shadow border border-slate-100 dark:border-slate-700 text-center mb-6">
-                            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{backgroundColor: tx?.color || '#64748b'}}><Icon name={tx?.icon || 'receipt'} size={32} className="text-white" /></div>
-                            <h3 className="text-2xl font-bold mb-2 dark:text-white">฿ {formatMoney(tx?.amount)}</h3>
-                            <p className="text-slate-400">{tx?.merchant || tx?.title}</p>
-                        </div>
-                        <div className="space-y-3">
-                            <div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('date')}</p><p className="font-bold dark:text-white">{tx?.date}</p></div>
-                            <div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('category')}</p><p className="font-bold dark:text-white">{tx?.categoryKey}</p></div>
-                            <div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('notes')}</p><p className="font-bold dark:text-white">{tx?.notes || 'N/A'}</p></div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const SplitBillScreen = ({ go, t, Icon, tx }) => {
-            return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('splitBill')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6"><p className="text-center text-slate-400 py-12">{t('noData')}</p></div>
-                </div>
-            );
-        };
-
-        const AddPocketScreen = ({ go, t, Icon, LoadingOverlay, onSave }) => {
-            const [name, setName] = useState(''); const [balance, setBalance] = useState(''); 
-            const [hasTarget, setHasTarget] = useState(false); const [target, setTarget] = useState('');
-            const [selectedIcon, setSelectedIcon] = useState(PASTEL_POCKET_ICONS[0]);
-            const [saving, setSaving] = useState(false); const [showCustomModal, setShowCustomModal] = useState(false);
-            
-            const handleSave = async () => { if(!name || !balance) return; setSaving(true); await onSave({ name, balance: Number(balance), target: hasTarget ? Number(target) : null, icon: selectedIcon }); setSaving(false); };
-            return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('newPocket')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-4">
-                        <div className="flex justify-center mb-6"><div className="w-20 h-20 rounded-full flex items-center justify-center" style={{backgroundColor: selectedIcon.bg}}><Icon name={selectedIcon.icon} size={32} className="text-white" /></div></div>
-                        <button onClick={()=>setShowCustomModal(true)} className="w-full bg-white dark:bg-slate-800 rounded-[28px] p-4 soft-shadow border border-slate-100 dark:border-slate-700 font-bold text-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">{t('chooseIcon')}</button>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder={t('pocketName')} /></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('initialAmount')}</label><input type="number" value={balance} onChange={e=>setBalance(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="0.00" /></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="flex items-center gap-3 cursor-pointer"><input type="checkbox" checked={hasTarget} onChange={e=>setHasTarget(e.target.checked)} className="w-5 h-5 rounded border-slate-300" /><span className="font-bold dark:text-white">{t('setMonthlyTarget')}</span></label>{hasTarget && <input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors mt-3" placeholder="0.00" />}</div>
-                    </div>
-                    <button onClick={handleSave} className="w-full bg-primary text-white py-4 rounded-full shadow-md font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform hover:shadow-lg">{t('savePocket')}</button>
-                    {showCustomModal && (
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-end z-[200] fade-in">
-                            <div className="w-full bg-white dark:bg-slate-800 rounded-t-[32px] p-6 max-h-[80vh] overflow-y-auto no-scrollbar">
-                                <h3 className="font-bold text-lg mb-4 dark:text-white">{t('chooseIcon')}</h3>
-                                <div className="grid grid-cols-5 gap-3 mb-6">
-                                    {PASTEL_POCKET_ICONS.map((ic, i) => (
-                                        <div key={i} onClick={()=>{ setSelectedIcon(ic); setShowCustomModal(false); }} className={`w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all ${selectedIcon.icon === ic.icon ? 'ring-2 ring-offset-2 ring-slate-400 dark:ring-slate-500 scale-105' : 'hover:scale-105'}`} style={{backgroundColor: ic.bg, color: ic.color}}><Icon name={ic.icon} size={20} /></div>
-                                    ))}
-                                </div>
-                                <button onClick={()=>setShowCustomModal(false)} className="w-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-full">{t('cancel')}</button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        const PocketDetailsScreen = ({ go, t, Icon, pocket, txs }) => {
-            const pocketTxs = txs.filter(tx => tx.pocketId === pocket?.id);
-            const spent = pocketTxs.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
-            const remaining = Number(pocket?.balance || 0) - spent;
-            return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('pocketDetails')}</h2><button onClick={()=>go('POCKET_SETTINGS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="settings" size={20}/></button></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-8 soft-shadow border border-slate-100 dark:border-slate-700 text-center mb-6">
-                            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{backgroundColor: pocket?.icon?.bg || '#8cb1ff'}}><Icon name={pocket?.icon?.icon || 'wallet'} size={32} className="text-white" /></div>
-                            <h3 className="text-2xl font-bold mb-2 dark:text-white">{pocket?.name}</h3>
-                            <p className="text-3xl font-bold text-primary">฿ {formatMoney(pocket?.balance)}</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('saved')}</p><p className="text-xl font-bold text-primary">฿ {formatMoney(pocket?.balance)}</p></div>
-                            <div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('left')}</p><p className="text-xl font-bold text-primary">฿ {formatMoney(Math.max(0, remaining))}</p></div>
-                        </div>
-                        <h4 className="font-bold text-sm mb-4 dark:text-white">{t('recentActivity')}</h4>
-                        {pocketTxs.length > 0 ? (
-                            <div className="space-y-3">
-                                {pocketTxs.slice(0, 5).map(tx => (
-                                    <div key={tx.id} className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: tx.color || '#64748b'}}><Icon name={tx.icon || 'receipt'} size={18} className="text-white" /></div>
-                                            <div><p className="font-bold text-sm dark:text-white">{tx.merchant}</p><p className="text-xs text-slate-400">{tx.date}</p></div>
-                                        </div>
-                                        <p className="font-bold text-sm dark:text-white">฿ {formatMoney(tx.amount)}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-center text-slate-400 py-6">{t('noData')}</p>
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        const PocketSettingsScreen = ({ go, t, Icon, LoadingOverlay, pocket, onUpdate, onDelete }) => {
-            const [name, setName] = useState(pocket?.name || ''); const [saving, setSaving] = useState(false);
-            const handleUpdate = async () => { setSaving(true); await onUpdate(pocket?.id, { name }); setSaving(false); };
-            const handleDelete = async () => { if(confirm(t('cannotUndone'))) { setSaving(true); await onDelete(pocket?.id); setSaving(false); } };
-            return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('pocketSettings')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
-                        <Section title={t('general')}><div className="bg-white dark:bg-slate-800 rounded-[20px] p-4 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div></Section>
-                        <button onClick={handleUpdate} className="w-full bg-primary text-white py-3 rounded-full font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform hover:shadow-lg">{t('saveChanges')}</button>
-                        <button onClick={handleDelete} className="w-full bg-danger text-white py-3 rounded-full font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform hover:shadow-lg">{t('deletePocket')}</button>
+                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <Section title={t('transactionAlerts')}>
+                            <div className="p-4 flex items-center justify-between"><div><p className="font-bold text-sm dark:text-white">{t('everyPurchase')}</p></div><button onClick={()=>setTxAlerts(!txAlerts)} className={`w-12 h-6 rounded-full transition-colors ${txAlerts ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${txAlerts ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
+                        </Section>
+                        <Section title={t('budgetAlerts')}>
+                            <div className="p-4 flex items-center justify-between"><div><p className="font-bold text-sm dark:text-white">{t('budgetWarnings')}</p></div><button onClick={()=>setBudgetAlerts(!budgetAlerts)} className={`w-12 h-6 rounded-full transition-colors ${budgetAlerts ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${budgetAlerts ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
+                        </Section>
+                        <Section title={t('accountTitle')}>
+                            <div className="p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-700"><div><p className="font-bold text-sm dark:text-white">{t('monthlySummaries')}</p></div><button onClick={()=>setSummaries(!summaries)} className={`w-12 h-6 rounded-full transition-colors ${summaries ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${summaries ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
+                            <div className="p-4 flex items-center justify-between"><div><p className="font-bold text-sm dark:text-white">{t('newLogins')}</p></div><button onClick={()=>setLogins(!logins)} className={`w-12 h-6 rounded-full transition-colors ${logins ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${logins ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
+                        </Section>
                     </div>
                 </div>
             );
@@ -876,58 +1088,89 @@
         // 6. MAIN APP
         // ==========================================
         const App = () => {
-            const [screen, setScreen] = useState('SIGN_IN'); const [tab, setTab] = useState('HOME'); const [screenData, setScreenData] = useState(null);
-            const [user, setUser] = useState(null); const [isAuthReady, setIsAuthReady] = useState(false); const [isLocked, setIsLocked] = useState(false);
-            const [lang, setLang] = useState('TH'); const [themeMode, setThemeMode] = useState('System'); const [accentColor, setAccentColor] = useState('#8cb1ff'); const [reduceMotion, setReduceMotion] = useState(false);
+            const [user, setUser] = useState(null); const [isAuthReady, setIsAuthReady] = useState(false); const [isLocked, setIsLocked] = useState(false); const [screen, setScreen] = useState('SIGN_IN'); const [tab, setTab] = useState('HOME'); const [screenData, setScreenData] = useState(null);
+            const [lang, setLang] = useState(localStorage.getItem('cozy_lang') || 'TH'); const [themeMode, setThemeMode] = useState(localStorage.getItem('cozy_theme') || 'Light'); const [accentColor, setAccentColor] = useState(localStorage.getItem('cozy_accent') || '#8cb1ff'); const [reduceMotion, setReduceMotion] = useState(localStorage.getItem('cozy_motion') === 'true');
             const [pinCode, setPinCode] = useState(localStorage.getItem('cozy_pin') || ''); const [showPinModal, setShowPinModal] = useState(false);
-            const [txs, setTxs] = useState([]); const [pockets, setPockets] = useState([]); const [userCategories, setUserCategories] = useState([]);
-            const [dismissedNotifs, setDismissedNotifs] = useState([]);
+            const [txs, setTxs] = useState([]); const [pockets, setPockets] = useState([]); const [notifications, setNotifications] = useState([]); const [dismissedNotifs, setDismissedNotifs] = useState([]);
+            const [userCategories, setUserCategories] = useState([
+                { id: 'Food & Drink', icon: 'coffee', color: '#ff9800' },
+                { id: 'Shopping', icon: 'shopping-bag', color: '#ffde6a' },
+                { id: 'Transport', icon: 'car', color: '#94e4ae' },
+                { id: 'Bills', icon: 'zap', color: '#ff9494' },
+                { id: 'Transfer', icon: 'users', color: '#8cb1ff' },
+                { id: 'General', icon: 'receipt', color: '#64748b' }
+            ]);
+            const defaultCatIds = userCategories.map(c => c.id);
+            const t = getT(lang);
+            const safeToSpend = pockets.reduce((a, c) => a + Number(c.balance), 0);
+            const visibleNotifications = notifications.filter(n => !dismissedNotifs.includes(n.id));
 
             useEffect(() => {
-                const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
-                    if(firebaseUser) { setUser(firebaseUser); setScreen('MAIN'); setTab('HOME'); }
-                    else {
+                localStorage.setItem('cozy_lang', lang);
+                localStorage.setItem('cozy_theme', themeMode);
+                localStorage.setItem('cozy_accent', accentColor);
+                localStorage.setItem('cozy_motion', reduceMotion);
+                document.documentElement.style.setProperty('--color-primary', accentColor);
+                document.documentElement.classList.toggle('dark', themeMode === 'Dark');
+            }, [lang, themeMode, accentColor, reduceMotion]);
+
+            useEffect(() => {
+                const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+                    if(currentUser) {
+                        setUser(currentUser);
+                        try {
+                            const txSnapshot = await db.collection('users').doc(currentUser.uid).collection('transactions').orderBy('timestamp', 'desc').get();
+                            const pocketSnapshot = await db.collection('users').doc(currentUser.uid).collection('pockets').get();
+                            setTxs(txSnapshot.docs.map(d => ({ id: d.id, ...d.data(), timestamp: d.data().timestamp?.toDate?.() })));
+                            setPockets(pocketSnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+                        } catch(e) { console.error(e); }
+                    } else {
                         const guest = localStorage.getItem('cozy_guest');
-                        if(guest) { setUser(JSON.parse(guest)); setScreen('MAIN'); setTab('HOME'); }
-                        else { setScreen('SIGN_IN'); }
+                        if(guest) { setUser(JSON.parse(guest)); } else { setUser(null); }
                     }
                     setIsAuthReady(true);
                 });
-                return () => unsubscribe();
+                return unsubscribe;
             }, []);
 
             useEffect(() => {
-                if(themeMode === 'Dark' || (themeMode === 'System' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-                document.documentElement.style.setProperty('--color-primary', accentColor);
-            }, [themeMode, accentColor]);
+                if(pinCode && !isLocked && user) setIsLocked(true);
+            }, [user, pinCode, isLocked]);
 
-            const go = (newScreen, newTab=null, data=null) => { setScreen(newScreen); if(newTab) setTab(newTab); if(data) setScreenData(data); };
-            const t = getT(lang);
+            const go = (newScreen, newTab = null, data = null) => {
+                setScreen(newScreen);
+                if(newTab) setTab(newTab);
+                if(data !== undefined) setScreenData(data);
+            };
 
-            const safeToSpend = useMemo(() => {
-                const totalBalance = pockets.reduce((sum, p) => sum + Number(p.balance || 0), 0);
-                return Math.max(0, totalBalance);
-            }, [pockets]);
+            const handleResetData = () => {
+                setTxs([]);
+                setPockets([]);
+                setNotifications([]);
+                setDismissedNotifs([]);
+            };
 
-            const notifications = useMemo(() => {
-                let notifs = [];
-                const totalBalance = pockets.reduce((sum, p) => sum + Number(p.balance || 0), 0);
-                if(totalBalance < totalBalance * 0.3) notifs.push({ id: 'low-balance', type: 'alert', title: t('lowBalance'), desc: t('safeThreshold'), time: new Date().toLocaleTimeString() });
-                if (txs.length > 0) { const latest = txs[0]; notifs.push({ id: `tx-${latest.id}`, type: 'receipt', title: t('newTx'), desc: `${latest.title || latest.merchant} ฿ ${formatMoney(latest.amount)}`, time: latest.date }); }
-                return notifs.filter(n => !dismissedNotifs.includes(n.id));
+            const handleUpdateTx = (txId, updates) => {
+                setTxs(txs.map(tx => tx.id === txId ? { ...tx, ...updates } : tx));
+            };
+
+            useEffect(() => {
+                const newNotifications = [];
+                pockets.forEach(p => {
+                    if(p.hasTarget && p.balance < p.target * 0.3) {
+                        newNotifications.push({ id: `low-${p.id}`, type: 'low-balance', icon: 'alert-circle', title: t('lowBalance'), message: `${p.name} ${t('safeThreshold')}` });
+                    }
+                });
+                setNotifications(newNotifications);
             }, [safeToSpend, pockets, txs, t, dismissedNotifs]);
 
             if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-slate-900 text-white"><Icon name="loader-2" size={48} className="animate-spin-smooth"/></div>;
             if (isLocked) return <div className="app-container"><LockScreen Icon={Icon} correctPin={pinCode} onUnlock={()=>{ setIsLocked(false); go(user?'MAIN':'SIGN_IN', user?'HOME':null); }} /></div>;
 
-            const p = { user, setUser, go, t, lang, setLang, themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, pinCode, setPinCode, showPinModal, setShowPinModal, txs, setTxs, pockets, setPockets, screenData, Icon, LoadingOverlay, translateAuthError, visibleNotifications: notifications, clearAllNotifs: ()=>setDismissedNotifs(notifications.map(n=>n.id)), safeToSpend, db, userCategories, setUserCategories, defaultCatIds: [], onResetData: ()=>{}, onUpdateTx: ()=>{} };
+            const p = { user, setUser, go, t, lang, setLang, themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, pinCode, setPinCode, showPinModal, setShowPinModal, txs, setTxs, pockets, setPockets, screenData, Icon, LoadingOverlay, translateAuthError, visibleNotifications: notifications, clearAllNotifs: ()=>setDismissedNotifs(notifications.map(n=>n.id)), safeToSpend, db, userCategories, setUserCategories, defaultCatIds, onResetData: handleResetData, onUpdateTx: handleUpdateTx };
 
             return (
-                <div className="app-container">
+                <div className={`app-container ${reduceMotion?'no-motion':''} ${themeMode==='Dark'?'theme-dark':''}`}>
                     {screen === 'SIGN_IN' && <LoginScreen {...p} />}
                     {screen === 'SIGN_UP' && <SignUpScreen {...p} />}
                     {screen === 'FORGOT_PASS' && <ForgotScreen {...p} />}
@@ -957,8 +1200,7 @@
                         try {
                             if(user && user.uid !== 'mock-uid') {
                                 await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
-                                if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.p
-Id; if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: Number(pkt.balance) - Number(d.amount) }); }
+                                if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: Number(pkt.balance) - Number(d.amount) }); }
                             } else {
                                 setTxs([{id: Date.now().toString(), ...d}, ...txs]); 
                                 if (d.pocketId && d.pocketId !== 'none') setPockets(pockets.map(pk => pk.id === d.pocketId ? {...pk, balance: Number(pk.balance) - Number(d.amount)} : pk));
@@ -983,71 +1225,6 @@ Id; if (pkt) await db.collection('users').doc(user.uid).collection('pockets').do
                     {screen === 'THEME' && <ThemeSettingsScreen {...p} />}
                     {screen === 'NOTIFICATION_SETTINGS' && <NotificationSettingsScreen {...p} />}
                     {showPinModal && <PinPadModal onClose={()=>setShowPinModal(false)} onSave={(pin)=>{ setPinCode(pin); localStorage.setItem('cozy_pin', pin); setShowPinModal(false); }} Icon={Icon} isSet={!!pinCode} t={t} />}
-                </div>
-            );
-        };
-
-        const LockScreen = ({ Icon, correctPin, onUnlock }) => {
-            const [pin, setPin] = useState('');
-            const handlePinInput = (digit) => {
-                if(pin.length < 6) {
-                    const newPin = pin + digit;
-                    setPin(newPin);
-                    if(newPin.length === 6 && newPin === correctPin) {
-                        setTimeout(onUnlock, 500);
-                    }
-                }
-            };
-            const handleBackspace = () => setPin(pin.slice(0, -1));
-            return (
-                <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-primary to-primary/80">
-                    <h1 className="text-3xl font-bold text-white mb-8">Enter PIN</h1>
-                    <div className="flex gap-3 mb-8">
-                        {[0,1,2,3,4,5].map(i => (
-                            <div key={i} className={`w-4 h-4 rounded-full transition-all ${i < pin.length ? 'bg-white scale-125' : 'bg-white/30'}`}></div>
-                        ))}
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 mb-8">
-                        {[1,2,3,4,5,6,7,8,9].map(n => (
-                            <button key={n} onClick={()=>handlePinInput(n.toString())} className="w-16 h-16 bg-white/20 text-white font-bold text-xl rounded-full hover:bg-white/30 active:scale-95 transition-all">{n}</button>
-                        ))}
-                        <button onClick={()=>handlePinInput('0')} className="col-span-2 w-full bg-white/20 text-white font-bold text-xl rounded-full hover:bg-white/30 active:scale-95 transition-all">0</button>
-                        <button onClick={handleBackspace} className="w-16 h-16 bg-danger text-white font-bold rounded-full hover:bg-red-600 active:scale-95 transition-all"><Icon name="delete" size={20} /></button>
-                    </div>
-                </div>
-            );
-        };
-
-        const PinPadModal = ({ onClose, onSave, Icon, isSet, t }) => {
-            const [pin, setPin] = useState('');
-            const handlePinInput = (digit) => {
-                if(pin.length < 6) setPin(pin + digit);
-            };
-            const handleBackspace = () => setPin(pin.slice(0, -1));
-            const handleSave = () => {
-                if(pin.length === 6) onSave(pin);
-            };
-            return (
-                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-end z-[200] fade-in">
-                    <div className="w-full bg-white dark:bg-slate-800 rounded-t-[32px] p-6 max-h-[80vh] overflow-y-auto no-scrollbar">
-                        <h3 className="font-bold text-lg mb-6 dark:text-white">{isSet ? t('changePin') : t('setPin')}</h3>
-                        <div className="flex gap-3 mb-8 justify-center">
-                            {[0,1,2,3,4,5].map(i => (
-                                <div key={i} className={`w-4 h-4 rounded-full transition-all ${i < pin.length ? 'bg-primary scale-125' : 'bg-slate-200'}`}></div>
-                            ))}
-                        </div>
-                        <div className="grid grid-cols-3 gap-3 mb-6">
-                            {[1,2,3,4,5,6,7,8,9].map(n => (
-                                <button key={n} onClick={()=>handlePinInput(n.toString())} className="p-4 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white font-bold text-xl rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 transition-all">{n}</button>
-                            ))}
-                            <button onClick={()=>handlePinInput('0')} className="col-span-2 p-4 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white font-bold text-xl rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 transition-all">0</button>
-                            <button onClick={handleBackspace} className="p-4 bg-danger text-white font-bold rounded-xl hover:bg-red-600 active:scale-95 transition-all"><Icon name="delete" size={20} /></button>
-                        </div>
-                        <div className="flex gap-3">
-                            <button onClick={onClose} className="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-full">{t('cancel')}</button>
-                            <button onClick={handleSave} disabled={pin.length !== 6} className="flex-1 bg-primary text-white font-bold py-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed">{t('done')}</button>
-                        </div>
-                    </div>
                 </div>
             );
         };
