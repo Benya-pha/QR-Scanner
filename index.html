@@ -43,7 +43,7 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
         .no-motion * { transition: none !important; animation: none !important; }
         
-        /* Dark Theme Logic */
+        /* Dark Theme Settings */
         .theme-dark { background-color: #0f172a !important; color: #f1f5f9 !important; }
         .theme-dark .bg-white { background-color: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; }
         .theme-dark .text-slate-800, .theme-dark .text-slate-700 { color: #f1f5f9 !important; }
@@ -70,16 +70,15 @@
         const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
         // ==========================================
-        // 1. FIREBASE INIT (Your Real Configuration)
+        // 1. FIREBASE INIT
         // ==========================================
         const fbConfig = {
-            apiKey: "AIzaSyCv1D7XjSuSYWJxpFxT7umaCAb9o8fY2o8",
+            apiKey: "YOUR_API_KEY", // <--- ใส่ API Key ของแม่ตรงนี้
             authDomain: "qr-scanner-a29e3.firebaseapp.com",
             projectId: "qr-scanner-a29e3",
             storageBucket: "qr-scanner-a29e3.firebasestorage.app",
             messagingSenderId: "1070573788877",
-            appId: "1:1070573788877:web:cd65246772c629f380d384",
-            measurementId: "G-DGH02NSB7R"
+            appId: "1:1070573788877:web:cd65246772c629f380d384"
         };
         
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
@@ -92,14 +91,13 @@
         const formatMoney = (num) => Number(num || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         
         const translateAuthError = (code) => {
-            if(code === 'auth/unauthorized-domain') return 'กรุณาเพิ่มโดเมน github.io ในเมนู Authorized domains ของ Firebase';
-            if(code.includes('operation-not-supported') || code.includes('operation-not-allowed')) return 'กรุณาเปิดการใช้งาน Email/Password Auth ใน Firebase Console';
+            if(code.includes('operation-not-supported') || code.includes('operation-not-allowed')) return 'กรุณาเปิดใช้งาน Email Auth ใน Firebase Console';
             switch(code) {
                 case 'auth/invalid-credential':
                 case 'auth/user-not-found':
                 case 'auth/wrong-password': return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
                 case 'auth/email-already-in-use': return 'อีเมลนี้ถูกใช้งานแล้ว กรุณาล็อกอิน';
-                case 'auth/weak-password': return 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+                case 'auth/weak-password': return 'รหัสผ่านขั้นต่ำ 6 ตัวอักษร';
                 case 'auth/invalid-email': return 'รูปแบบอีเมลไม่ถูกต้อง';
                 default: return `เกิดข้อผิดพลาด: ${code}`;
             }
@@ -132,8 +130,7 @@
                     welcome: 'ยินดีต้อนรับ', subWelcome: 'จัดการเงินง่ายๆ สไตล์คุณ', email: 'อีเมล', password: 'รหัสผ่าน',
                     forgotPass: 'ลืมรหัสผ่าน?', login: 'เข้าสู่ระบบ', loginGoogle: 'เข้าสู่ระบบด้วย Google',
                     noAccount: 'ยังไม่มีบัญชี?', signUp: 'สมัครเลย', createAccount: 'สร้างบัญชี', name: 'ชื่อ-นามสกุล',
-                    confirmPass: 'ยืนยันรหัสผ่าน', sendLink: 'ส่งลิงก์',
-                    home: 'หน้าหลัก', wallet: 'กระเป๋าเงิน', scan: 'สแกน', history: 'ประวัติ', profile: 'โปรไฟล์',
+                    confirmPass: 'ยืนยันรหัสผ่าน', sendLink: 'ส่งลิงก์', home: 'หน้าหลัก', wallet: 'กระเป๋าเงิน', scan: 'สแกน', history: 'ประวัติ', profile: 'โปรไฟล์',
                     totalSpend: 'ยอดใช้จ่ายรวม', safeSpend: 'ยอดเงินคงเหลือ', recent: 'รายการล่าสุด', seeAll: 'ดูทั้งหมด',
                     noData: 'ยังไม่มีรายการ', newPocket: 'สร้างกระเป๋าใหม่', scanReceipt: 'สแกนสลิป', gallery: 'คลังภาพ',
                     manual: 'กรอกเอง', reviewDetails: 'ตรวจสอบข้อมูล', merchant: 'ชื่อร้าน/ผู้รับโอน', date: 'วันที่',
@@ -145,14 +142,14 @@
                     pinCode: 'รหัส PIN', biometric: 'สแกนใบหน้า/นิ้วมือ (จำลอง)', setPin: 'ตั้งรหัส PIN', changePin: 'เปลี่ยน PIN',
                     yourDevices: 'อุปกรณ์ของคุณ', currentDevice: 'อุปกรณ์นี้', pocketName: 'ชื่อกระเป๋า', targetAmount: 'เป้าหมาย (บาท)',
                     savePocket: 'บันทึกกระเป๋า', passMismatch: 'รหัสผ่านไม่ตรงกัน', fillAll: 'กรุณากรอกให้ครบ', loading: 'กำลังประมวลผล...',
-                    guestLogin: 'ทดลองใช้งาน (Guest)'
+                    guestLogin: 'ทดลองใช้งาน (Guest)', aiSelected: 'AI เลือกให้', catFood: 'อาหาร/เครื่องดื่ม', catShop: 'ช้อปปิ้ง', catTransfer: 'โอนเงิน', catBill: 'จ่ายบิล', catTravel: 'เดินทาง/น้ำมัน', catGeneral: 'ทั่วไป',
+                    searchPlaceholder: 'ค้นหารายการ...', all: 'ทั้งหมด', notFound: 'ไม่พบรายการที่ค้นหา'
                 },
                 EN: {
                     welcome: 'Welcome', subWelcome: 'Manage your money easily', email: 'Email', password: 'Password',
                     forgotPass: 'Forgot Password?', login: 'Sign In', loginGoogle: 'Sign In with Google',
                     noAccount: 'No account?', signUp: 'Sign Up', createAccount: 'Create Account', name: 'Full Name',
-                    confirmPass: 'Confirm Password', sendLink: 'Send Link',
-                    home: 'Home', wallet: 'Wallet', scan: 'Scan', history: 'History', profile: 'Profile',
+                    confirmPass: 'Confirm Password', sendLink: 'Send Link', home: 'Home', wallet: 'Wallet', scan: 'Scan', history: 'History', profile: 'Profile',
                     totalSpend: 'Total Spent', safeSpend: 'Total Balance', recent: 'Recent', seeAll: 'See All',
                     noData: 'No Data', newPocket: 'New Pocket', scanReceipt: 'Scan Receipt', gallery: 'Gallery',
                     manual: 'Manual', reviewDetails: 'Review Details', merchant: 'Merchant', date: 'Date',
@@ -164,7 +161,8 @@
                     pinCode: 'PIN Code', biometric: 'Face/Touch ID (Mock)', setPin: 'Set PIN', changePin: 'Change PIN',
                     yourDevices: 'Your Devices', currentDevice: 'Current Device', pocketName: 'Pocket Name', targetAmount: 'Target Amount',
                     savePocket: 'Save Pocket', passMismatch: 'Passwords do not match', fillAll: 'Please fill all fields', loading: 'Loading...',
-                    guestLogin: 'Try as Guest'
+                    guestLogin: 'Try as Guest', aiSelected: 'AI Selected', catFood: 'Food/Drink', catShop: 'Shopping', catTransfer: 'Transfer', catBill: 'Bills', catTravel: 'Transport/Gas', catGeneral: 'General',
+                    searchPlaceholder: 'Search transactions...', all: 'All', notFound: 'No results found'
                 }
             };
             return d[lang]?.[key] || key;
@@ -201,15 +199,18 @@
             const [tab, setTab] = useState('HOME');
             const [screenData, setScreenData] = useState(null);
             
+            // App Preferences
             const [lang, setLang] = useState('TH');
             const [themeMode, setThemeMode] = useState('system'); 
             const [reduceMotion, setReduceMotion] = useState(false);
             
+            // App Lock Logic
             const savedPin = localStorage.getItem('cozy_pin');
             const [pinCode, setPinCode] = useState(savedPin); 
             const [isLocked, setIsLocked] = useState(!!savedPin); 
             const [showPinModal, setShowPinModal] = useState(false);
             
+            // Core Data States
             const [txs, setTxs] = useState([]);
             const [pockets, setPockets] = useState([]);
 
@@ -226,6 +227,7 @@
                 return themeMode;
             }, [themeMode]);
 
+            // Sync User Data & Auth State
             useEffect(() => {
                 const unsub = auth.onAuthStateChanged(u => {
                     setIsAuthReady(true);
@@ -397,51 +399,35 @@
                 try {
                     await auth.signInWithEmailAndPassword(email, password);
                 } catch (e) {
-                    if(window.location.protocol === 'file:') {
+                    if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
                         setTimeout(() => {
                             const guestUser = { uid: 'mock-uid', email: email, displayName: 'ผู้ใช้งานทั่วไป', photoURL: 'https://ui-avatars.com/api/?name=User&background=2F80ED&color=fff' };
                             localStorage.setItem('cozy_guest', JSON.stringify(guestUser));
-                            setUser(guestUser);
-                            go('MAIN', 'HOME');
-                        }, 1500);
-                    } else {
-                        setErr(translateAuthError(e.code));
-                        setLoading(false);
-                    }
+                            setUser(guestUser); go('MAIN', 'HOME');
+                        }, 1000);
+                    } else { setErr(translateAuthError(e.code)); setLoading(false); }
                 }
             };
-
             const googleLogin = async () => {
-                setLoading(true); setErr('');
-                try {
-                    const p = new firebase.auth.GoogleAuthProvider();
-                    await auth.signInWithPopup(p);
-                } catch (e) {
-                    if(e.code === 'auth/unauthorized-domain') {
-                        setErr('กรุณาเพิ่มโดเมน github.io ในเมนู Authorized domains ของ Firebase');
-                        setLoading(false);
-                    } else if(window.location.protocol === 'file:') {
+                setLoading(true);
+                try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); } 
+                catch (e) {
+                    if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
                         setTimeout(() => {
                             const guestGoogle = { uid: 'mock-uid', email: 'guest@google.com', displayName: 'Google User', photoURL: 'https://ui-avatars.com/api/?name=Google&background=DB4437&color=fff' };
                             localStorage.setItem('cozy_guest', JSON.stringify(guestGoogle));
-                            setUser(guestGoogle);
-                            go('MAIN', 'HOME');
-                        }, 1500);
-                    } else {
-                        setErr(e.message);
-                        setLoading(false);
-                    }
+                            setUser(guestGoogle); go('MAIN', 'HOME');
+                        }, 1000);
+                    } else { setErr(e.message); setLoading(false); }
                 }
             };
-
             const guestLogin = () => {
                 setLoading(true);
                 setTimeout(() => {
                     const guest = { uid: 'mock-uid', email: 'guest@app.com', displayName: 'ผู้ใช้งานทั่วไป', photoURL: 'https://ui-avatars.com/api/?name=User&background=2F80ED&color=fff' };
                     localStorage.setItem('cozy_guest', JSON.stringify(guest));
-                    setUser(guest);
-                    go('MAIN', 'HOME');
-                }, 1500);
+                    setUser(guest); go('MAIN', 'HOME');
+                }, 1000);
             };
 
             return (
@@ -456,13 +442,8 @@
                     </form>
                     {err && <div className="bg-red-50 text-red-500 p-3 rounded-xl text-xs font-bold text-center mt-4 border border-red-100">{err}</div>}
                     <div className="flex items-center gap-4 my-8"><div className="h-px bg-slate-100 flex-1"/><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">OR</span><div className="h-px bg-slate-100 flex-1"/></div>
-                    
-                    <button onClick={googleLogin} className="w-full border border-slate-200 py-4 rounded-[20px] flex items-center justify-center gap-3 font-bold text-slate-700 active:scale-95 transition-transform shadow-sm mb-4">
-                        <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                        {t('loginGoogle')}
-                    </button>
+                    <button onClick={googleLogin} className="w-full border border-slate-200 py-4 rounded-[20px] flex items-center justify-center gap-3 font-bold text-slate-700 active:scale-95 transition-transform shadow-sm mb-4"><svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>{t('loginGoogle')}</button>
                     <button onClick={guestLogin} className="w-full border border-slate-200 py-4 rounded-[20px] flex items-center justify-center gap-3 font-bold text-slate-700 active:scale-95 transition-transform shadow-sm mb-4"><Icon name="user" size={20} className="text-slate-500" /> {t('guestLogin')}</button>
-                    
                     <button onClick={()=>go('SIGN_UP')} className="mt-8 text-sm font-bold text-slate-500 text-center w-full">{t('noAccount')} <span className="text-[#2F80ED] underline">{t('signUp')}</span></button>
                 </div>
             );
@@ -482,17 +463,13 @@
                     const res = await auth.createUserWithEmailAndPassword(email, pass);
                     await res.user.updateProfile({ displayName: name });
                 } catch(error) {
-                    if(window.location.protocol === 'file:') {
+                    if(error.code.includes('operation-not-supported') || error.code.includes('operation-not-allowed')) {
                         setTimeout(() => {
                             const guestUser = { uid: 'mock-uid', email: email, displayName: name, photoURL: 'https://ui-avatars.com/api/?name='+name+'&background=2F80ED&color=fff' };
                             localStorage.setItem('cozy_guest', JSON.stringify(guestUser));
-                            setUser(guestUser);
-                            go('MAIN', 'HOME');
-                        }, 1500);
-                    } else {
-                        setErr(translateAuthError(error.code));
-                        setLoading(false);
-                    }
+                            setUser(guestUser); go('MAIN', 'HOME');
+                        }, 1000);
+                    } else { setErr(translateAuthError(error.code)); setLoading(false); }
                 }
             };
 
@@ -521,16 +498,10 @@
                 e.preventDefault();
                 if(!email) return setErr(t('fillAll'));
                 setLoading(true); setErr('');
-                try {
-                    await auth.sendPasswordResetEmail(email);
-                    setSent(true); setTimeout(()=>go('SIGN_IN'), 3000);
-                } catch(error) {
-                    if(window.location.protocol === 'file:') {
-                        setTimeout(() => { setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); }, 1500);
-                    } else {
-                        setErr(translateAuthError(error.code));
-                        setLoading(false);
-                    }
+                try { await auth.sendPasswordResetEmail(email); setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); } 
+                catch(error) {
+                    if(error.code.includes('operation-not-supported')) { setTimeout(() => { setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); }, 1000); } 
+                    else { setErr(translateAuthError(error.code)); setLoading(false); }
                 }
             };
 
@@ -540,8 +511,7 @@
                     <button onClick={()=>go('SIGN_IN')} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center mb-8 absolute"><Icon name="chevron-left"/></button>
                     <div className="w-24 h-24 bg-blue-50 text-[#2F80ED] rounded-full flex items-center justify-center mx-auto mt-16 mb-8"><Icon name="key" size={40}/></div>
                     <h1 className="text-3xl font-black text-slate-800 mb-2">{t('forgotPass')}</h1>
-                    
-                    {sent ? <div className="bg-green-50 text-green-600 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 animate-pulse"><Icon name="check-circle"/> ส่งลิงก์ไปยังอีเมลแล้ว!</div> : 
+                    {sent ? <div className="bg-green-50 text-green-600 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 animate-pulse mt-10"><Icon name="check-circle"/> ส่งลิงก์ไปยังอีเมลแล้ว!</div> : 
                     <form onSubmit={handleReset} className="space-y-6 mt-10">
                         <div className="bg-slate-50 p-4 rounded-2xl flex items-center text-left"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-medium text-slate-800" placeholder={t('email')} /></div>
                         {err && <p className="text-[10px] font-bold text-red-500 bg-red-50 p-2 rounded-xl">{err}</p>}
@@ -584,35 +554,104 @@
         };
 
         const PocketsScreen = ({ pockets, go, t, Icon }) => (
-            <div className="p-6 pt-10 fade-in">
+            <div className="p-6 pt-10 fade-in flex flex-col h-full">
                 <h2 className="text-3xl font-black text-slate-800 mb-8 leading-none">{t('wallet')}</h2>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                    {pockets.length===0 ? <div className="col-span-2 text-center p-8 text-slate-400 font-bold border border-dashed border-slate-200 rounded-3xl">{t('noData')}</div> : pockets.map(p => (
-                        <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-white p-6 rounded-[36px] shadow-sm border border-slate-100 active:scale-[0.98] transition-transform cursor-pointer">
+                <div className="grid grid-cols-2 gap-4 mb-6 flex-1 overflow-y-auto no-scrollbar">
+                    {pockets.length===0 ? <div className="col-span-2 text-center p-8 text-slate-400 font-bold border border-dashed border-slate-200 rounded-3xl h-fit">{t('noData')}</div> : pockets.map(p => (
+                        <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-white p-6 rounded-[36px] shadow-sm border border-slate-100 active:scale-[0.98] transition-transform cursor-pointer h-fit">
                             <div className={`w-12 h-12 rounded-2xl ${p.color||'bg-blue-50 text-blue-500'} flex items-center justify-center mb-5`}><Icon name={p.icon||'wallet'}/></div>
                             <h4 className="font-black text-slate-800 text-sm mb-1">{p.name}</h4><p className="text-lg font-black text-slate-800 mb-4">฿{formatMoney(p.balance)}</p>
                         </div>
                     ))}
                 </div>
-                <button onClick={()=>go('ADD_POCKET')} className="w-full bg-white border-2 border-dashed border-[#2F80ED]/30 text-[#2F80ED] font-black py-5 rounded-[28px] flex items-center justify-center gap-2 active:scale-95 transition-transform"><Icon name="plus" size={20}/> {t('newPocket')}</button>
+                <button onClick={()=>go('ADD_POCKET')} className="w-full bg-white border-2 border-dashed border-[#2F80ED]/30 text-[#2F80ED] font-black py-5 rounded-[28px] flex items-center justify-center gap-2 active:scale-95 transition-transform shrink-0"><Icon name="plus" size={20}/> {t('newPocket')}</button>
             </div>
         );
 
-        const HistoryScreen = ({ txs, go, t, Icon }) => (
-            <div className="p-6 pt-10 fade-in">
-                <h2 className="text-3xl font-black text-slate-800 mb-6 leading-none">{t('history')}</h2>
-                <div className="space-y-3 pb-24">
-                    {txs.length===0 ? <div className="text-center text-slate-400 font-bold p-8 border border-dashed border-slate-200 rounded-3xl">{t('noData')}</div> : txs.map(tx => (
-                        <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white p-4 rounded-3xl flex justify-between items-center shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98] transition-all">
-                            <div className="flex items-center gap-4"><div className={`w-14 h-14 rounded-2xl ${tx.color||'bg-slate-50 text-slate-600'} flex items-center justify-center`}><Icon name={tx.icon||'receipt'} size={24}/></div><div><h4 className="font-black text-slate-800 text-sm leading-tight mb-1">{tx.title}</h4><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{tx.category} • {tx.date}</p></div></div>
-                            <div className="font-black text-slate-800">฿{formatMoney(tx.amount)}</div>
-                        </div>
-                    ))}
+        // 🌟 SMART SEARCH & CATEGORY PILLS IN HISTORY 🌟
+        const HistoryScreen = ({ txs, go, t, Icon }) => {
+            const [searchQuery, setSearchQuery] = useState('');
+            const [activeCategory, setActiveCategory] = useState(t('all'));
+
+            // Dynamic categories from transactions + 'All'
+            const categories = useMemo(() => {
+                const uniqueCats = [...new Set(txs.map(tx => tx.category))].filter(Boolean);
+                return [t('all'), ...uniqueCats];
+            }, [txs, t]);
+
+            // Filter Logic
+            const filteredTxs = useMemo(() => {
+                return txs.filter(tx => {
+                    const matchCategory = activeCategory === t('all') || tx.category === activeCategory;
+                    const matchSearch = tx.title.toLowerCase().includes(searchQuery.toLowerCase()) || (tx.merchant && tx.merchant.toLowerCase().includes(searchQuery.toLowerCase()));
+                    return matchCategory && matchSearch;
+                });
+            }, [txs, activeCategory, searchQuery, t]);
+
+            return (
+                <div className="p-6 pt-10 fade-in flex flex-col h-full">
+                    <h2 className="text-3xl font-black text-slate-800 mb-6 leading-none shrink-0">{t('history')}</h2>
+                    
+                    {/* Search Bar */}
+                    <div className="bg-white p-4 rounded-[24px] flex items-center shadow-sm border border-slate-100 mb-4 focus-within:ring-2 ring-[#2F80ED] shrink-0 transition-all">
+                        <Icon name="search" size={20} className="text-slate-400 mr-3"/>
+                        <input 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-transparent w-full font-bold text-sm outline-none text-slate-800" 
+                            placeholder={t('searchPlaceholder')} 
+                        />
+                        {searchQuery && (
+                            <button onClick={() => setSearchQuery('')} className="text-slate-400 p-1 active:scale-90">
+                                <Icon name="x-circle" size={16} />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Horizontal Scrollable Category Pills */}
+                    <div className="flex overflow-x-auto no-scrollbar gap-2 mb-6 pb-2 shrink-0">
+                        {categories.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setActiveCategory(cat)}
+                                className={`whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-black transition-colors border ${activeCategory === cat ? 'bg-[#2F80ED] text-white border-[#2F80ED] shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Filtered Transaction List */}
+                    <div className="space-y-3 pb-24 overflow-y-auto flex-1 no-scrollbar">
+                        {filteredTxs.length === 0 ? (
+                            <div className="text-center text-slate-400 font-bold p-8 border border-dashed border-slate-200 rounded-3xl mt-4">
+                                {searchQuery ? t('notFound') : t('noData')}
+                            </div>
+                        ) : filteredTxs.map(tx => (
+                            <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white p-4 rounded-3xl flex justify-between items-center shadow-sm border border-slate-100 cursor-pointer active:scale-[0.98] transition-all">
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-14 h-14 rounded-2xl ${tx.color||'bg-slate-50 text-slate-600'} flex items-center justify-center`}><Icon name={tx.icon||'receipt'} size={24}/></div>
+                                    <div><h4 className="font-black text-slate-800 text-sm leading-tight mb-1">{tx.title}</h4><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{tx.category} • {tx.date}</p></div>
+                                </div>
+                                <div className="font-black text-slate-800">฿{formatMoney(tx.amount)}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        };
 
         // --- 7. CAMERA & AI OCR SCANNING ---
+        const categorizeText = (text) => {
+            const tText = text.toLowerCase();
+            if (tText.match(/น้ำปั่น|ครัว|coffee|คาเฟ่|อาหาร|เครื่องดื่ม|ข้าว|ชา|นม|food|drink|ปลา|หมู|ไก่|เนื้อ|กุ้ง|เบเกอรี่|ขนม|เค้ก|ชาบู|ปิ้งย่าง|สุกี้|restaurant|cafe/)) return { cat: 'catFood', icon: 'coffee', col: 'bg-orange-50 text-orange-500' };
+            if (tText.match(/shop|ร้าน|ช้อป|โลตัส|เซเว่น|7-11|บิ๊กซี|มินิมาร์ท|ซื้อ|mart|ค้า|supermarket|mall|store/)) return { cat: 'catShop', icon: 'shopping-bag', col: 'bg-pink-50 text-pink-500' };
+            if (tText.match(/นาย|นาง|น\.ส\.|ด\.ช\.|ด\.ญ\.|คุณ|โอนเงิน/)) return { cat: 'catTransfer', icon: 'users', col: 'bg-blue-50 text-blue-500' };
+            if (tText.match(/บิล|การไฟฟ้า|การประปา|ais|true|dtac|ค่าเน็ต|ค่าไฟ|ค่าน้ำ|bill|ประกัน|สินเชื่อ|บัตรเครดิต|ชำระ/)) return { cat: 'catBill', icon: 'zap', col: 'bg-yellow-50 text-yellow-500' };
+            if (tText.match(/น้ำมัน|ปั๊ม|ptt|pt|shell|bangchak|caltex|gas/)) return { cat: 'catTravel', icon: 'car', col: 'bg-teal-50 text-teal-500' };
+            return { cat: 'catGeneral', icon: 'receipt', col: 'bg-slate-50 text-slate-500' };
+        };
+
         const ScanScreen = ({ go, onNext, t, Icon, LoadingOverlay }) => {
             const videoRef = useRef(null);
             const fileInputRef = useRef(null);
@@ -638,28 +677,67 @@
                 try {
                     const worker = await Tesseract.createWorker('tha+eng');
                     const ret = await worker.recognize(file);
-                    const text = ret.data.text.replace(/\s+/g, ' ');
+                    const rawText = ret.data.text;
+                    const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
                     await worker.terminate();
 
-                    const numbers = text.match(/\d{1,3}(?:,\d{3})*(?:\.\d{2})/g);
                     let finalAmount = '';
-                    if(numbers && numbers.length > 0) {
-                        const vals = numbers.map(n => parseFloat(n.replace(/,/g, '')));
-                        finalAmount = Math.max(...vals).toFixed(2);
+                    let merchant = '';
+                    let dateStr = new Date().toLocaleDateString('th-TH');
+                    let memoText = '';
+
+                    const amountRegex = /(?:จำนวนเงิน|จำนวน|ยอดรวม|ยอดเงิน|รวมทั้งสิ้น|Total|Amount|฿|B)[^\d]*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i;
+                    for(let line of lines) {
+                        const match = line.match(amountRegex);
+                        if(match && match[1]) { finalAmount = parseFloat(match[1].replace(/,/g, '')).toFixed(2); break; }
                     }
+                    if (!finalAmount || finalAmount === '0.00') {
+                        const numbers = rawText.match(/\b\d{1,3}(?:,\d{3})*\.\d{2}\b/g);
+                        if (numbers && numbers.length > 0) {
+                            const vals = numbers.map(n => parseFloat(n.replace(/,/g, '')));
+                            finalAmount = Math.max(...vals).toFixed(2);
+                        }
+                    }
+
+                    let foundTo = false;
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+                        if (line.match(/(บันทึกช่วยจำ|บันทึก|Memo)/i)) {
+                            const cleanMemo = line.replace(/(บันทึกช่วยจำ|บันทึก|Memo)[\s.:]*/i, '').trim();
+                            if (cleanMemo) memoText = cleanMemo; else if (i + 1 < lines.length) memoText = lines[i+1];
+                        }
+                        const dateMatch = line.match(/(\d{1,2}[\/\-\. ]\d{1,2}[\/\-\. ]\d{2,4})|(\d{1,2}\s+(ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.|มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)\s+\d{2,4})/);
+                        if(dateMatch) dateStr = dateMatch[0];
+                        if (line.match(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)/i)) {
+                            let cleanMerchant = line.replace(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)[\s.:]*/i, '').trim();
+                            if (cleanMerchant.length < 3 && i + 1 < lines.length) cleanMerchant = lines[i+1].trim();
+                            cleanMerchant = cleanMerchant.replace(/(ธนาคาร|พร้อมเพย์|PromptPay|KBank|SCB|KTB|BBL|GSB)/ig, '').trim();
+                            if (cleanMerchant.length > 2) { merchant = cleanMerchant; foundTo = true; }
+                        }
+                        if (!foundTo && !merchant && line.match(/(นาย|นาง|น\.ส\.|บจก|หจก|บริษัท|ร้าน|SHOP|ครัว|คาเฟ่|cafe|มินิมาร์ท|ตลาด)/i)) {
+                             if(!line.match(/^(จาก|ผู้โอน)/i)) merchant = line.replace(/^(จาก|ผู้โอน)[\s.:]*/i, '').trim();
+                        }
+                    }
+                    if (!merchant && finalAmount) {
+                        if(lines.length > 0) merchant = lines[0];
+                        if(merchant.match(/ใบเสร็จ|Receipt|รับเงิน/i) && lines.length > 1) merchant = lines[1];
+                    }
+
+                    let finalTitle = memoText || merchant || 'รายการใช้จ่าย';
+                    finalTitle = finalTitle.replace(/(รหัสอ้างอิง|เลขอ้างอิง|Ref|วันที่).*/i, '').trim();
                     
-                    const merchant = text.includes('โอนเงิน') ? 'โอนเงินสำเร็จ' : 'รายการสแกนจากคลังภาพ';
-                    
+                    const categoryInfo = categorizeText(finalTitle + ' ' + rawText);
+
                     setTimeout(() => {
                         setScanning(false);
-                        onNext({ amount: finalAmount || '', merchant: merchant, date: new Date().toLocaleDateString('th-TH') });
-                    }, 1500);
+                        onNext({ amount: finalAmount || '', merchant: finalTitle, date: dateStr || new Date().toLocaleDateString('th-TH'), categoryKey: categoryInfo.cat, icon: categoryInfo.icon, color: categoryInfo.col, isAuto: true });
+                    }, 500);
 
                 } catch (error) {
                     setTimeout(() => {
                         setScanning(false);
-                        onNext({ amount: '', merchant: 'สแกนไม่สำเร็จ กรุณากรอกเอง', date: new Date().toLocaleDateString('th-TH') });
-                    }, 1500);
+                        onNext({ amount: '', merchant: '', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'catGeneral', icon: 'receipt', color: 'bg-slate-50 text-slate-500', isAuto: false });
+                    }, 500);
                 }
             };
 
@@ -669,7 +747,7 @@
                     setFlash(false); setScanning(true);
                     setTimeout(() => {
                         setScanning(false);
-                        onNext({ amount: '', merchant: 'ถ่ายภาพใหม่', date: new Date().toLocaleDateString('th-TH') });
+                        onNext({ amount: '', merchant: 'ถ่ายภาพใหม่', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'catGeneral', icon: 'receipt', color: 'bg-slate-50 text-slate-500', isAuto: false });
                     }, 1500);
                 }, 300); 
             };
@@ -700,25 +778,42 @@
         const ReviewScreen = ({ go, screenData, onConfirm, t, Icon, LoadingOverlay }) => {
             const [amount, setAmount] = useState(screenData?.amount || '');
             const [merchant, setMerchant] = useState(screenData?.merchant || '');
+            const [category, setCategory] = useState(screenData?.categoryKey || 'catGeneral');
+            const [catIcon, setCatIcon] = useState(screenData?.icon || 'receipt');
+            const [catColor, setCatColor] = useState(screenData?.color || 'bg-slate-100 text-slate-600');
             const [saving, setSaving] = useState(false);
             
             const handleSave = () => {
                 setSaving(true);
                 setTimeout(() => {
-                    onConfirm({ title: merchant||'รายการใหม่', amount: Number(amount), category: 'ทั่วไป', date: screenData?.date || 'วันนี้', icon: 'check', color: 'bg-green-50 text-green-500' });
+                    onConfirm({ title: merchant||'รายการใหม่', amount: Number(amount), category: t(category), date: screenData?.date || 'วันนี้', icon: catIcon, color: catColor });
                 }, 1000);
             };
 
             return (
                 <div className="p-6 pt-10 flex flex-col h-full bg-[#F7F9FC] fade-in relative">
-                    {saving && <LoadingOverlay text="กำลังบันทึกข้อมูล..." Icon={Icon} />}
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
                     <div className="flex items-center justify-between mb-8"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button><h2 className="font-black text-slate-800 text-lg">{t('reviewDetails')}</h2><div className="w-10"></div></div>
+                    
                     <div className="bg-white p-8 rounded-[36px] shadow-sm border border-slate-100 flex flex-col items-center mb-6">
                         <p className={`text-[10px] font-black ${amount?'text-green-500':'text-orange-500'} uppercase tracking-widest mb-2 flex items-center gap-1 px-3 py-1 rounded-full ${amount?'bg-green-50':'bg-orange-50'}`}><Icon name={amount?'check-circle-2':'alert-circle'} size={12}/> {amount?'ดึงข้อมูลสำเร็จ':'กรุณาตรวจสอบยอดเงิน'}</p>
                         <div className="flex items-center gap-1"><span className="text-2xl font-black text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-black text-slate-800 bg-transparent text-center w-full outline-none focus:border-b-2 border-[#2F80ED] transition-colors" placeholder="0.00"/></div>
                     </div>
+
                     <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4 mb-6">
                         <div><label className="text-[10px] font-bold text-slate-400 uppercase">{t('merchant')}</label><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-slate-50 p-4 rounded-2xl mt-1 font-bold text-slate-700 text-sm outline-none focus:ring-2 ring-[#2F80ED]"/></div>
+                        
+                        <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase">{t('category')}</label>
+                            <div className="bg-slate-50 p-4 rounded-2xl mt-1 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-8 h-8 rounded-full ${catColor} flex items-center justify-center`}><Icon name={catIcon} size={14}/></div>
+                                    <span className="font-bold text-slate-700 text-sm">{t(category)}</span>
+                                </div>
+                                {screenData?.isAuto && <span className="text-[10px] text-slate-400 font-bold bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-sm flex items-center gap-1"><Icon name="sparkles" size={10} className="text-[#2F80ED]"/> {t('aiSelected')}</span>}
+                            </div>
+                        </div>
+
                         <div><label className="text-[10px] font-bold text-slate-400 uppercase">{t('date')}</label><div className="bg-slate-50 p-4 rounded-2xl mt-1 text-sm font-bold text-slate-700">{screenData?.date || 'วันนี้'}</div></div>
                     </div>
                     <button disabled={!amount || amount==='0' || amount==='0.00'} onClick={handleSave} className="mt-auto w-full bg-[#2F80ED] text-white font-black py-5 rounded-[24px] shadow-lg active:scale-95 disabled:bg-slate-300">{t('confirmSave')}</button>
@@ -733,13 +828,13 @@
             const handleSave = () => {
                 setSaving(true);
                 setTimeout(() => {
-                    onSave({id:Date.now().toString(), title:merchant||'ทั่วไป', amount:Number(amount), category:'อื่นๆ', date:'วันนี้', icon:'edit', color:'bg-slate-50 text-slate-600'});
+                    onSave({id:Date.now().toString(), title:merchant||t('manual'), amount:Number(amount), category:t('catGeneral'), date:new Date().toLocaleDateString('th-TH'), icon:'edit-3', color:'bg-slate-50 text-slate-600'});
                 }, 1000);
             };
 
             return (
                 <div className="p-6 pt-10 flex flex-col h-full bg-[#F7F9FC] fade-in relative">
-                    {saving && <LoadingOverlay text="กำลังบันทึก..." Icon={Icon} />}
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
                     <div className="flex items-center mb-8"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><Icon name="chevron-left"/></button><h2 className="font-black text-lg ml-4">{t('addTx')}</h2></div>
                     <div className="bg-white p-8 rounded-[36px] text-center border border-slate-100 mb-6 shadow-sm"><label className="text-xs font-bold text-slate-400">{t('amount')}</label><div className="flex justify-center items-center mt-2"><span className="text-3xl font-black text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00" className="text-6xl font-black text-slate-800 w-48 text-center bg-transparent outline-none"/></div></div>
                     <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4"><div><label className="text-xs font-bold text-slate-400 block">{t('merchant')}</label><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-slate-50 mt-2 p-4 rounded-2xl outline-none focus:ring-2 ring-[#2F80ED] font-medium" placeholder="เช่น ค่าอาหาร"/></div></div>
@@ -789,6 +884,7 @@
                     <div className="flex flex-col items-center mb-8"><div className={`w-20 h-20 rounded-[32px] ${tx.color||'bg-slate-100'} flex items-center justify-center mb-6 shadow-sm`}><Icon name={tx.icon||'receipt'} size={36}/></div><h1 className="text-5xl font-black text-slate-800 mb-2">฿{formatMoney(tx.amount)}</h1><p className="font-bold text-slate-400 text-lg">{tx.title}</p></div>
                     <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm space-y-6 mb-8">
                         <div className="flex justify-between items-center"><span className="text-xs font-bold text-slate-400 uppercase">{t('status')}</span><span className="bg-green-50 text-green-600 font-black text-xs px-3 py-1.5 rounded-full">สำเร็จ</span></div>
+                        <div className="flex justify-between items-center"><span className="text-xs font-bold text-slate-400 uppercase">{t('category')}</span><span className="font-bold text-slate-700 text-sm">{tx.category}</span></div>
                         <div className="flex justify-between items-center"><span className="text-xs font-bold text-slate-400 uppercase">{t('date')}</span><span className="font-bold text-slate-700 text-sm">{tx.date}</span></div>
                     </div>
                     <button onClick={()=>go('SPLIT_BILL', null, tx)} className="mt-auto w-full bg-[#2F80ED] text-white font-black py-4 rounded-[24px] shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"><Icon name="users" size={20}/> {t('splitBill')}</button>
