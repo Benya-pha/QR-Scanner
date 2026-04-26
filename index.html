@@ -110,6 +110,17 @@
         const ACCENT_COLORS = [ { name: 'Blue', hex: '#8cb1ff' }, { name: 'Yellow', hex: '#ffde6a' }, { name: 'Pink', hex: '#ffb0cd' }, { name: 'Green', hex: '#94e4ae' }, { name: 'Purple', hex: '#cda8ff' }, { name: 'Red', hex: '#ff9494' } ];
         const PASTEL_COLORS = ['#ffb0cd', '#ffde6a', '#94e4ae', '#8cb1ff', '#cda8ff', '#ff9494', '#e2e8f0', '#fbcfe8', '#fde047', '#86efac'];
         const lineIconsList = ['wallet', 'plane', 'car', 'gift', 'home', 'coffee', 'piggy-bank', 'shopping-bag', 'heart', 'star', 'music', 'book', 'smartphone', 'monitor', 'camera', 'zap', 'umbrella', 'scissors', 'trending-up', 'award', 'briefcase', 'bus', 'clapperboard', 'gamepad-2', 'headphones', 'key', 'laptop', 'lightbulb', 'map-pin', 'palette', 'pizza', 'shirt', 'smile', 'ticket', 'tv', 'watch', 'wifi', 'utensils', 'train', 'tag'];
+        
+        const PASTEL_POCKET_ICONS = [
+            { icon: 'wallet', bg: '#8cb1ff33', color: '#8cb1ff' },
+            { icon: 'piggy-bank', bg: '#ffde6a33', color: '#ffde6a' },
+            { icon: 'shopping-bag', bg: '#ffb0cd33', color: '#ffb0cd' },
+            { icon: 'car', bg: '#94e4ae33', color: '#94e4ae' },
+            { icon: 'home', bg: '#cda8ff33', color: '#cda8ff' },
+            { icon: 'plane', bg: '#ff949433', color: '#ff9494' },
+            { icon: 'coffee', bg: '#fde04733', color: '#fde047' },
+            { icon: 'zap', bg: '#86efac33', color: '#86efac' }
+        ];
 
         const formatMoney = (num) => Number(num || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         
@@ -150,7 +161,7 @@
         };
 
         const LoadingOverlay = ({ text, Icon }) => (
-            <div className="absolute inset-0 bg-white/70 dark:bg-dark/70 backdrop-blur-md z-[100] flex flex-col items-center justify-center fade-in">
+            <div className="fixed inset-0 bg-white/70 dark:bg-dark/70 backdrop-blur-md z-[100] flex flex-col items-center justify-center fade-in">
                 <Icon name="loader-2" size={48} className="animate-spin text-primary mb-6"/>
                 <h2 className="font-bold text-xl tracking-widest uppercase text-slate-700 dark:text-white">{text}</h2>
             </div>
@@ -477,7 +488,7 @@
                 <div className="fixed bottom-0 left-0 right-0 w-full bg-white/90 dark:bg-dark/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50 pb-[env(safe-area-inset-bottom)]">
                     <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} Icon={Icon} />
                     <NavBtn icon="layout-grid" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} Icon={Icon} />
-                    <div className="relative -top-6"><button onClick={()=>go('SCAN')} className="bg-primary text-white w-14 h-14 flex items-center justify-center rounded-[20px] shadow-[0_8px_20px_var(--color-primary-light)] hover:-translate-y-1 active:scale-95 transition-all"><Icon name="scan-line" size={24} /></button></div>
+                    <div className="relative -top-6"><button onClick={()=>go('SCAN')} className="bg-primary text-white w-14 h-14 flex items-center justify-center rounded-[20px] shadow-[0_8px_20px_var(--color-primary-light)] hover:-translate-y-1 active:scale-95 transition-all"><Icon name="scan-line" size={28} /></button></div>
                     <NavBtn icon="clock" label={t('history')} active={tab==='HISTORY'} onClick={()=>go('MAIN','HISTORY')} Icon={Icon} />
                     <NavBtn icon="user" label={t('profile')} active={tab==='PROFILE'} onClick={()=>go('MAIN','PROFILE')} Icon={Icon} />
                 </div>
@@ -525,7 +536,7 @@
                 <div className="flex-1 overflow-y-auto bg-white dark:bg-dark fade-in relative no-scrollbar">
                     <div className="min-h-full flex flex-col justify-center p-8 pb-12">
                         {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                        <div className="text-center mb-10 mt-4"><div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mb-6"><Icon name="scan-face" size={40}/></div><h1 className="text-3xl font-bold dark:text-white">QR Scanner</h1><p className="text-slate-400 font-bold mt-2">{t('welcome')}</p></div>
+                        <div className="text-center mb-10 mt-4"><div className="w-32 h-32 bg-primary/10 text-primary rounded-[40px] flex items-center justify-center mx-auto mb-6 shadow-sm"><Icon name="scan-face" size={64}/></div><h1 className="text-3xl font-bold dark:text-white">QR Scanner</h1><p className="text-slate-400 font-bold mt-2">{t('welcome')}</p></div>
                         <form onSubmit={handleLogin} className="space-y-4">
                             <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
                             <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('password')} /></div>
