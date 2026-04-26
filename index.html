@@ -89,17 +89,6 @@
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
-        
-        /* FIX #4: Smooth spinner animation - prevent wobbling */
-        @keyframes smoothSpin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin-smooth {
-            animation: smoothSpin 1s linear infinite;
-            transform-origin: center;
-            will-change: transform;
-        }
     </style>
 </head>
 <body>
@@ -121,20 +110,6 @@
         const ACCENT_COLORS = [ { name: 'Blue', hex: '#8cb1ff' }, { name: 'Yellow', hex: '#ffde6a' }, { name: 'Pink', hex: '#ffb0cd' }, { name: 'Green', hex: '#94e4ae' }, { name: 'Purple', hex: '#cda8ff' }, { name: 'Red', hex: '#ff9494' } ];
         const PASTEL_COLORS = ['#ffb0cd', '#ffde6a', '#94e4ae', '#8cb1ff', '#cda8ff', '#ff9494', '#e2e8f0', '#fbcfe8', '#fde047', '#86efac'];
         const lineIconsList = ['wallet', 'plane', 'car', 'gift', 'home', 'coffee', 'piggy-bank', 'shopping-bag', 'heart', 'star', 'music', 'book', 'smartphone', 'monitor', 'camera', 'zap', 'umbrella', 'scissors', 'trending-up', 'award', 'briefcase', 'bus', 'clapperboard', 'gamepad-2', 'headphones', 'key', 'laptop', 'lightbulb', 'map-pin', 'palette', 'pizza', 'shirt', 'smile', 'ticket', 'tv', 'watch', 'wifi', 'utensils', 'train', 'tag'];
-        
-        // FIX #1: Define PASTEL_POCKET_ICONS constant that was missing
-        const PASTEL_POCKET_ICONS = [
-            { icon: 'wallet', bg: '#ffb0cd', color: '#fff' },
-            { icon: 'plane', bg: '#ffde6a', color: '#fff' },
-            { icon: 'car', bg: '#94e4ae', color: '#fff' },
-            { icon: 'gift', bg: '#8cb1ff', color: '#fff' },
-            { icon: 'home', bg: '#cda8ff', color: '#fff' },
-            { icon: 'coffee', bg: '#ff9494', color: '#fff' },
-            { icon: 'piggy-bank', bg: '#e2e8f0', color: '#000' },
-            { icon: 'shopping-bag', bg: '#fbcfe8', color: '#fff' },
-            { icon: 'heart', bg: '#fde047', color: '#000' },
-            { icon: 'star', bg: '#86efac', color: '#fff' }
-        ];
 
         const formatMoney = (num) => Number(num || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         
@@ -174,11 +149,9 @@
             return <span ref={spanRef} className={`inline-flex items-center justify-center ${className}`} style={{width: size, height: size}}></span>;
         };
 
-        // FIX #3: Increase icon size in LoadingOverlay and use smooth spinner
-        // FIX #4: Use animate-spin-smooth instead of animate-spin for smooth rotation
         const LoadingOverlay = ({ text, Icon }) => (
             <div className="absolute inset-0 bg-white/70 dark:bg-dark/70 backdrop-blur-md z-[100] flex flex-col items-center justify-center fade-in">
-                <Icon name="loader-2" size={64} className="animate-spin-smooth text-primary mb-6"/>
+                <Icon name="loader-2" size={48} className="animate-spin text-primary mb-6"/>
                 <h2 className="font-bold text-xl tracking-widest uppercase text-slate-700 dark:text-white">{text}</h2>
             </div>
         );
@@ -257,7 +230,7 @@
                 transactionAlerts: 'เตือนการทำรายการ', everyPurchase: 'ทุกรายการใช้จ่าย', budgetAlerts: 'เตือนงบประมาณ',
                 budgetWarnings: 'เตือนเมื่อใกล้หมดงบ', monthlySummaries: 'สรุปยอดรายเดือน', newLogins: 'การเข้าระบบใหม่', passwordChanges: 'เปลี่ยนรหัสผ่าน',
                 themeMode: 'โหมดหน้าจอ', activeNow: 'กำลังใช้งาน', pinStatusNotSet: 'ยังไม่ตั้งค่า', pinStatusSet: 'ตั้งค่าแล้ว', viewReceipt: 'ดูรูปสลิป',
-                resetData: 'ล้างข้อมูลทั้งหมด', confirmReset: 'คุณแน่ใจหรือไม่ว่าจะล้างประวัติและกระเป๋าเงินทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้', resetSuccess: 'ล้างข้อมูลเรียบร้อยแล้ว!', torchNotSupported: 'ไฟฉายไม่รองรับบนอุปกรณ์นี้', edit: 'แก้ไข', done: 'เสร็จสิ้น', accentColor: 'สีเน้น', name: 'ชื่อ', email: 'อีเมล', password: 'รหัสผ่าน', confirmPass: 'ยืนยันรหัสผ่าน', createAccount: 'สร้างบัญชี', noAccount: 'ยังไม่มีบัญชี', signUp: 'สมัครสมาชิก', forgotPass: 'ลืมรหัสผ่าน', resetPass: 'รีเซ็ตรหัสผ่าน', checkEmail: 'ตรวจสอบอีเมล', resetSent: 'ลิงก์รีเซ็ตรหัสผ่านถูกส่งไปยังอีเมลของคุณ', sendReset: 'ส่งลิงก์รีเซ็ต', backLogin: 'กลับไปหน้าเข้าสู่ระบบ'
+                resetData: 'ล้างข้อมูลทั้งหมด', confirmReset: 'คุณแน่ใจหรือไม่ว่าจะล้างประวัติและกระเป๋าเงินทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้', resetSuccess: 'ล้างข้อมูลเรียบร้อยแล้ว!', torchNotSupported: 'ไฟฉายไม่รองรับบนอุปกรณ์นี้', edit: 'แก้ไข', done: 'เสร็จสิ้น'
             },
             EN: {
                 welcome: 'Welcome', home: 'Home', wallet: 'Pockets', scan: 'Scan', history: 'History', profile: 'Profile',
@@ -289,7 +262,7 @@
                 transactionAlerts: 'Transaction Alerts', everyPurchase: 'Every purchase', budgetAlerts: 'Budget Alerts',
                 budgetWarnings: 'Budget warnings', monthlySummaries: 'Monthly summaries', newLogins: 'New device logins', passwordChanges: 'Password changes',
                 themeMode: 'Theme Mode', activeNow: 'Active now', pinStatusNotSet: 'Not configured', pinStatusSet: 'Configured', viewReceipt: 'View Receipt',
-                resetData: 'Reset All Data', confirmReset: 'Are you sure you want to clear all transactions and pockets? This cannot be undone.', resetSuccess: 'Data cleared successfully!', torchNotSupported: 'Torch not supported on this device', edit: 'Edit', done: 'Done', accentColor: 'Accent Color', name: 'Name', email: 'Email', password: 'Password', confirmPass: 'Confirm Password', createAccount: 'Create Account', noAccount: 'No account yet', signUp: 'Sign Up', forgotPass: 'Forgot Password', resetPass: 'Reset Password', checkEmail: 'Check Email', resetSent: 'Password reset link has been sent to your email', sendReset: 'Send Reset Link', backLogin: 'Back to Login'
+                resetData: 'Reset All Data', confirmReset: 'Are you sure you want to clear all transactions and pockets? This cannot be undone.', resetSuccess: 'Data cleared successfully!', torchNotSupported: 'Torch not supported on this device', edit: 'Edit', done: 'Done'
             }
         };
         const getT = (lang) => (key) => TRANSLATIONS[lang]?.[key] || key;
@@ -298,180 +271,33 @@
         // 4. SHARED UI COMPONENTS
         // ==========================================
         class ErrorBoundary extends React.Component {
-            constructor(props) { super(props); this.state = { hasError: false }; }
-            static getDerivedStateFromError(error) { return { hasError: true }; }
-            componentDidCatch(error, errorInfo) { console.error('Error caught:', error, errorInfo); }
-            render() { return this.state.hasError ? <div className="flex items-center justify-center h-screen bg-red-50 text-red-600"><div className="text-center"><h1 className="text-2xl font-bold mb-4">Something went wrong</h1><p>Please refresh the page</p></div></div> : this.props.children; }
+            constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+            static getDerivedStateFromError(error) { return { hasError: true, error }; }
+            render() {
+                if (this.state.hasError) {
+                    return (
+                        <div className="p-8 bg-slate-900 text-white h-screen w-screen flex flex-col items-center justify-center">
+                            <h1 className="text-4xl font-black mb-4 text-[#FF4D4D]">Oops!</h1>
+                            <h2 className="text-xl font-bold mb-2">Something went wrong</h2>
+                            <p className="text-slate-400 text-center mb-8 text-xs bg-slate-800 p-4 rounded-xl">{this.state.error?.toString()}</p>
+                            <button onClick={()=>window.location.reload()} className="px-8 py-4 bg-primary text-white rounded-full font-bold">Reload App</button>
+                        </div>
+                    );
+                }
+                return this.props.children;
+            }
         }
 
-        const NavBtn = ({ icon, label, active, onClick, Icon }) => (
-            <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-colors ${active ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
-                <Icon name={icon} size={24} />
-                <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
-            </button>
-        );
-
-        const Section = ({ title, children }) => (
-            <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700">
-                <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{title}</h3>
-                <div className="space-y-3">{children}</div>
+        const SwitchToggle = ({ isOn, onToggle }) => (
+            <div onClick={onToggle} className={`w-12 h-7 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${isOn ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}>
+                <div className={`bg-white w-5 h-5 rounded-full shadow-sm transform transition-transform duration-300 ${isOn ? 'translate-x-5' : ''}`}></div>
             </div>
         );
 
-        const MenuItem = ({ icon, label, onClick }) => (
-            <button onClick={onClick} className="flex items-center justify-between py-3 px-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors group">
-                <div className="flex items-center gap-3">
-                    <Icon name={icon} size={20} className="text-slate-400 group-hover:text-primary transition-colors" />
-                    <span className="font-bold text-sm dark:text-white">{label}</span>
-                </div>
-                <Icon name="chevron-right" size={18} className="text-slate-300 group-hover:text-primary transition-colors" />
-            </button>
-        );
-
-        // ==========================================
-        // 5. SCREEN COMPONENTS
-        // ==========================================
-        const LoginScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
-            const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
-            
-            const handleLogin = async (e) => {
-                e.preventDefault(); if(!email || !password) return setErr(t('fillAll'));
-                setLoading(true); setErr('');
-                try {
-                    await auth.signInWithEmailAndPassword(email, password);
-                } catch(e) {
-                    if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
-                        setTimeout(() => {
-                            const guest = { uid: 'mock-uid', email, displayName: 'Guest User', photoURL: 'https://ui-avatars.com/api/?name=U&background=8cb1ff&color=fff' };
-                            localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
-                        }, 1000);
-                    } else { setErr(translateAuthError(e.code)); setLoading(false); }
-                }
-            };
-            const googleLogin = async () => {
-                setLoading(true);
-                try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); } 
-                catch (e) {
-                    if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
-                        setTimeout(() => {
-                            const guest = { uid: 'mock-uid', email: 'guest@google.com', displayName: 'Google User', photoURL: 'https://ui-avatars.com/api/?name=G&background=8cb1ff&color=fff' };
-                            localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
-                        }, 1000);
-                    } else { setErr(e.message); setLoading(false); }
-                }
-            };
-            const guestLogin = () => {
-                setLoading(true);
-                setTimeout(() => {
-                    const guest = { uid: 'mock-uid', email: 'guest@app.com', displayName: 'ผู้ใช้งานทั่วไป', photoURL: 'https://ui-avatars.com/api/?name=User&background=8cb1ff&color=fff' };
-                    localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
-                }, 1000);
-            };
-
-            return (
-                <div className="flex-1 overflow-y-auto bg-white dark:bg-dark fade-in relative no-scrollbar">
-                    <div className="min-h-full flex flex-col justify-center p-8 pb-12">
-                        {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                        <div className="text-center mb-10 mt-4"><div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mb-6"><Icon name="scan-face" size={40}/></div><h1 className="text-3xl font-bold dark:text-white">QR Scanner</h1><p className="text-slate-400 font-bold mt-2">{t('welcome')}</p></div>
-                        <form onSubmit={handleLogin} className="space-y-4">
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('password')} /></div>
-                            <div className="text-right"><button type="button" onClick={()=>go('FORGOT_PASS')} className="text-xs font-bold text-slate-400 hover:text-primary transition-colors">{t('forgotPass')}</button></div>
-                            <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-2 tracking-widest shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">{t('login')}</button>
-                        </form>
-                        {err && <div className="bg-red-50 dark:bg-red-500/10 text-danger p-3 rounded-2xl text-xs font-bold text-center mt-4">{err}</div>}
-                        <div className="flex items-center gap-4 my-8"><div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"/><span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">OR</span><div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"/></div>
-                        <button onClick={googleLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700">
-                            <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                            {t('loginGoogle')}
-                        </button>
-                        <button onClick={guestLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700"><Icon name="user" size={20} className="text-slate-400"/> {t('guestLogin')}</button>
-                        <button onClick={()=>go('SIGN_UP')} className="mt-4 pb-8 text-sm font-bold text-slate-400 text-center w-full transition-colors hover:text-primary">{t('noAccount')} <span className="text-primary underline">{t('signUp')}</span></button>
-                    </div>
-                </div>
-            );
+        const PocketIcon = ({ pocket, size = 20 }) => {
+            if (!pocket) return null;
+            return <div className={`flex items-center justify-center rounded-full shadow-sm`} style={{backgroundColor: pocket.bg || 'var(--color-primary-light)', color: pocket.color || 'var(--color-primary)', width: size*2.5, height: size*2.5}}><Icon name={pocket.icon || 'wallet'} size={size} /></div>;
         };
-
-        const SignUpScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
-            const [name, setName] = useState(''); const [email, setEmail] = useState(''); const [pass, setPass] = useState(''); const [confirm, setConfirm] = useState('');
-            const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
-
-            const handleSignUp = async (e) => {
-                e.preventDefault(); if(pass !== confirm) return setErr(t('passMismatch')); if(!name || !email || !pass) return setErr(t('fillAll'));
-                setLoading(true); setErr('');
-                try {
-                    const res = await auth.createUserWithEmailAndPassword(email, pass);
-                    await res.user.updateProfile({ displayName: name });
-                } catch(error) {
-                    if(error.code.includes('operation-not-supported') || error.code.includes('operation-not-allowed')) {
-                        setTimeout(() => {
-                            const guest = { uid: 'mock-uid', email, displayName: name, photoURL: 'https://ui-avatars.com/api/?name='+name+'&background=8cb1ff&color=fff' };
-                            localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
-                        }, 1000);
-                    } else { setErr(translateAuthError(error.code)); setLoading(false); }
-                }
-            };
-            return (
-                <div className="flex-1 overflow-y-auto bg-white dark:bg-dark fade-in relative no-scrollbar">
-                    <div className="min-h-full flex flex-col p-8 pb-12">
-                        {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                        <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 active:scale-95 transition-transform dark:text-white hover:bg-slate-100"><Icon name="arrow-left"/></button>
-                        <h1 className="text-3xl font-bold mb-8 dark:text-white">{t('createAccount')}</h1>
-                        <form onSubmit={handleSignUp} className="space-y-4">
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="user" size={20} className="text-slate-400 mr-3"/><input required value={name} onChange={e=>setName(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('name')} /></div>
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input required type="password" value={pass} onChange={e=>setPass(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('password')} /></div>
-                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input required type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('confirmPass')} /></div>
-                            <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-6 tracking-widest shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">{t('signUp')}</button>
-                        </form>
-                        {err && <div className="bg-red-50 dark:bg-red-500/10 text-danger p-3 rounded-2xl text-xs font-bold text-center mt-4">{err}</div>}
-                    </div>
-                </div>
-            );
-        };
-
-        const ForgotScreen = ({ go, t, Icon, LoadingOverlay }) => {
-            const [email, setEmail] = useState(''); const [loading, setLoading] = useState(false); const [sent, setSent] = useState(false);
-            const handleReset = async (e) => {
-                e.preventDefault(); if(!email) return;
-                setLoading(true);
-                try { await auth.sendPasswordResetEmail(email); setSent(true); } 
-                catch(e) { setLoading(false); }
-            };
-            return (
-                <div className="flex-1 overflow-y-auto bg-white dark:bg-dark fade-in relative no-scrollbar">
-                    <div className="min-h-full flex flex-col justify-center p-8 pb-12">
-                        {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                        <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 active:scale-95 transition-transform dark:text-white hover:bg-slate-100"><Icon name="arrow-left"/></button>
-                        {!sent ? (
-                            <>
-                                <h1 className="text-3xl font-bold mb-8 dark:text-white">{t('resetPass')}</h1>
-                                <form onSubmit={handleReset} className="space-y-4">
-                                    <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
-                                    <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-6 tracking-widest shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">{t('sendReset')}</button>
-                                </form>
-                            </>
-                        ) : (
-                            <div className="text-center"><Icon name="check-circle" size={48} className="text-primary mx-auto mb-4"/><h2 className="text-2xl font-bold mb-2 dark:text-white">{t('checkEmail')}</h2><p className="text-slate-400 mb-6">{t('resetSent')}</p><button onClick={()=>go('SIGN_IN')} className="w-full bg-primary text-white font-bold py-4 rounded-full tracking-widest shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">{t('backLogin')}</button></div>
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        const MainLayout = ({ children, tab, go, t, Icon }) => (
-            <div className="flex flex-col h-full relative fade-in">
-                <div className="flex-1 overflow-y-auto pb-[90px] no-scrollbar">{children}</div>
-                {/* FIX #2: Changed from fixed to absolute bottom-0 with safe-area-inset-bottom for iPhone Safe Area compatibility */}
-                <div className="absolute bottom-0 left-0 right-0 w-full bg-white/90 dark:bg-dark/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50 pb-[env(safe-area-inset-bottom)]">
-                    <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} Icon={Icon} />
-                    <NavBtn icon="layout-grid" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} Icon={Icon} />
-                    <div className="relative -top-6"><button onClick={()=>go('SCAN')} className="bg-primary text-white w-14 h-14 flex items-center justify-center rounded-[20px] shadow-[0_8px_20px_var(--color-primary-light)] hover:-translate-y-1 active:scale-95 transition-all"><Icon name="scan-line" size={24} /></button></div>
-                    <NavBtn icon="clock" label={t('history')} active={tab==='HISTORY'} onClick={()=>go('MAIN','HISTORY')} Icon={Icon} />
-                    <NavBtn icon="user" label={t('profile')} active={tab==='PROFILE'} onClick={()=>go('MAIN','PROFILE')} Icon={Icon} />
-                </div>
-            </div>
-        );
 
         const CustomIconModal = ({ onClose, onSelect, t }) => {
             const [hex, setHex] = useState('#8cb1ff');
@@ -549,11 +375,11 @@
             );
         };
 
-        const SectionOld = ({ title, children }) => (
+        const Section = ({ title, children }) => (
             <div className="mb-6"><h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-4">{title}</h4><div className="bg-white dark:bg-slate-800 rounded-[28px] border border-slate-100 dark:border-slate-700 soft-shadow overflow-hidden">{children}</div></div>
         );
 
-        const PinPadModalOld = ({ onClose, onSave, isSet, t, Icon }) => {
+        const PinPadModal = ({ onClose, onSave, isSet, t, Icon }) => {
             const [pin, setPin] = useState('');
             const press = (n) => { if(pin.length < 6) setPin(p => p + n); };
             const del = () => setPin(p => p.slice(0, -1));
@@ -645,7 +471,231 @@
             );
         };
 
+        const MainLayout = ({ children, tab, go, t, Icon }) => (
+            <div className="flex flex-col h-full relative fade-in">
+                <div className="flex-1 overflow-y-auto pb-[90px] no-scrollbar">{children}</div>
+                <div className="fixed bottom-0 left-0 right-0 w-full bg-white/90 dark:bg-dark/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50 pb-[env(safe-area-inset-bottom)]">
+                    <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} Icon={Icon} />
+                    <NavBtn icon="layout-grid" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} Icon={Icon} />
+                    <div className="relative -top-6"><button onClick={()=>go('SCAN')} className="bg-primary text-white w-14 h-14 flex items-center justify-center rounded-[20px] shadow-[0_8px_20px_var(--color-primary-light)] hover:-translate-y-1 active:scale-95 transition-all"><Icon name="scan-line" size={24} /></button></div>
+                    <NavBtn icon="clock" label={t('history')} active={tab==='HISTORY'} onClick={()=>go('MAIN','HISTORY')} Icon={Icon} />
+                    <NavBtn icon="user" label={t('profile')} active={tab==='PROFILE'} onClick={()=>go('MAIN','PROFILE')} Icon={Icon} />
+                </div>
+            </div>
+        );
         const NavBtn = ({ icon, label, active, onClick, Icon }) => (<button onClick={onClick} className={`flex flex-col items-center gap-1 w-12 transition-all hover:scale-105 ${active?'text-primary':'text-slate-400 dark:text-slate-500'}`}><Icon name={icon} size={22} strokeWidth={active?2.5:1.5} /><span className="text-[9px] font-bold">{label}</span></button>);
+
+        const LoginScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
+            const [email, setEmail] = useState(''); const [password, setPassword] = useState('');
+            const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
+
+            const handleLogin = async (e) => {
+                e.preventDefault(); if(!email || !password) return setErr(t('fillAll')); setLoading(true); setErr('');
+                try { await auth.signInWithEmailAndPassword(email, password); } 
+                catch (e) {
+                    if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
+                        setTimeout(() => {
+                            const guest = { uid: 'mock-uid', email, displayName: 'Guest User', photoURL: 'https://ui-avatars.com/api/?name=U&background=8cb1ff&color=fff' };
+                            localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
+                        }, 1000);
+                    } else { setErr(translateAuthError(e.code)); setLoading(false); }
+                }
+            };
+            const googleLogin = async () => {
+                setLoading(true);
+                try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); } 
+                catch (e) {
+                    if(e.code.includes('operation-not-supported') || window.location.protocol === 'file:') {
+                        setTimeout(() => {
+                            const guest = { uid: 'mock-uid', email: 'guest@google.com', displayName: 'Google User', photoURL: 'https://ui-avatars.com/api/?name=G&background=8cb1ff&color=fff' };
+                            localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
+                        }, 1000);
+                    } else { setErr(e.message); setLoading(false); }
+                }
+            };
+            const guestLogin = () => {
+                setLoading(true);
+                setTimeout(() => {
+                    const guest = { uid: 'mock-uid', email: 'guest@app.com', displayName: 'ผู้ใช้งานทั่วไป', photoURL: 'https://ui-avatars.com/api/?name=User&background=8cb1ff&color=fff' };
+                    localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
+                }, 1000);
+            };
+
+            return (
+                <div className="flex-1 overflow-y-auto bg-white dark:bg-dark fade-in relative no-scrollbar">
+                    <div className="min-h-full flex flex-col justify-center p-8 pb-12">
+                        {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                        <div className="text-center mb-10 mt-4"><div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mb-6"><Icon name="scan-face" size={40}/></div><h1 className="text-3xl font-bold dark:text-white">QR Scanner</h1><p className="text-slate-400 font-bold mt-2">{t('welcome')}</p></div>
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
+                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('password')} /></div>
+                            <div className="text-right"><button type="button" onClick={()=>go('FORGOT_PASS')} className="text-xs font-bold text-slate-400 hover:text-primary transition-colors">{t('forgotPass')}</button></div>
+                            <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-2 tracking-widest shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">{t('login')}</button>
+                        </form>
+                        {err && <div className="bg-red-50 dark:bg-red-500/10 text-danger p-3 rounded-2xl text-xs font-bold text-center mt-4">{err}</div>}
+                        <div className="flex items-center gap-4 my-8"><div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"/><span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">OR</span><div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"/></div>
+                        <button onClick={googleLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700">
+                            <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                            {t('loginGoogle')}
+                        </button>
+                        <button onClick={guestLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700"><Icon name="user" size={20} className="text-slate-400"/> {t('guestLogin')}</button>
+                        <button onClick={()=>go('SIGN_UP')} className="mt-4 pb-8 text-sm font-bold text-slate-400 text-center w-full transition-colors hover:text-primary">{t('noAccount')} <span className="text-primary underline">{t('signUp')}</span></button>
+                    </div>
+                </div>
+            );
+        };
+
+        const SignUpScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
+            const [name, setName] = useState(''); const [email, setEmail] = useState(''); const [pass, setPass] = useState(''); const [confirm, setConfirm] = useState('');
+            const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
+
+            const handleSignUp = async (e) => {
+                e.preventDefault(); if(pass !== confirm) return setErr(t('passMismatch')); if(!name || !email || !pass) return setErr(t('fillAll'));
+                setLoading(true); setErr('');
+                try {
+                    const res = await auth.createUserWithEmailAndPassword(email, pass);
+                    await res.user.updateProfile({ displayName: name });
+                } catch(error) {
+                    if(error.code.includes('operation-not-supported') || error.code.includes('operation-not-allowed')) {
+                        setTimeout(() => {
+                            const guest = { uid: 'mock-uid', email, displayName: name, photoURL: 'https://ui-avatars.com/api/?name='+name+'&background=8cb1ff&color=fff' };
+                            localStorage.setItem('cozy_guest', JSON.stringify(guest)); setUser(guest); go('MAIN', 'HOME');
+                        }, 1000);
+                    } else { setErr(translateAuthError(error.code)); setLoading(false); }
+                }
+            };
+            return (
+                <div className="flex-1 overflow-y-auto bg-white dark:bg-dark fade-in relative no-scrollbar">
+                    <div className="min-h-full flex flex-col p-8 pb-12">
+                        {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                        <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 active:scale-95 transition-transform dark:text-white hover:bg-slate-100"><Icon name="arrow-left"/></button>
+                        <h1 className="text-3xl font-bold mb-8 dark:text-white">{t('createAccount')}</h1>
+                        <form onSubmit={handleSignUp} className="space-y-4">
+                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="user" size={20} className="text-slate-400 mr-3"/><input required value={name} onChange={e=>setName(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('name')} /></div>
+                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
+                            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input required type="password" value={pass} onChange={e=>setPass(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={`${t('password')} (min 6)`} /></div>
+                            <div className={`bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm ${(pass&&confirm&&pass!==confirm)?'!border-danger':''}`}><Icon name="lock" size={20} className={(pass&&confirm&&pass!==confirm)?'text-danger mr-3':'text-slate-400 mr-3'}/><input required type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('confirmPass')} /></div>
+                            {err && <p className="text-xs font-bold text-danger text-center bg-red-50 dark:bg-red-500/10 p-2 rounded-xl">{err}</p>}
+                            <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-8 tracking-widest shadow-md hover:-translate-y-0.5 active:scale-95 transition-all">{t('createAccount')}</button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        const ForgotScreen = ({ go, t, Icon, LoadingOverlay, translateAuthError }) => {
+            const [email, setEmail] = useState(''); const [sent, setSent] = useState(false); const [err, setErr] = useState(''); const [loading, setLoading] = useState(false);
+            const handleReset = async (e) => {
+                e.preventDefault(); if(!email) return setErr(t('fillAll')); setLoading(true); setErr('');
+                try { await auth.sendPasswordResetEmail(email); setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); } 
+                catch(error) { if(error.code.includes('operation-not-supported')) { setTimeout(() => { setSent(true); setTimeout(()=>go('SIGN_IN'), 3000); }, 1000); } else { setErr(translateAuthError(error.code)); setLoading(false); } }
+            };
+            return (
+                <div className="flex-1 p-8 flex flex-col text-center relative fade-in bg-white dark:bg-dark">
+                    {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 absolute active:scale-95 transition-transform dark:text-white hover:bg-slate-100"><Icon name="arrow-left"/></button>
+                    <div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mt-20 mb-8"><Icon name="key" size={40}/></div>
+                    <h1 className="text-3xl font-bold mb-2 dark:text-white">{t('forgotPass')}</h1>
+                    {sent ? <div className="bg-green-50 dark:bg-green-500/10 text-[#4ADE80] p-4 rounded-2xl font-bold flex items-center justify-center gap-2 animate-pulse mt-10"><Icon name="check-circle"/> Email Sent!</div> : 
+                    <form onSubmit={handleReset} className="space-y-6 mt-10">
+                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center text-left focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
+                        {err && <p className="text-xs font-bold text-danger bg-red-50 dark:bg-red-500/10 p-2 rounded-xl">{err}</p>}
+                        <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full tracking-widest shadow-md hover:-translate-y-0.5 active:scale-95 transition-all">{t('sendLink')}</button>
+                    </form>}
+                </div>
+            );
+        };
+
+        const NotificationsScreen = ({ go, user, t, Icon, visibleNotifications, clearAllNotifs }) => (
+            <div className="flex-1 flex flex-col h-full fade-in relative overflow-hidden bg-[var(--bg-color)]">
+                <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-primaryLight via-transparent to-transparent z-0 pointer-events-none"></div>
+                <div className="px-6 pt-12 flex justify-between items-center relative z-10 mb-8">
+                    <button onClick={() => go('MAIN', 'HOME')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button>
+                    <h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2>
+                    <div className="w-10 h-10 rounded-full overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 bg-white flex items-center justify-center"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
+                </div>
+                <div className="px-6 flex-1 overflow-y-auto no-scrollbar relative z-10 pb-10">
+                    <div className="flex justify-between items-end mb-8">
+                        <div><h1 className="text-3xl font-bold mb-1 dark:text-white">{t('recentAlerts')}</h1><p className="text-sm font-bold text-slate-400">{t('caughtUp')}</p></div>
+                        {visibleNotifications.length > 0 && (<button onClick={clearAllNotifs} className="bg-danger/10 text-danger px-4 py-2 rounded-full font-bold active:scale-95 transition-transform text-xs">ล้าง</button>)}
+                    </div>
+                    <div className="space-y-4">
+                        {visibleNotifications.length === 0 ? (<div className="bg-white dark:bg-slate-800 rounded-[28px] text-center p-8 soft-shadow border border-slate-100 dark:border-slate-700"><p className="font-bold text-slate-400">{t('caughtUp')}</p></div>) : (
+                            visibleNotifications.map(notif => (
+                                <div key={notif.id} className="bg-white dark:bg-slate-800 rounded-[28px] p-5 flex gap-4 soft-shadow border border-slate-100 dark:border-slate-700 hover:-translate-y-1 transition-transform">
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${notif.type==='alert'?'bg-danger/10 text-danger':'bg-primaryLight text-primary'}`}><Icon name={notif.type==='alert'?'alert-triangle':'calendar'} size={20} /></div>
+                                    <div className="flex-1 pt-1">
+                                        <div className="flex justify-between items-start mb-1"><h3 className="font-bold text-sm dark:text-white">{notif.title}</h3><span className="text-[9px] font-bold text-slate-400">{notif.time}</span></div>
+                                        <p className="text-xs font-medium text-slate-500 leading-relaxed">{notif.desc}</p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+
+        const PocketsScreen = ({ pockets, go, t, Icon }) => (
+            <div className="p-6 pt-12 fade-in flex flex-col h-full bg-[var(--bg-color)]">
+                <div className="flex justify-between items-center mb-8"><h2 className="text-3xl font-bold leading-none dark:text-white">{t('yourPockets')}</h2><button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 active:scale-95 transition-transform hover:bg-slate-50 border border-slate-100 dark:border-slate-700"><Icon name="bell" size={20}/></button></div>
+                <div className="grid grid-cols-2 gap-4 mb-6 flex-1 overflow-y-auto no-scrollbar">
+                    {pockets.length===0 ? <div className="col-span-2 bg-white dark:bg-slate-800 soft-shadow border border-slate-100 dark:border-slate-700 rounded-[28px] text-center p-8"><p className="font-bold text-slate-400">{t('noData')}</p></div> : pockets.map(p => {
+                        const pct = p.hasTarget && p.target > 0 ? Math.min((p.balance / p.target) * 100, 100) : 0;
+                        return (
+                            <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700 active:scale-95 transition-all cursor-pointer h-fit relative overflow-hidden hover:-translate-y-1 hover:shadow-md">
+                                <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full opacity-20`} style={{backgroundColor: p.bg || 'var(--color-primary-light)'}}></div>
+                                <div className="mb-4 relative z-10"><PocketIcon pocket={p} size={18} /></div>
+                                <h4 className="font-bold text-sm mb-1 truncate relative z-10 dark:text-white">{p.name}</h4>
+                                <div className="flex items-baseline gap-1 mb-4 relative z-10"><p className="text-xl font-bold dark:text-white">฿ {formatMoney(p.balance)}</p></div>
+                                {p.hasTarget && (<div className="relative z-10"><div className="h-1 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-500" style={{width:`${pct}%`, backgroundColor: p.color||'var(--color-primary)'}}></div></div><div className="text-right text-[9px] font-bold mt-1 text-slate-400">{Math.round(pct)}%</div></div>)}
+                            </div>
+                        )
+                    })}
+                </div>
+                <button onClick={()=>go('ADD_POCKET')} className="w-full bg-primary/10 text-primary font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-95 transition-transform shrink-0 hover:bg-primary/20"><Icon name="plus" size={20}/> {t('createNewPocket')}</button>
+            </div>
+        );
+
+        const AddPocketScreen = ({ go, onSave, t, Icon, LoadingOverlay }) => {
+            const [name, setName] = useState(''); const [balance, setBalance] = useState(''); 
+            const [hasTarget, setHasTarget] = useState(false); const [target, setTarget] = useState('');
+            const [selectedIcon, setSelectedIcon] = useState(PASTEL_POCKET_ICONS[0]);
+            const [saving, setSaving] = useState(false); const [showCustomModal, setShowCustomModal] = useState(false);
+            
+            const handleSave = async () => {
+                setSaving(true);
+                try {
+                    await onSave({ id: Date.now().toString(), name, balance: Number(balance||0), hasTarget, target: hasTarget ? Number(target) : 0, iconType: 'lucide', icon: selectedIcon.icon || 'wallet', bg: selectedIcon.bg || 'var(--color-primary-light)', color: selectedIcon.color || 'var(--color-primary)' });
+                } catch(e) { console.error(e); } finally { setSaving(false); }
+            };
+
+            return (
+                <div className="p-6 pt-12 h-full flex flex-col fade-in relative bg-[var(--bg-color)]">
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={setSelectedIcon} t={t} Icon={Icon} />}
+                    
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('newPocket')}</h2><div className="w-10"></div></div>
+
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 font-bold text-sm outline-none dark:text-white transition-colors focus:ring-2 ring-primary/20" placeholder="e.g. Holiday Fund"/></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('initialAmount')}</label><div className="w-full bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-xl font-bold text-slate-400 mr-3">฿</span><input type="number" value={balance} onChange={e=>setBalance(e.target.value)} className="w-full bg-transparent font-bold text-2xl outline-none dark:text-white" placeholder="0.00"/></div></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700">
+                            <div className="flex justify-between items-center mb-2"><h4 className="font-bold text-sm dark:text-white">{t('setMonthlyTarget')}</h4><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>
+                            {hasTarget && (<div className="pt-4 border-t border-slate-100 dark:border-slate-700 fade-in"><div className="w-full bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-lg font-bold text-slate-400 mr-3">฿</span><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-transparent font-bold text-xl outline-none dark:text-white" placeholder="0.00"/></div></div>)}
+                        </div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">{t('chooseIcon')}</label>
+                            <div className="grid grid-cols-4 gap-6 px-2">
+                                {PASTEL_POCKET_ICONS.map((ic, i) => (<div key={i} onClick={()=>setSelectedIcon(ic)} className={`w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all ${selectedIcon.icon === ic.icon ? 'ring-2 ring-offset-2 ring-slate-400 dark:ring-slate-500 scale-105' : 'hover:scale-105'}`} style={{backgroundColor: ic.bg, color: ic.color}}><Icon name={ic.icon} size={20} /></div>))}
+                                <div onClick={()=>setShowCustomModal(true)} className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer border border-dashed border-slate-300 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"><Icon name="plus" size={20} /></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button disabled={!name || (hasTarget && !target)} onClick={handleSave} className="w-full bg-primary text-white py-4 mt-2 text-sm font-bold rounded-full shadow-md active:scale-95 transition-transform disabled:opacity-50 tracking-widest uppercase hover:shadow-lg">{t('savePocket')}</button>
+                </div>
+            );
+        };
 
         const PocketDetailsScreen = ({ go, pocket, txs, t, Icon }) => {
             if(!pocket) return null;
@@ -697,154 +747,216 @@
             if(!pocket) return null;
 
             return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketSettings')}</h2><div className="w-10"></div></div>
+                <div className="p-6 pt-12 h-full flex flex-col fade-in relative bg-[var(--bg-color)]">
+                    {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={(ic)=>{setSelectedIcon({type:'lucide', icon:ic.icon, bg:`${ic.color}33`, color:ic.color})}} t={t} Icon={Icon} />}
+                    <div className="flex items-center justify-between mb-6"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketSettings')}</h2><div className="w-10"></div></div>
+                    <div className="flex flex-col items-center mb-8"><div className="mb-4"><PocketIcon pocket={selectedIcon} size={36} /></div><h2 className="text-2xl font-bold dark:text-white">{pocket.name}</h2></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
-                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('general')}</h3>
-                            <div className="space-y-4">
-                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('pocketName')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="edit-2" size={16} className="text-primary mr-3" /><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder={t('pocketName')} /></div></div>
-                                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-2xl"><div className="flex items-center gap-3"><Icon name="target" size={18} className="text-primary" /><span className="font-bold text-sm dark:text-white">{t('monthlyGoal')}</span></div><button onClick={()=>setHasTarget(!hasTarget)} className={`w-12 h-6 rounded-full transition-colors ${hasTarget ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${hasTarget ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
-                                {hasTarget && <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('targetAmount')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><span className="text-primary font-bold mr-2">฿</span><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="0.00" /></div></div>}
-                            </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
-                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('iconColor')}</h3>
-                            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-2xl mb-4 cursor-pointer" onClick={()=>setShowCustomModal(true)}>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: selectedIcon.color, color: 'white'}}><Icon name={selectedIcon.icon} size={24}/></div>
-                                    <span className="font-bold dark:text-white">{t('chooseIcon')}</span>
-                                </div>
-                                <Icon name="chevron-right" size={20} className="text-slate-400" />
-                            </div>
-                            {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={(icon)=>setSelectedIcon(icon)} t={t} />}
-                        </div>
-
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
-                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('notifSettings')}</h3>
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-2xl">
-                                    <span className="font-bold text-sm dark:text-white">{t('notify80')}</span>
-                                    <button className="w-12 h-6 bg-primary rounded-full flex items-center justify-center"><div className="w-5 h-5 bg-white rounded-full translate-x-3"></div></button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <button onClick={()=>onUpdate(pocket.id, {name, hasTarget, target: hasTarget ? Number(target) : 0, icon: selectedIcon.icon, color: selectedIcon.color, bg: selectedIcon.bg})} className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform hover:shadow-lg">{t('saveChanges')}</button>
-                            <button onClick={()=>{ if(confirm(t('cannotUndone'))) onDelete(pocket.id); }} className="w-full bg-danger/10 text-danger font-bold py-4 rounded-full active:scale-95 transition-transform hover:bg-danger/20">{t('deletePocket')}</button>
-                        </div>
+                        <Section title={t('general')}><div className="p-4 border-b border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors"/></div><div onClick={()=>setShowCustomModal(true)} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><span className="font-bold text-sm dark:text-white">{t('iconColor')}</span><div className="bg-slate-100 dark:bg-slate-700 p-2 rounded-full text-slate-400 dark:text-white"><Icon name="edit-2" size={14}/></div></div></Section>
+                        <Section title={t('budgeting')}><div className="p-4 flex justify-between items-center"><span className="font-bold text-sm dark:text-white">{t('monthlyGoal')}</span><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>{hasTarget && <div className="p-4 border-t border-slate-100 dark:border-slate-700 fade-in"><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-base outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="0.00"/></div>}</Section>
+                        <div className="pt-2"><button onClick={()=>{ if(window.confirm(t('confirmReset'))) onDelete(pocket.id); }} className="w-full bg-danger/10 text-danger font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-95 transition-colors hover:bg-danger/20 text-sm"><Icon name="trash-2" size={18}/> {t('deletePocket')}</button></div>
                     </div>
+                    <button onClick={()=>onUpdate(pocket.id, {name, hasTarget, target: Number(target)||0, iconType: selectedIcon.type, icon: selectedIcon.icon, colorType: selectedIcon.colorType, color: selectedIcon.color, bg: selectedIcon.bg})} className="w-full bg-primary text-white font-bold py-4 rounded-full shadow-md active:scale-95 text-sm tracking-widest uppercase hover:shadow-lg transition-all">{t('saveChanges')}</button>
                 </div>
             );
         };
 
-        const PocketIcon = ({ pocket, size=20 }) => {
-            const style = { width: size, height: size, backgroundColor: pocket?.bg || pocket?.color || 'var(--color-primary-light)', color: pocket?.color || 'var(--color-primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' };
-            return <div style={style}><Icon name={pocket?.icon || 'wallet'} size={size * 0.6} /></div>;
-        };
-
-        const PocketsScreen = ({ go, pockets, t, Icon }) => {
+        const ProfileScreen = ({ user, go, t, onLogout, Icon, LoadingOverlay, themeMode, onResetData }) => {
+            const [loading, setLoading] = useState(false);
+            const doLogout = () => { setLoading(true); setTimeout(() => onLogout(), 1000); };
+            const MenuItem = ({ icon, label, onClick, value }) => (<div onClick={onClick} className="flex items-center justify-between p-5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary"><Icon name={icon} size={18}/></div><span className="font-bold text-sm dark:text-white">{label}</span></div><div className="flex items-center gap-3">{value && <span className="text-[10px] font-bold px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-300 uppercase tracking-widest">{value}</span>}<Icon name="chevron-right" size={16} className="text-slate-300"/></div></div>);
             return (
-                <div className="p-6 pt-10 fade-in">
-                    <h2 className="text-2xl font-bold mb-8 dark:text-white">{t('yourPockets')}</h2>
-                    {pockets.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center p-12 text-center">
-                            <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4"><Icon name="wallet" size={32} /></div>
-                            <p className="font-bold text-slate-400 mb-4">{t('keepOrganized')}</p>
-                            <button onClick={()=>go('ADD_POCKET')} className="bg-primary text-white font-bold py-3 px-6 rounded-full active:scale-95 transition-transform">{t('createNewPocket')}</button>
-                        </div>
-                    ) : (
-                        <div className="space-y-4 pb-24">
-                            {pockets.map(p => (
-                                <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-white dark:bg-slate-800 p-6 rounded-[28px] soft-shadow cursor-pointer active:scale-95 transition-all border border-slate-100 dark:border-slate-700 hover:-translate-y-1 hover:shadow-md">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-4">
-                                            <PocketIcon pocket={p} size={24} />
-                                            <div><h3 className="font-bold text-lg dark:text-white">{p.name}</h3><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{p.hasTarget ? `Goal: ฿${formatMoney(p.target)}` : 'No goal'}</p></div>
-                                        </div>
-                                        <Icon name="chevron-right" size={20} className="text-slate-300" />
-                                    </div>
-                                    <div className="text-2xl font-bold text-primary dark:text-white">฿ {formatMoney(p.balance)}</div>
-                                </div>
-                            ))}
-                            <button onClick={()=>go('ADD_POCKET')} className="w-full bg-white dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 p-6 rounded-[28px] font-bold text-primary flex items-center justify-center gap-2 active:scale-95 transition-transform hover:bg-slate-50 dark:hover:bg-slate-700"><Icon name="plus" size={20} /> {t('newPocket')}</button>
-                        </div>
-                    )}
+                <div className="p-6 pt-12 fade-in relative h-full overflow-y-auto no-scrollbar bg-[var(--bg-color)]">
+                    {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <div className="flex flex-col items-center mb-8 mt-2 relative">
+                        <button onClick={()=>go('NOTIFICATIONS')} className="absolute top-0 right-0 text-slate-400 w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 shadow-sm hover:text-primary transition-colors"><Icon name="bell" size={20}/></button>
+                        <div className="relative mb-4"><div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-md"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-md cursor-pointer hover:scale-110 transition-transform"><Icon name="edit-2" size={14}/></div></div>
+                        <h1 className="text-2xl font-bold mb-1 dark:text-white">{user?.displayName}</h1><p className="text-xs font-bold text-slate-400">{user?.email}</p>
+                    </div>
+                    <div className="space-y-6 mb-8">
+                        <Section title={t('accountTitle')}><MenuItem icon="user" label={t('accountSettings')} onClick={()=>go('EDIT_PROFILE')} /><MenuItem icon="shield" label={t('security')} onClick={()=>go('SECURITY')} /></Section>
+                        <Section title={t('preferencesTitle')}><MenuItem icon="globe" label={t('language')} onClick={()=>go('LANGUAGE')} /><MenuItem icon="palette" label={t('appTheme')} onClick={()=>go('THEME')} /></Section>
+                        <Section title="Data Management">
+                            <div onClick={onResetData} className="flex items-center justify-between p-4 cursor-pointer hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                                <div className="flex items-center gap-4"><div className="w-10 h-10 bg-danger/10 rounded-full flex items-center justify-center text-danger"><Icon name="trash-2" size={18}/></div><span className="font-bold text-sm text-danger">{t('resetData')}</span></div>
+                            </div>
+                        </Section>
+                    </div>
+                    <button onClick={doLogout} className="w-full bg-slate-50 dark:bg-slate-800 text-slate-500 font-bold py-4 rounded-full flex items-center justify-center gap-2 text-sm tracking-widest mb-10 active:scale-95 transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 uppercase"><Icon name="log-out" size={18}/> {t('logout')}</button>
                 </div>
             );
         };
 
-        const AddPocketScreen = ({ go, onSave, t, Icon }) => {
-            const [name, setName] = useState(''); const [initialAmount, setInitialAmount] = useState(''); const [hasTarget, setHasTarget] = useState(false); const [target, setTarget] = useState('');
-            const [selectedIcon, setSelectedIcon] = useState(PASTEL_POCKET_ICONS[0]);
-            const [showIconModal, setShowIconModal] = useState(false);
-
-            const handleSave = async () => {
-                if(!name || !initialAmount) return;
-                await onSave({ name, initialAmount: Number(initialAmount), balance: Number(initialAmount), hasTarget, target: hasTarget ? Number(target) : 0, icon: selectedIcon.icon, color: selectedIcon.bg, bg: `${selectedIcon.bg}33`, iconType: 'lucide', colorType: 'hex' });
+        const EditProfileScreen = ({ go, user, setUser, t, Icon, LoadingOverlay }) => {
+            const [name, setName] = useState(user?.displayName || ''); const [bio, setBio] = useState(user?.bio || '');
+            const [saving, setSaving] = useState(false); const fileInputRef = useRef(null);
+            const handleUpdate = () => {
+                setSaving(true);
+                setTimeout(async () => {
+                    if(user && user.uid !== 'mock-uid') { try { await user.updateProfile({ displayName: name }); await db.collection('users').doc(user.uid).set({ displayName: name, bio }, { merge: true }); } catch(e) {} } 
+                    else { const guestData = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...guestData, displayName: name, bio})); }
+                    setUser(prev => ({...prev, displayName: name, bio})); go('MAIN','PROFILE');
+                }, 1000);
             };
-
+            const handleAvatarUpload = (e) => {
+                const file = e.target.files[0];
+                if(file) {
+                    setSaving(true); const reader = new FileReader(); reader.readAsDataURL(file);
+                    reader.onload = (event) => {
+                        const img = new Image(); img.src = event.target.result;
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas'); const scaleSize = 300 / img.width; canvas.width = 300; canvas.height = img.height * scaleSize;
+                            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); const b64 = canvas.toDataURL('image/jpeg', 0.8);
+                            if(user && user.uid !== 'mock-uid') { db.collection('users').doc(user.uid).set({ photoURL: b64 }, { merge: true }); } 
+                            else { const g = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...g, photoURL: b64})); }
+                            setUser(prev => ({...prev, photoURL: b64})); setSaving(false);
+                        }
+                    }
+                }
+            };
             return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('newPocket')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
-                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('general')}</h3>
-                            <div className="space-y-4">
-                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('pocketName')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="edit-2" size={16} className="text-primary mr-3" /><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder={t('pocketName')} /></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('initialAmount')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><span className="text-primary font-bold mr-2">฿</span><input type="number" value={initialAmount} onChange={e=>setInitialAmount(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="0.00" /></div></div>
-                                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-2xl"><div className="flex items-center gap-3"><Icon name="target" size={18} className="text-primary" /><span className="font-bold text-sm dark:text-white">{t('monthlyGoal')}</span></div><button onClick={()=>setHasTarget(!hasTarget)} className={`w-12 h-6 rounded-full transition-colors ${hasTarget ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${hasTarget ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
-                                {hasTarget && <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('targetAmount')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><span className="text-primary font-bold mr-2">฿</span><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="0.00" /></div></div>}
-                            </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
-                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('iconColor')}</h3>
-                            <div className="grid grid-cols-5 gap-3">
-                                {PASTEL_POCKET_ICONS.map((icon, i) => (
-                                    <div key={i} onClick={()=>setSelectedIcon(icon)} className={`aspect-square rounded-full flex items-center justify-center cursor-pointer transition-transform ${selectedIcon.icon === icon.icon ? 'scale-110 ring-2 ring-primary' : 'hover:scale-105'}`} style={{backgroundColor: icon.bg, color: icon.color}}>
-                                        <Icon name={icon.icon} size={24} />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('editProfile')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
+                        <div className="flex flex-col items-center mb-8 relative"><div className="relative"><div className="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-md overflow-hidden bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><button onClick={()=>fileInputRef.current.click()} className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full shadow-md flex items-center justify-center hover:scale-110 transition-transform"><Icon name="camera" size={14}/></button></div><input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} /></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('name')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('bio')}</label><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm h-28 resize-none outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="Add bio..." /></div>
                     </div>
-                    <button onClick={handleSave} disabled={!name || !initialAmount} className="w-full bg-primary text-white font-bold py-4 rounded-full disabled:opacity-50 active:scale-95 transition-transform hover:shadow-lg">{t('savePocket')}</button>
+                    <button onClick={handleUpdate} className="w-full bg-primary text-white py-4 rounded-full shadow-md font-bold text-sm uppercase tracking-widest mt-4 active:scale-95 transition-transform hover:shadow-lg">{t('saveChanges')}</button>
                 </div>
             );
         };
 
-        const HistoryScreen = ({ go, txs, t, Icon, userCategories }) => {
-            const [searchTerm, setSearchTerm] = useState(''); const [selectedCat, setSelectedCat] = useState('All');
-            const filtered = txs.filter(tx => {
-                const matchSearch = !searchTerm || tx.title.toLowerCase().includes(searchTerm.toLowerCase()) || tx.category.toLowerCase().includes(searchTerm.toLowerCase()) || tx.merchant?.toLowerCase().includes(searchTerm.toLowerCase());
-                const matchCat = selectedCat === 'All' || tx.category === selectedCat;
-                return matchSearch && matchCat;
-            });
-
+        const SecuritySettingsScreen = ({ go, pinCode, setPinCode, setShowPinModal, t, Icon, user }) => {
+            const deviceName = useMemo(() => getDeviceName(), []);
+            const handleTogglePin = () => { if (pinCode) { setPinCode(''); localStorage.removeItem('cozy_pin'); } else { setShowPinModal(true); } };
+            const [msg, setMsg] = useState('');
+            const handleResetPass = async () => { if(user && user.uid !== 'mock-uid') { try { await auth.sendPasswordResetEmail(user.email); setMsg('Sent!'); } catch(e) { setMsg('Error'); } } else setMsg('Not supported in Guest'); setTimeout(()=>setMsg(''), 3000); };
             return (
-                <div className="p-6 pt-10 fade-in pb-24">
-                    <div className="mb-8">
-                        <h2 className="text-2xl font-bold mb-4 dark:text-white">{t('transactions')}</h2>
-                        <div className="bg-white dark:bg-slate-800 p-3.5 rounded-2xl flex items-center border border-slate-100 dark:border-slate-700 focus-within:ring-2 ring-primary/20 transition-colors">
-                            <Icon name="search" size={18} className="text-slate-400 mr-3" />
-                            <input value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder={t('searchPlaceholder')} />
+                <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('security')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <Section title="Account Security">
+                            <div onClick={handleResetPass} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-50 dark:border-slate-700 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center"><Icon name="lock" size={18}/></div><h4 className="font-bold text-sm dark:text-white">{t('changePass')}</h4></div><button className="bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest">Update</button></div>
+                            <div className="p-4 flex justify-between items-center"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400"><Icon name="layout-grid" size={18}/></div><div><span className="font-bold text-sm block leading-none mb-1 dark:text-white">{t('pinCode')}</span><span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{pinCode ? t('pinStatusSet') : t('pinStatusNotSet')}</span></div></div><div className="flex items-center gap-3">{pinCode && (<button onClick={()=>setShowPinModal(true)} className="text-[10px] font-bold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 uppercase tracking-widest">{t('changePin')}</button>)}<SwitchToggle isOn={!!pinCode} onToggle={handleTogglePin} /></div></div>
+                        </Section>
+                        <Section title={t('yourDevices')}><div className="p-4 flex justify-between items-center bg-white dark:bg-slate-900"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-[#94e4ae]/20 rounded-full flex items-center justify-center text-[#4ea86a]"><Icon name="smartphone" size={18}/></div><div><h4 className="font-bold text-sm dark:text-white">{deviceName}</h4><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{t('activeNow')}</p></div></div><span className="bg-[#94e4ae]/20 text-[#4ea86a] px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest">THIS DEVICE</span></div></Section>
+                    </div>
+                    {msg && <div className="bg-white dark:bg-slate-900 shadow-sm text-center font-bold text-sm p-4 mt-4 text-primary rounded-2xl border border-slate-100 dark:border-slate-700">{msg}</div>}
+                </div>
+            );
+        };
+
+        const NotificationSettingsScreen = ({ go, t, Icon }) => {
+            const [opts, setOpts] = useState({ p: true, bw: true, ms: false, nl: true, pc: true });
+            const toggle = (k) => setOpts({...opts, [k]: !opts[k]});
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <Section title={t('transactionAlerts')}><div className="p-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><h4 className="font-bold text-sm dark:text-white">{t('everyPurchase')}</h4><SwitchToggle isOn={opts.p} onToggle={()=>toggle('p')} /></div></Section>
+                        <Section title={t('budgetAlerts')}>
+                            <div className="p-4 flex justify-between items-center border-b border-slate-50 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><h4 className="font-bold text-sm dark:text-white">{t('budgetWarnings')}</h4><SwitchToggle isOn={opts.bw} onToggle={()=>toggle('bw')} /></div>
+                            <div className="p-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><h4 className="font-bold text-sm dark:text-white">{t('monthlySummaries')}</h4><SwitchToggle isOn={opts.ms} onToggle={()=>toggle('ms')} /></div>
+                        </Section>
+                        <Section title="Security Alerts">
+                            <div className="p-4 flex justify-between items-center border-b border-slate-50 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><h4 className="font-bold text-sm dark:text-white">{t('newLogins')}</h4><SwitchToggle isOn={opts.nl} onToggle={()=>toggle('nl')} /></div>
+                            <div className="p-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><h4 className="font-bold text-sm dark:text-white">{t('passwordChanges')}</h4><SwitchToggle isOn={opts.pc} onToggle={()=>toggle('pc')} /></div>
+                        </Section>
+                    </div>
+                </div>
+            );
+        };
+
+        const ThemeSettingsScreen = ({ themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, go, t, Icon }) => (
+            <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
+                <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('theme')}</h2><div className="w-10"></div></div>
+                <div className="flex-1 overflow-y-auto no-scrollbar space-y-8 pb-6">
+                    <div>
+                        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 ml-4">{t('themeMode')}</h4>
+                        <div className="flex justify-between gap-4 px-2">
+                            <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Light')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col p-2 gap-2 bg-white shadow-sm transition-all hover:-translate-y-1 ${themeMode === 'Light' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-100'}`}><div className="w-full h-1/4 bg-slate-100 rounded-md"></div><div className="w-full flex-1 bg-slate-50 rounded-md flex flex-col gap-1.5 p-1.5"><div className="w-full h-1.5 bg-white rounded-sm"></div><div className="w-2/3 h-1.5 bg-white rounded-sm"></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='Light' ? 'text-primary' : 'text-slate-400'}`}>{t('light')}</span></div>
+                            <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Dark')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col p-2 gap-2 bg-slate-800 shadow-sm transition-all hover:-translate-y-1 ${themeMode === 'Dark' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-700'}`}><div className="w-full h-1/4 bg-slate-700 rounded-md"></div><div className="w-full flex-1 bg-slate-900 rounded-md flex flex-col gap-1.5 p-1.5"><div className="w-full h-1.5 bg-slate-700 rounded-sm"></div><div className="w-2/3 h-1.5 bg-slate-700 rounded-sm"></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='Dark' ? 'text-primary' : 'text-slate-400'}`}>{t('dark')}</span></div>
+                            <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('System')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col bg-white shadow-sm overflow-hidden relative transition-all hover:-translate-y-1 ${themeMode === 'System' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-100 dark:border-slate-700'}`}><div className="absolute top-0 right-0 bottom-0 w-1/2 bg-slate-800"></div><div className="relative w-full h-full p-2 flex flex-col gap-2 z-10"><div className="w-full h-1/4 bg-slate-200/50 rounded-md backdrop-blur-sm"></div><div className="w-full flex-1 bg-slate-200/30 rounded-md flex flex-col gap-1.5 p-1.5 backdrop-blur-sm"><div className="w-full h-1.5 bg-white/50 rounded-sm"></div></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='System' ? 'text-primary' : 'text-slate-400'}`}>{t('system')}</span></div>
                         </div>
                     </div>
+                    <Section title={t('accentColor')}>
+                        <div className="p-5 flex gap-4 overflow-x-auto no-scrollbar bg-white dark:bg-slate-900">
+                            {ACCENT_COLORS.map(color => (
+                                <button key={color.name} onClick={() => setAccentColor(color.hex)} className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all shadow-sm ${accentColor === color.hex ? 'scale-110 ring-4 ring-offset-2 dark:ring-offset-slate-900 ring-slate-100 dark:ring-slate-800' : 'hover:scale-105'}`} style={{ backgroundColor: color.hex }}>
+                                    {accentColor === color.hex && <Icon name="check" size={20} className="text-white"/>}
+                                </button>
+                            ))}
+                        </div>
+                    </Section>
+                    <Section title="Animations"><div className="p-4 flex justify-between items-center hover:bg-slate-50 dark:bg-slate-800 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary"><Icon name="sparkles" size={18}/></div><span className="font-bold text-sm dark:text-white">{t('reduceMotion')}</span></div><SwitchToggle isOn={reduceMotion} onToggle={()=>setReduceMotion(!reduceMotion)} /></div></Section>
+                </div>
+            </div>
+        );
 
-                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-4 mb-6">
-                        <button onClick={()=>setSelectedCat('All')} className={`px-4 py-2 rounded-full text-xs font-bold shrink-0 transition-colors ${selectedCat==='All'?'bg-primary text-white':'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}`}>{t('all')}</button>
-                        {userCategories.map(cat => <button key={cat.id} onClick={()=>setSelectedCat(cat.id)} className={`px-4 py-2 rounded-full text-xs font-bold shrink-0 transition-colors flex items-center gap-1.5 ${selectedCat===cat.id?'bg-primary text-white':'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}`}><Icon name={cat.icon} size={14}/>{cat.id}</button>)}
+        const LanguageSettingsScreen = ({ lang, setLang, go, t, Icon }) => (
+            <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
+                <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl ml-4 dark:text-white">{t('language')}</h2></div>
+                <div className="space-y-4">
+                    {['TH', 'EN'].map(l => (
+                        <div key={l} onClick={()=>setLang(l)} className={`p-5 rounded-[24px] flex justify-between items-center cursor-pointer transition-transform hover:-translate-y-0.5 shadow-sm border ${lang===l?'bg-primaryLight border-primary':'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'}`}>
+                            <span className={`font-bold text-sm ${lang===l?'text-primary':'text-slate-800 dark:text-white'}`}>{l === 'TH' ? 'ภาษาไทย' : 'English'}</span>
+                            {lang===l && <div className="bg-primary text-white rounded-full p-1"><Icon name="check" size={16} strokeWidth={3}/></div>}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        // 🌟 HISTORY & SEARCH 🌟
+        const HistoryScreen = ({ txs, go, t, Icon, visibleNotifications, userCategories }) => {
+            const [searchQuery, setSearchQuery] = useState('');
+            const [activeFilter, setActiveFilter] = useState(t('all'));
+            const filters = [t('all'), ...userCategories.map(c => c.id)];
+
+            const filteredTxs = useMemo(() => txs.filter(tx => {
+                let matchF = activeFilter === t('all') || tx.category === activeFilter;
+                let matchS = (tx.title||'').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             (tx.category||'').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             (tx.notes||'').toLowerCase().includes(searchQuery.toLowerCase());
+                return matchF && matchS;
+            }), [txs, activeFilter, searchQuery, t]);
+
+            const grouped = useMemo(() => {
+                const g = {}; const today = new Date().toISOString().split('T')[0];
+                const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+                const yStr = yesterday.toISOString().split('T')[0];
+                filteredTxs.forEach(tx => { 
+                    let dMatch = tx.date;
+                    if(dMatch && dMatch.includes('/')) {
+                        const parts = dMatch.split('/');
+                        if(parts[2] && parts[2].length === 4) dMatch = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                    }
+                    let d = dMatch === today ? t('today') : dMatch === yStr ? t('yesterday') : tx.date; 
+                    if(!g[d]) g[d]=[]; g[d].push(tx); 
+                });
+                return g;
+            }, [filteredTxs, t]);
+
+            return (
+                <div className="p-6 pt-10 fade-in flex flex-col h-full bg-[var(--bg-color)]">
+                    <div className="shrink-0 mb-6 z-10 pb-2">
+                        <div className="flex justify-end mb-4"><button onClick={()=>go('NOTIFICATIONS')} className="relative w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center text-danger active:scale-95 transition-transform hover:bg-slate-50"><Icon name="bell" size={20}/>{visibleNotifications?.length > 0 && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800"></span>}</button></div>
+                        <h2 className="text-3xl font-bold mb-6 leading-none dark:text-white">{t('transactions')}</h2>
+                        <div className="bg-white dark:bg-slate-900 p-3 rounded-[20px] flex items-center soft-shadow border border-slate-100 dark:border-slate-800 mb-6 focus-within:border-primary transition-colors"><Icon name="search" size={20} className="text-slate-400 mr-3 ml-1"/><input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent w-full font-bold text-sm outline-none dark:text-white" placeholder={t('searchPlaceholder')} />{searchQuery && (<button onClick={() => setSearchQuery('')} className="text-slate-400 bg-slate-50 dark:bg-slate-800 rounded-full p-1.5 hover:text-danger"><Icon name="x" size={14} /></button>)}</div>
+                        <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">{filters.map(cat => (<button key={cat} onClick={() => setActiveFilter(cat)} className={`whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-bold transition-all active:scale-95 ${activeFilter === cat ? 'bg-primary text-white shadow-md' : 'bg-white dark:bg-slate-900 text-slate-500 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-800'}`}>{cat}</button>))}</div>
                     </div>
-
-                    <div className="space-y-3">
-                        {filtered.length === 0 ? <div className="text-center p-8 text-xs font-bold text-slate-400">{t('notFound')}</div> :
-                        filtered.map(tx => (
-                            <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white dark:bg-slate-800 p-4 rounded-[24px] flex justify-between items-center soft-shadow cursor-pointer active:scale-95 transition-all border border-slate-100 dark:border-slate-700 hover:-translate-y-1 hover:shadow-md">
-                                <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20} /><div><h4 className="font-bold text-sm dark:text-white">{tx.title}</h4><p className="text-[10px] font-bold text-slate-500 mt-1">{tx.category}</p></div></div>
-                                <div className="font-bold text-sm dark:text-white">฿ {formatMoney(tx.amount)}</div>
+                    <div className="space-y-6 pb-24 overflow-y-auto flex-1 no-scrollbar -mx-6 px-6">
+                        {Object.keys(grouped).length === 0 ? <div className="bg-white dark:bg-slate-900 rounded-[28px] text-center p-8 font-bold text-sm text-slate-400 soft-shadow border border-slate-100 dark:border-slate-800">{t('noData')}</div> : Object.keys(grouped).map(dateLabel => (
+                            <div key={dateLabel}>
+                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-2">{dateLabel}</h4>
+                                <div className="space-y-3">{grouped[dateLabel].map(tx => (
+                                    <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white dark:bg-slate-900 rounded-[24px] soft-shadow border border-slate-100 dark:border-slate-800 p-4 flex justify-between items-center cursor-pointer active:scale-95 transition-all hover:-translate-y-1 hover:shadow-md">
+                                        <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20}/><div><h4 className="font-bold text-sm leading-tight mb-1 dark:text-white">{tx.title}</h4><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{tx.category}</p></div></div>
+                                        <div className="font-bold text-base dark:text-white">-{tx.amount > 0 ? '' : ''} ฿ {formatMoney(Math.abs(tx.amount))}</div>
+                                    </div>
+                                ))}</div>
                             </div>
                         ))}
                     </div>
@@ -852,71 +964,76 @@
             );
         };
 
-        const TxDetailScreen = ({ go, tx, t, Icon, onUpdateTx }) => {
-            if(!tx) return null;
+        const ScanScreen = ({ go, onNext, t, Icon, LoadingOverlay }) => {
+            const videoRef = useRef(null); const fileInputRef = useRef(null); const streamRef = useRef(null);
+            const [isTorchOn, setIsTorchOn] = useState(false); const [scanning, setScanning] = useState(false);
+
+            useEffect(() => {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(s => { streamRef.current = s; if(videoRef.current) { videoRef.current.srcObject = s; videoRef.current.setAttribute('playsinline', true); videoRef.current.play().catch(()=>{}); } }).catch(()=>{});
+                return () => {
+                    if (streamRef.current) {
+                        streamRef.current.getTracks().forEach(t => {
+                            if (isTorchOn) t.applyConstraints({ advanced: [{ torch: false }] }).catch(()=>{});
+                            t.stop();
+                        });
+                    }
+                };
+            }, [isTorchOn]);
+
+            const toggleFlash = async () => {
+                if (streamRef.current) {
+                    try {
+                        const track = streamRef.current.getVideoTracks()[0];
+                        const newTorchState = !isTorchOn;
+                        await track.applyConstraints({ advanced: [{ torch: newTorchState }] });
+                        setIsTorchOn(newTorchState);
+                    } catch (e) { 
+                        console.error("Torch error:", e);
+                        alert(t('torchNotSupported'));
+                    }
+                }
+            };
+
+            const capture = () => { 
+                setScanning(true);
+                if (videoRef.current) {
+                    const canvas = document.createElement('canvas'); canvas.width = videoRef.current.videoWidth; canvas.height = videoRef.current.videoHeight;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+                    setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใหม่', date: new Date().toISOString().split('T')[0], categoryKey: 'General', iconType: 'lucide', icon: 'receipt', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: canvas.toDataURL('image/jpeg', 0.8) }); }, 1500);
+                } else { setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใหม่', date: new Date().toISOString().split('T')[0], categoryKey: 'General', iconType: 'lucide', icon: 'receipt', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: null }); }, 1500); }
+            };
+
+            if(scanning) return <LoadingOverlay text={t('loading')} Icon={Icon} />;
+
             return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('txDetail')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        {tx.imageUrl && <div className="w-full h-48 bg-white dark:bg-slate-900 rounded-[28px] p-2 flex justify-center items-center soft-shadow border border-slate-100 dark:border-slate-800 relative"><img src={tx.imageUrl} className="max-w-full max-h-full object-contain rounded-[20px]" /><div className="absolute right-3 bottom-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-primary shadow-sm"><Icon name="scan-line" size={14}/></div></div>}
-                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('amount')}</p><h1 className="text-5xl font-bold text-primary">฿ {formatMoney(tx.amount)}</h1></div>
-                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800 soft-shadow space-y-5">
-                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchant')}</label><p className="font-bold text-lg dark:text-white">{tx.title}</p></div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><p className="font-bold dark:text-white">{tx.date}</p></div>
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label><p className="font-bold dark:text-white">{tx.category}</p></div>
-                            </div>
-                            {tx.notes && <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('notes')}</label><p className="font-bold dark:text-white">{tx.notes}</p></div>}
-                        </div>
-                        <button onClick={()=>go('SPLIT_BILL', null, tx)} className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform hover:shadow-lg">{t('splitBill')}</button>
-                    </div>
+                <div className="flex-1 bg-black relative flex flex-col h-full fade-in">
+                    <div className="absolute top-10 left-0 w-full px-6 flex justify-between items-center z-40"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white active:scale-95 backdrop-blur-md transition-colors hover:bg-white/30"><Icon name="x" size={20}/></button><button onClick={toggleFlash} className={`w-10 h-10 rounded-full flex items-center justify-center active:scale-95 backdrop-blur-md transition-colors ${isTorchOn ? 'bg-primary text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}><Icon name={isTorchOn ? 'zap' : 'zap-off'} size={20}/></button></div>
+                    <div className="flex-1 relative overflow-hidden flex items-center justify-center"><video ref={videoRef} playsInline webkit-playsinline autoPlay muted className="absolute inset-0 w-full h-full object-cover opacity-90" /><div className="scan-frame"><div className="scan-corner tl"></div><div className="scan-corner tr"></div><div className="scan-corner bl"></div><div className="scan-corner br"></div><div className="laser"></div></div></div>
+                    <div className="bg-white dark:bg-dark rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.3)] z-40 relative border-t border-slate-100 dark:border-slate-800"><div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mb-6"></div><h2 className="text-xl font-bold dark:text-white">{t('scanReceipt')}</h2><p className="text-[10px] font-bold text-slate-400 mt-2 mb-8 uppercase tracking-widest">{t('alignReceipt')}</p><div className="flex justify-between w-full px-4 items-center"><button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="image" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('gallery')}</span></button><button onClick={capture} className="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:-translate-y-1"><Icon name="camera" size={28}/></button><button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="edit-2" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('manual')}</span></button></div></div>
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e=>{if(e.target.files[0]){ processReceiptImage(e.target.files[0], (data)=>{ setScanning(false); onNext(data); }); }}} />
                 </div>
             );
         };
 
-        const SplitBillScreen = ({ go, tx, t, Icon }) => {
-            const [friends, setFriends] = useState([{ name: '', share: tx.amount / 2 }]);
-            const totalShares = friends.reduce((a, c) => a + Number(c.share), 0) + Number(tx.amount / 2);
+        const ReviewScreen = ({ go, screenData, onConfirm, t, Icon, pockets, LoadingOverlay, userCategories, setUserCategories, defaultCatIds }) => {
+            const [amount, setAmount] = useState(screenData?.amount || ''); const [merchant, setMerchant] = useState(screenData?.merchant || ''); const [txDate, setTxDate] = useState(screenData?.date || new Date().toISOString().split('T')[0]); const [selectedPocket, setSelectedPocket] = useState('none'); const [activeCategory, setActiveCategory] = useState(screenData?.categoryKey || 'General'); const [saving, setSaving] = useState(false); const [showAddCat, setShowAddCat] = useState(false);
             
-            return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('splitBill')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('totalAmount')}</p><h1 className="text-5xl font-bold text-primary">฿ {formatMoney(tx.amount)}</h1></div>
-                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[28px] border border-slate-100 dark:border-slate-800 soft-shadow space-y-4">
-                            <div className="flex items-center justify-between"><p className="font-bold dark:text-white">Your share</p><p className="font-bold text-lg text-primary">฿ {formatMoney(tx.amount / 2)}</p></div>
-                            {friends.map((f, i) => (
-                                <div key={i} className="flex items-center gap-3">
-                                    <input value={f.name} onChange={e=>{ const newFriends = [...friends]; newFriends[i].name = e.target.value; setFriends(newFriends); }} className="flex-1 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg font-bold outline-none dark:text-white" placeholder={t('name')} />
-                                    <span className="font-bold dark:text-white">฿</span>
-                                    <input type="number" value={f.share} onChange={e=>{ const newFriends = [...friends]; newFriends[i].share = e.target.value; setFriends(newFriends); }} className="w-20 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg font-bold outline-none dark:text-white" />
-                                </div>
-                            ))}
-                            <button onClick={()=>setFriends([...friends, {name: '', share: 0}])} className="w-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold py-2 rounded-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"><Icon name="plus" size={16}/> {t('addFriend')}</button>
-                        </div>
-                        <button className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform hover:shadow-lg">{t('confirmSplit')}</button>
-                    </div>
-                </div>
-            );
-        };
-
-        const AddTxScreen = ({ go, onSave, t, Icon, pockets, userCategories }) => {
-            const [amount, setAmount] = useState(''); const [merchant, setMerchant] = useState(''); const [txDate, setTxDate] = useState(new Date().toISOString().split('T')[0]); const [selectedPocket, setSelectedPocket] = useState('none'); const [activeCategory, setActiveCategory] = useState(userCategories[0]?.id || 'General'); const [saving, setSaving] = useState(false);
-            
-            const handleSave = async () => {
-                setSaving(true);
+            const handleSave = async () => { 
+                setSaving(true); 
                 try {
-                    const catObj = userCategories.find(c => c.id === activeCategory) || userCategories[0];
-                    await onSave({ title: merchant || t('manual'), amount: Number(amount), category: activeCategory, date: txDate, iconType: 'lucide', icon: catObj.icon, colorType: 'hex', color: catObj.color, bg: `${catObj.color}33`, pocketId: selectedPocket, imageUrl: null });
+                    const catObj = userCategories.find(c => c.id === activeCategory) || userCategories[0]; 
+                    await onConfirm({ title: merchant || t('manual'), amount: Number(amount), category: activeCategory, date: txDate, iconType: 'lucide', icon: catObj.icon, colorType: 'hex', color: catObj.color, bg: `${catObj.color}33`, pocketId: selectedPocket, imageUrl: screenData?.imageUrl || null }); 
                 } catch(e) { console.error(e); } finally { setSaving(false); }
             };
 
             return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
+                <div className="flex-1 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
                     {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('addTx')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('amount')}</p><div className="flex items-center gap-2"><span className="text-2xl font-bold text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-bold bg-transparent text-center w-full outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary transition-colors dark:text-white" placeholder="0.00"/></div></div>
+                    {showAddCat && <CategoryModal onClose={()=>setShowAddCat(false)} onSave={(cat)=>{setUserCategories([...userCategories.filter(c=>c.id!==cat.id), cat]); setActiveCategory(cat.id); setShowAddCat(false);}} t={t} Icon={Icon} initialCategory={showAddCat !== true ? showAddCat : null}/>}
+                    <div className="px-6 pt-12 flex items-center justify-between mb-6"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('reviewDetails')}</h2><button onClick={handleSave} disabled={!amount} className="bg-primaryLight text-primary px-4 py-2 rounded-full font-bold text-xs disabled:opacity-50 active:scale-95 transition-colors hover:bg-primary/20 uppercase tracking-widest">{t('save')}</button></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-6">
+                        {screenData?.imageUrl && (<div className="w-full h-32 bg-white dark:bg-slate-900 rounded-[28px] p-2 flex justify-center items-center soft-shadow border border-slate-100 dark:border-slate-800 relative"><img src={screenData.imageUrl} className="max-w-full max-h-full object-contain rounded-[20px]" /><div className="absolute right-3 bottom-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-primary shadow-sm"><Icon name="scan-line" size={14}/></div></div>)}
+                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center relative">{screenData?.isAuto && <div className="absolute top-4 right-4 bg-primaryLight text-primary w-8 h-8 rounded-full flex items-center justify-center"><Icon name="sparkles" size={14}/></div>}<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('extractedAmount')}</p><div className="flex items-center gap-2"><span className="text-2xl font-bold text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-bold bg-transparent text-center w-full outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary transition-colors dark:text-white" placeholder="0.00"/></div></div>
                         <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800 soft-shadow space-y-5">
                             <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchant')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="store" size={18} className="text-primary mr-3" /><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="ระบุชื่อร้านค้า"/></div></div>
                             <div className="grid grid-cols-2 gap-4">
@@ -926,245 +1043,233 @@
                             <div>
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-3">{t('category')}</label>
                                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full shrink-0 transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primaryLight border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button></div>))}
+                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full shrink-0 transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primaryLight border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{(<button onClick={()=>setShowAddCat(cat)} className="pr-3 pl-1 hover:text-primary"><Icon name="edit-2" size={12}/></button>)}</div>))}
+                                    <button onClick={()=>setShowAddCat(true)} className="px-4 py-2 rounded-full text-xs font-bold border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 shrink-0 transition-colors"><Icon name="plus" size={14}/></button>
                                 </div>
                             </div>
                         </div>
-                        <button onClick={handleSave} disabled={!amount} className="w-full bg-primary text-white font-bold py-4 rounded-full disabled:opacity-50 active:scale-95 transition-transform hover:shadow-lg">{t('saveTx')}</button>
+                        <button disabled={!amount || amount==='0'} onClick={handleSave} className="w-full bg-danger text-white py-5 rounded-full font-bold text-sm tracking-widest uppercase shadow-md active:scale-95 transition-all hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center gap-2">{t('confirmSave')} <Icon name="check" size={18}/></button>
                     </div>
                 </div>
             );
         };
 
-        const NotificationsScreen = ({ go, visibleNotifications, clearAllNotifs, t, Icon }) => {
+        const AddTxScreen = ({ go, onSave, t, Icon, LoadingOverlay, pockets, userCategories, setUserCategories, defaultCatIds }) => {
+            const [amount, setAmount] = useState(''); const [notes, setNotes] = useState(''); const [txDate, setTxDate] = useState(new Date().toISOString().split('T')[0]); const [activeCategory, setActiveCategory] = useState('Food & Drink'); const [saving, setSaving] = useState(false); const [showAddCat, setShowAddCat] = useState(false); const [selectedPocket, setSelectedPocket] = useState('none');
+            const handleSave = async () => { 
+                setSaving(true); 
+                try {
+                    const catObj = userCategories.find(c => c.id === activeCategory) || userCategories[0]; 
+                    await onSave({ id: Date.now().toString(), title: notes || t('manual'), amount: Number(amount), category: activeCategory, date: txDate, iconType: 'lucide', icon: catObj.icon, colorType: 'hex', color: catObj.color, bg: `${catObj.color}33`, notes: notes, pocketId: selectedPocket }); 
+                } catch(e){ console.error(e); } finally { setSaving(false); }
+            };
+
             return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2><button onClick={clearAllNotifs} className="text-xs font-bold text-primary uppercase tracking-widest hover:underline">{t('clearAll')}</button></div>
+                <div className="flex-1 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    {showAddCat && <CategoryModal onClose={()=>setShowAddCat(false)} onSave={(cat)=>{setUserCategories([...userCategories.filter(c=>c.id!==cat.id), cat]); setActiveCategory(cat.id); setShowAddCat(false);}} t={t} Icon={Icon} initialCategory={showAddCat !== true ? showAddCat : null}/>}
+                    <div className="px-6 pt-12 flex items-center justify-between mb-8"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('addTx')}</h2><div className="w-10"></div></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-6">
+                        <div className="bg-white dark:bg-slate-900 rounded-[36px] p-10 text-center relative soft-shadow border border-slate-100 dark:border-slate-800"><div className="absolute top-4 right-4 text-slate-200 dark:text-slate-700"><Icon name="activity" size={32}/></div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">{t('amount')}</label><div className="flex justify-center items-center"><span className="text-3xl font-bold text-slate-300 mr-2">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00" className="text-7xl font-bold w-full max-w-[250px] text-center bg-transparent outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary pb-2 transition-colors dark:text-white"/></div></div>
+                        <div className="bg-white dark:bg-slate-900 rounded-[32px] p-6 soft-shadow border border-slate-100 dark:border-slate-800 space-y-6">
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-3">{t('category')}</label>
+                                <div className="flex gap-3 flex-wrap">
+                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primaryLight border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-3 py-1.5 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{(<button onClick={()=>setShowAddCat(cat)} className="pr-2 pl-1 hover:text-primary"><Icon name="edit-2" size={12}/></button>)}</div>))}
+                                    <button onClick={()=>setShowAddCat(true)} className="px-3 py-1.5 rounded-full text-xs font-bold border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><Icon name="plus" size={14}/></button>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl flex items-center transition-colors focus-within:ring-2 ring-primary/20"><Icon name="calendar" size={18} className="text-slate-400 mr-3" /><input type="date" value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl flex items-center relative transition-colors focus-within:ring-2 ring-primary/20"><Icon name="wallet" size={18} className="text-primary mr-3" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
+                            </div>
+                            <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-1">{t('notes')}</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="ระบุบันทึกย่อ..." className="w-full bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 text-base font-bold outline-none resize-none h-28 dark:text-white transition-colors focus:ring-2 ring-primary/20" /></div>
+                        </div>
+                        <button disabled={!amount} onClick={handleSave} className="w-full bg-danger text-white py-5 rounded-full font-bold text-sm tracking-widest uppercase shadow-md active:scale-95 transition-all hover:-translate-y-0.5 disabled:opacity-50">{t('saveTx')}</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const TxDetailScreen = ({ tx, go, t, Icon, onUpdateTx, userCategories }) => {
+            const [viewImage, setViewImage] = useState(false);
+            const [isEditing, setIsEditing] = useState(false);
+            const [editTitle, setEditTitle] = useState(tx?.title || tx?.merchant || '');
+            const [editDate, setEditDate] = useState(tx?.date || new Date().toISOString().split('T')[0]);
+            const [editCat, setEditCat] = useState(tx?.category || '');
+
+            if(!tx) return null;
+
+            const handleSaveEdit = () => {
+                const catObj = userCategories.find(c => c.id === editCat) || userCategories[0];
+                onUpdateTx(tx.id, {
+                    title: editTitle,
+                    merchant: editTitle,
+                    date: editDate,
+                    category: editCat,
+                    icon: catObj.icon,
+                    color: catObj.color,
+                    bg: `${catObj.color}33`
+                });
+                setIsEditing(false);
+            };
+
+            return (
+                <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
+                    {viewImage && tx.imageUrl && (<div className="absolute inset-0 bg-black/90 z-[100] flex flex-col fade-in pb-10"><div className="p-6 pt-12 flex justify-between items-center w-full"><button onClick={()=>setViewImage(false)} className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white active:scale-95 backdrop-blur-md hover:bg-white/20 transition-colors"><Icon name="x" size={20}/></button></div><div className="flex-1 flex items-center justify-center p-4"><img src={tx.imageUrl} className="max-w-full max-h-full rounded-[24px] object-contain shadow-2xl" /></div></div>)}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('txDetail')}</h2><button onClick={()=>setIsEditing(!isEditing)} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name={isEditing ? 'x' : 'edit-2'} size={18}/></button></div>
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                        <div className="flex flex-col items-center mb-4"><div className="mb-6"><PocketIcon pocket={tx} size={40} /></div><h1 className="text-5xl font-bold mb-3 dark:text-white">-{tx.amount > 0 ? '' : ''}฿ {formatMoney(Math.abs(tx.amount))}</h1></div>
+                        
+                        {isEditing ? (
+                            <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow space-y-5 border border-slate-100 dark:border-slate-800 fade-in">
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">ชื่อรายการ / ร้านค้า</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="edit-3" size={18} className="text-primary mr-3" /><input value={editTitle} onChange={e=>setEditTitle(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="calendar" size={18} className="text-primary mr-3" /><input type="date" value={editDate} onChange={e=>setEditDate(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="tag" size={18} className="text-primary mr-3" /><select value={editCat} onChange={e=>setEditCat(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"><option value="">เลือกหมวดหมู่</option>{userCategories.map(c => <option key={c.id} value={c.id}>{c.id}</option>)}</select></div></div>
+                                <button onClick={handleSaveEdit} className="w-full bg-primary text-white font-bold py-4 rounded-full mt-4 active:scale-95">{t('done')}</button>
+                            </div>
+                        ) : (
+                            <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow space-y-6 border border-slate-100 dark:border-slate-800 fade-in">
+                                <p className="bg-slate-50 dark:bg-slate-800 px-5 py-3 rounded-2xl font-bold text-lg dark:text-white text-center mb-2">{tx.title || tx.merchant}</p>
+                                <div className="flex justify-between items-center border-b border-slate-50 dark:border-slate-800 pb-3"><span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('status')}</span><span className="bg-[#94e4ae]/20 text-[#4ea86a] font-bold text-[9px] px-3 py-1 rounded-full flex items-center gap-1.5 uppercase tracking-widest"><Icon name="check" size={12}/>{t('completed')}</span></div>
+                                <div className="flex justify-between items-center border-b border-slate-50 dark:border-slate-800 pb-3"><span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('date')}</span><span className="font-bold text-base dark:text-white">{tx.date}</span></div>
+                                <div className="flex justify-between items-center"><span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('category')}</span><span className="font-bold bg-primaryLight text-primary px-3 py-1 rounded-full text-[10px] flex items-center gap-1.5 uppercase tracking-widest"><Icon name={tx.icon||'coffee'} size={12}/> {tx.category}</span></div>
+                            </div>
+                        )}
+
+                        {!isEditing && tx.notes && (<div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-800 fade-in"><h4 className="text-[9px] font-bold text-slate-400 uppercase mb-3 flex items-center gap-1.5 tracking-widest"><Icon name="align-left" size={14}/> {t('notes')}</h4><p className="text-sm font-bold bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl dark:text-white">{tx.notes}</p></div>)}
+                        {!isEditing && (
+                            <div className="flex gap-3 pt-2 fade-in">
+                                <button onClick={()=>go('SPLIT_BILL', null, tx)} className="flex-1 bg-white dark:bg-slate-900 dark:text-white font-bold py-4 rounded-full soft-shadow flex items-center justify-center gap-2 active:scale-95 transition-all hover:-translate-y-0.5 text-xs uppercase tracking-widest border border-slate-100 dark:border-slate-800"><Icon name="split-square-horizontal" size={16}/> {t('splitBill')}</button>
+                                {tx.imageUrl && (<button onClick={()=>setViewImage(true)} className="flex-1 bg-primaryLight text-primary font-bold py-4 rounded-full shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-all hover:-translate-y-0.5 text-xs uppercase tracking-widest"><Icon name="image" size={16}/> {t('viewReceipt')}</button>)}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const SplitBillScreen = ({ tx, go, t, Icon }) => {
+            const billTotal = Number(tx?.amount || 0);
+            const [friends, setFriends] = useState([{id:1, name:'ฉัน', amount:billTotal/2}, {id:2, name:'เพื่อน 1', amount:billTotal/2}]);
+            const currentSum = friends.reduce((a,c)=>a+Number(c.amount), 0);
+            const isMatch = Math.abs(currentSum - billTotal) < 0.01;
+
+            const updateAmount = (id, val) => setFriends(friends.map(f=>f.id===id?{...f, amount:val}:f));
+
+            return (
+                <div className="p-6 pt-10 flex flex-col h-full fade-in bg-[var(--bg-color)]">
+                    <div className="flex items-center mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-10 h-10 bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl ml-4 dark:text-white">{t('splitBill')}</h2></div>
+                    <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 text-center mb-6 soft-shadow border border-slate-100 dark:border-slate-800">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('totalAmount')}</p><h1 className="text-4xl font-bold my-2 dark:text-white">฿ {formatMoney(billTotal)}</h1>
+                        <div className="flex justify-between items-center mt-4 px-4 bg-slate-50 dark:bg-slate-800 py-3 rounded-xl border border-slate-100 dark:border-slate-700"><span className="text-xs font-bold text-slate-500">แบ่งแล้ว: ฿ {formatMoney(currentSum)}</span><span className={`text-xs font-bold ${isMatch?'text-[#4ea86a]':'text-danger'}`}>เหลือ: ฿ {formatMoney(Math.max(billTotal-currentSum, 0))}</span></div>
+                    </div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-6">
-                        {visibleNotifications.length === 0 ? <div className="text-center p-8 text-xs font-bold text-slate-400">{t('caughtUp')}</div> :
-                        visibleNotifications.map(notif => (
-                            <div key={notif.id} className="bg-white dark:bg-slate-800 p-4 rounded-[24px] flex items-start gap-4 soft-shadow border border-slate-100 dark:border-slate-700">
-                                <div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center shrink-0"><Icon name={notif.icon} size={18}/></div>
-                                <div className="flex-1"><h4 className="font-bold text-sm dark:text-white">{notif.title}</h4><p className="text-[10px] font-bold text-slate-500 mt-1">{notif.message}</p></div>
+                        {friends.map(f => (
+                            <div key={f.id} className="bg-white dark:bg-slate-900 rounded-[20px] p-3 flex items-center soft-shadow border border-slate-100 dark:border-slate-800 hover:-translate-y-0.5 transition-transform">
+                                <div className="flex-1 ml-2 font-bold text-sm dark:text-white">{f.name}</div>
+                                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-2 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-[10px] font-bold text-slate-400 mr-1">฿</span><input type="number" value={f.amount} onChange={e=>updateAmount(f.id, e.target.value)} className="w-16 bg-transparent text-right font-bold text-primary text-sm outline-none"/></div>
+                                {f.name!=='ฉัน' && <button onClick={()=>setFriends(friends.filter(x=>x.id!==f.id))} className="ml-2 text-slate-400 hover:text-danger transition-colors p-1"><Icon name="x" size={16}/></button>}
                             </div>
                         ))}
+                        <button onClick={()=>setFriends([...friends,{id:Date.now(), name:`เพื่อน ${friends.length+1}`, amount:0}])} className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-[20px] text-slate-400 font-bold flex items-center justify-center gap-2 hover:bg-white dark:hover:bg-slate-900 transition-colors text-xs uppercase tracking-widest"><Icon name="plus" size={16}/> {t('addFriend')}</button>
                     </div>
+                    <button disabled={!isMatch} onClick={()=>go('MAIN','HISTORY')} className={`w-full py-5 rounded-full font-bold text-sm tracking-widest shadow-md active:scale-95 transition-all uppercase ${isMatch?'bg-primary text-white hover:shadow-lg hover:-translate-y-0.5':'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600'}`}>{t('confirmSplit')}</button>
                 </div>
             );
         };
 
-        const ProfileScreen = ({ go, user, t, Icon, onLogout, lang, setLang, themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, pinCode, setShowPinModal }) => {
-            return (
-                <div className="p-6 pt-10 fade-in pb-24">
-                    <h2 className="text-2xl font-bold mb-8 dark:text-white">{t('profile')}</h2>
-                    
-                    <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700 mb-8">
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm w-16 h-16 flex items-center justify-center bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
-                            <div><h3 className="font-bold text-lg dark:text-white">{user?.displayName}</h3><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{user?.email}</p></div>
-                        </div>
-                        <button onClick={()=>go('EDIT_PROFILE')} className="w-full bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold py-3 rounded-full active:scale-95 transition-transform hover:bg-slate-100">{t('editProfile')}</button>
-                    </div>
-
-                    <div className="space-y-6">
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
-                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('accountTitle')}</h3>
-                            <div className="space-y-2">
-                                <MenuItem icon="shield" label={t('security')} onClick={()=>go('SECURITY')} />
-                                <MenuItem icon="lock" label={pinCode ? `${t('pinCode')}: ${t('pinStatusSet')}` : `${t('pinCode')}: ${t('pinStatusNotSet')}`} onClick={()=>setShowPinModal(true)} />
-                            </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
-                            <h3 className="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">{t('preferencesTitle')}</h3>
-                            <div className="space-y-2">
-                                <MenuItem icon="globe" label={t('language')} onClick={()=>go('LANGUAGE')} />
-                                <MenuItem icon="palette" label={t('theme')} onClick={()=>go('THEME')} />
-                                <MenuItem icon="bell" label={t('notifications')} onClick={()=>go('NOTIFICATION_SETTINGS')} />
-                            </div>
-                        </div>
-
-                        <button onClick={onLogout} className="w-full bg-danger/10 text-danger font-bold py-4 rounded-full active:scale-95 transition-transform hover:bg-danger/20">{t('logout')}</button>
-                    </div>
-                </div>
-            );
-        };
-
-        const EditProfileScreen = ({ go, user, t, Icon }) => {
-            const [name, setName] = useState(user?.displayName || ''); const [bio, setBio] = useState(user?.bio || '');
-            return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('editProfile')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm w-16 h-16 flex items-center justify-center bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
-                                <button className="flex flex-col items-center gap-2 group"><div className="w-12 h-12 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="camera" size={18}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('tapToUpload')}</span></button>
-                            </div>
-                            <div className="space-y-4">
-                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('name')}</label><div className="bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="user" size={16} className="text-primary mr-3" /><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" /></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('bio')}</label><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-700 p-3.5 rounded-2xl font-bold text-sm outline-none focus:ring-2 ring-primary/20 transition-colors dark:text-white resize-none h-24" placeholder="Tell us about yourself" /></div>
-                            </div>
-                        </div>
-                    </div>
-                    <button className="w-full bg-primary text-white font-bold py-4 rounded-full active:scale-95 transition-transform hover:shadow-lg">{t('saveChanges')}</button>
-                </div>
-            );
-        };
-
-        const SecuritySettingsScreen = ({ go, t, Icon }) => {
-            return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('security')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <Section title={t('yourDevices')}>
-                            <div className="p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-700 last:border-0">
-                                <div className="flex items-center gap-3"><Icon name="smartphone" size={20} className="text-primary" /><div><p className="font-bold text-sm dark:text-white">{getDeviceName()}</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('currentDevice')}</p></div></div>
-                                <span className="text-xs font-bold text-primary">{t('activeNow')}</span>
-                            </div>
-                        </Section>
-                        <button className="w-full bg-danger/10 text-danger font-bold py-4 rounded-full active:scale-95 transition-transform hover:bg-danger/20">{t('changePass')}</button>
-                    </div>
-                </div>
-            );
-        };
-
-        const LanguageSettingsScreen = ({ go, lang, setLang, t, Icon }) => {
-            const languages = [{ code: 'TH', name: 'ไทย' }, { code: 'EN', name: 'English' }];
-            return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('language')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-6">
-                        {languages.map(lng => (
-                            <button key={lng.code} onClick={()=>setLang(lng.code)} className={`w-full p-4 rounded-[24px] flex items-center justify-between font-bold transition-colors border ${lang===lng.code?'bg-primary/10 border-primary text-primary':'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50'}`}>
-                                <span>{lng.name}</span>
-                                {lang===lng.code && <Icon name="check" size={20} />}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        const ThemeSettingsScreen = ({ go, themeMode, setThemeMode, t, Icon }) => {
-            const themes = [{ mode: 'Light', icon: 'sun' }, { mode: 'Dark', icon: 'moon' }, { mode: 'System', icon: 'monitor' }];
-            return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('appTheme')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-6">
-                        {themes.map(theme => (
-                            <button key={theme.mode} onClick={()=>setThemeMode(theme.mode)} className={`w-full p-4 rounded-[24px] flex items-center justify-between font-bold transition-colors border ${themeMode===theme.mode?'bg-primary/10 border-primary text-primary':'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50'}`}>
-                                <div className="flex items-center gap-3"><Icon name={theme.icon} size={20} /><span>{t(theme.mode.toLowerCase())}</span></div>
-                                {themeMode===theme.mode && <Icon name="check" size={20} />}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        const NotificationSettingsScreen = ({ go, t, Icon }) => {
-            const [txAlerts, setTxAlerts] = useState(true); const [budgetAlerts, setBudgetAlerts] = useState(true); const [summaries, setSummaries] = useState(true); const [logins, setLogins] = useState(false);
-            return (
-                <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2><div className="w-10"></div></div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <Section title={t('transactionAlerts')}>
-                            <div className="p-4 flex items-center justify-between"><div><p className="font-bold text-sm dark:text-white">{t('everyPurchase')}</p></div><button onClick={()=>setTxAlerts(!txAlerts)} className={`w-12 h-6 rounded-full transition-colors ${txAlerts ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${txAlerts ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
-                        </Section>
-                        <Section title={t('budgetAlerts')}>
-                            <div className="p-4 flex items-center justify-between"><div><p className="font-bold text-sm dark:text-white">{t('budgetWarnings')}</p></div><button onClick={()=>setBudgetAlerts(!budgetAlerts)} className={`w-12 h-6 rounded-full transition-colors ${budgetAlerts ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${budgetAlerts ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
-                        </Section>
-                        <Section title={t('accountTitle')}>
-                            <div className="p-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-700"><div><p className="font-bold text-sm dark:text-white">{t('monthlySummaries')}</p></div><button onClick={()=>setSummaries(!summaries)} className={`w-12 h-6 rounded-full transition-colors ${summaries ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${summaries ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
-                            <div className="p-4 flex items-center justify-between"><div><p className="font-bold text-sm dark:text-white">{t('newLogins')}</p></div><button onClick={()=>setLogins(!logins)} className={`w-12 h-6 rounded-full transition-colors ${logins ? 'bg-primary' : 'bg-slate-300'}`}><div className={`w-5 h-5 bg-white rounded-full transition-transform ${logins ? 'translate-x-6' : 'translate-x-0.5'}`}></div></button></div>
-                        </Section>
-                    </div>
-                </div>
-            );
-        };
-
-        // ==========================================
-        // 6. MAIN APP
-        // ==========================================
         const App = () => {
-            const [user, setUser] = useState(null); const [isAuthReady, setIsAuthReady] = useState(false); const [isLocked, setIsLocked] = useState(false); const [screen, setScreen] = useState('SIGN_IN'); const [tab, setTab] = useState('HOME'); const [screenData, setScreenData] = useState(null);
-            const [lang, setLang] = useState(localStorage.getItem('cozy_lang') || 'TH'); const [themeMode, setThemeMode] = useState(localStorage.getItem('cozy_theme') || 'Light'); const [accentColor, setAccentColor] = useState(localStorage.getItem('cozy_accent') || '#8cb1ff'); const [reduceMotion, setReduceMotion] = useState(localStorage.getItem('cozy_motion') === 'true');
-            const [pinCode, setPinCode] = useState(localStorage.getItem('cozy_pin') || ''); const [showPinModal, setShowPinModal] = useState(false);
-            const [txs, setTxs] = useState([]); const [pockets, setPockets] = useState([]); const [notifications, setNotifications] = useState([]); const [dismissedNotifs, setDismissedNotifs] = useState([]);
-            const [userCategories, setUserCategories] = useState([
-                { id: 'Food & Drink', icon: 'coffee', color: '#ff9800' },
-                { id: 'Shopping', icon: 'shopping-bag', color: '#ffde6a' },
-                { id: 'Transport', icon: 'car', color: '#94e4ae' },
-                { id: 'Bills', icon: 'zap', color: '#ff9494' },
-                { id: 'Transfer', icon: 'users', color: '#8cb1ff' },
-                { id: 'General', icon: 'receipt', color: '#64748b' }
-            ]);
-            const defaultCatIds = userCategories.map(c => c.id);
-            const t = getT(lang);
-            const safeToSpend = pockets.reduce((a, c) => a + Number(c.balance), 0);
-            const visibleNotifications = notifications.filter(n => !dismissedNotifs.includes(n.id));
+            const [isAuthReady, setIsAuthReady] = useState(false); const [user, setUser] = useState(null);
+            const [screen, setScreen] = useState('SIGN_IN'); const [tab, setTab] = useState('HOME'); const [screenData, setScreenData] = useState(null);
+            const [lang, setLang] = useState('TH'); const [themeMode, setThemeMode] = useState('Light'); const [reduceMotion, setReduceMotion] = useState(false);
+            const [pinCode, setPinCode] = useState(localStorage.getItem('cozy_pin')); const [isLocked, setIsLocked] = useState(!!localStorage.getItem('cozy_pin')); const [showPinModal, setShowPinModal] = useState(false);
+            const [txs, setTxs] = useState([]); const [pockets, setPockets] = useState([]); const [dismissedNotifs, setDismissedNotifs] = useState([]);
+            const [accentColor, setAccentColor] = useState(localStorage.getItem('cozy_accent') || '#8cb1ff');
+            
+            const defaultCatIds = ['Food & Drink', 'Shopping', 'Transport', 'Bills'];
+            const [userCategories, setUserCategories] = useState([{ id: 'Food & Drink', icon: 'coffee', color: '#ff9800' },{ id: 'Shopping', icon: 'shopping-bag', color: '#ffde6a' },{ id: 'Transport', icon: 'car', color: '#94e4ae' },{ id: 'Bills', icon: 'zap', color: '#ff9494' }]);
+            
+            const t = useCallback((key) => getT(lang)(key), [lang]);
+            const go = useCallback((s, tb = null, data = null) => { setScreen(s); if(tb) setTab(tb); if(data!==undefined) setScreenData(data); }, []);
 
             useEffect(() => {
-                localStorage.setItem('cozy_lang', lang);
-                localStorage.setItem('cozy_theme', themeMode);
                 localStorage.setItem('cozy_accent', accentColor);
-                localStorage.setItem('cozy_motion', reduceMotion);
                 document.documentElement.style.setProperty('--color-primary', accentColor);
-                document.documentElement.classList.toggle('dark', themeMode === 'Dark');
-            }, [lang, themeMode, accentColor, reduceMotion]);
+                
+                const hex2rgb = (hex) => {
+                    const v = parseInt(hex.replace('#', ''), 16);
+                    return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+                };
+                const [r, g, b] = hex2rgb(accentColor);
+                document.documentElement.style.setProperty('--color-primary-light', `rgba(${r}, ${g}, ${b}, 0.15)`);
+                
+                const isDark = themeMode === 'Dark' || (themeMode === 'System' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.style.setProperty('--bg-color', '#1e1e24');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.style.setProperty('--bg-color', '#fffdfb');
+                }
+            }, [accentColor, themeMode]);
 
             useEffect(() => {
-                const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
-                    if(currentUser) {
-                        setUser(currentUser);
-                        try {
-                            const txSnapshot = await db.collection('users').doc(currentUser.uid).collection('transactions').orderBy('timestamp', 'desc').get();
-                            const pocketSnapshot = await db.collection('users').doc(currentUser.uid).collection('pockets').get();
-                            setTxs(txSnapshot.docs.map(d => ({ id: d.id, ...d.data(), timestamp: d.data().timestamp?.toDate?.() })));
-                            setPockets(pocketSnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
-                        } catch(e) { console.error(e); }
-                    } else {
-                        const guest = localStorage.getItem('cozy_guest');
-                        if(guest) { setUser(JSON.parse(guest)); } else { setUser(null); }
-                    }
+                const unsub = auth.onAuthStateChanged(u => {
                     setIsAuthReady(true);
-                });
-                return unsubscribe;
-            }, []);
-
-            useEffect(() => {
-                if(pinCode && !isLocked && user) setIsLocked(true);
-            }, [user, pinCode, isLocked]);
-
-            const go = (newScreen, newTab = null, data = null) => {
-                setScreen(newScreen);
-                if(newTab) setTab(newTab);
-                if(data !== undefined) setScreenData(data);
-            };
-
-            const handleResetData = () => {
-                setTxs([]);
-                setPockets([]);
-                setNotifications([]);
-                setDismissedNotifs([]);
-            };
-
-            const handleUpdateTx = (txId, updates) => {
-                setTxs(txs.map(tx => tx.id === txId ? { ...tx, ...updates } : tx));
-            };
-
-            useEffect(() => {
-                const newNotifications = [];
-                pockets.forEach(p => {
-                    if(p.hasTarget && p.balance < p.target * 0.3) {
-                        newNotifications.push({ id: `low-${p.id}`, type: 'low-balance', icon: 'alert-circle', title: t('lowBalance'), message: `${p.name} ${t('safeThreshold')}` });
+                    if(u) {
+                        db.collection('users').doc(u.uid).onSnapshot(doc => { const d = doc.data() || {}; setUser({ uid: u.uid, email: u.email, displayName: d.displayName || u.email.split('@')[0], photoURL: d.photoURL || 'https://ui-avatars.com/api/?name=U&background=8cb1ff&color=fff', bio: d.bio || '' }); });
+                        if(!isLocked) go('MAIN', 'HOME');
+                        db.collection('users').doc(u.uid).collection('transactions').orderBy('timestamp', 'desc').onSnapshot(snap => setTxs(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+                        db.collection('users').doc(u.uid).collection('pockets').onSnapshot(snap => setPockets(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+                    } else {
+                        const localGuest = localStorage.getItem('cozy_guest');
+                        if (localGuest) { setUser(JSON.parse(localGuest)); if(!isLocked) go('MAIN', 'HOME'); } else { go('SIGN_IN'); setTxs([]); setPockets([]); setDismissedNotifs([]); }
                     }
                 });
-                setNotifications(newNotifications);
+                return unsub;
+            }, [go, isLocked]);
+
+            const handleResetData = async () => {
+                if(!window.confirm(t('confirmReset'))) return;
+                try {
+                    if (user && user.uid !== 'mock-uid') {
+                        const tSnap = await db.collection('users').doc(user.uid).collection('transactions').get();
+                        const pSnap = await db.collection('users').doc(user.uid).collection('pockets').get();
+                        const batch = db.batch();
+                        tSnap.docs.forEach(d => batch.delete(d.ref));
+                        pSnap.docs.forEach(d => batch.delete(d.ref));
+                        await batch.commit();
+                    } else { setTxs([]); setPockets([]); }
+                    alert(t('resetSuccess')); go('MAIN', 'HOME');
+                } catch(e) { console.error(e); }
+            };
+
+            const handleUpdateTx = async (id, newData) => {
+                try {
+                    if(user && user.uid !== 'mock-uid') {
+                        await db.collection('users').doc(user.uid).collection('transactions').doc(id).update(newData);
+                    } else {
+                        setTxs(txs.map(t => t.id === id ? {...t, ...newData} : t));
+                    }
+                    setScreenData({...screenData, ...newData});
+                } catch(e) { console.error(e); }
+            };
+
+            const safeToSpend = useMemo(() => pockets.reduce((a,c) => a + Number(c.balance), 0), [pockets]);
+            const notifications = useMemo(() => {
+                const notifs = [];
+                if (safeToSpend > 0 && safeToSpend <= 500) notifs.push({ id: 'low-bal', type: 'alert', title: t('lowBalance'), desc: t('safeThreshold'), time: 'Now' });
+                pockets.filter(p => p.hasTarget && Number(p.target) > 0).forEach(p => { 
+                    if ((Number(p.balance) / Number(p.target)) < 0.3) {
+                        notifs.push({ id: `pocket-low-${p.id}`, type: 'alert', title: t('lowBalance'), desc: `${p.name} เหลือเงินน้อยกว่า 30% (฿ ${formatMoney(p.balance)})`, time: 'Now' }); 
+                    }
+                });
+                if (txs.length > 0) { const latest = txs[0]; notifs.push({ id: `tx-${latest.id}`, type: 'receipt', title: t('newTx'), desc: `${latest.title || latest.merchant} ฿ ${formatMoney(latest.amount)}`, time: latest.date }); }
+                return notifs.filter(n => !dismissedNotifs.includes(n.id));
             }, [safeToSpend, pockets, txs, t, dismissedNotifs]);
 
-            if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-slate-900 text-white"><Icon name="loader-2" size={48} className="animate-spin-smooth"/></div>;
+            if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-slate-900 text-white"><Icon name="loader-2" size={48} className="animate-spin"/></div>;
             if (isLocked) return <div className="app-container"><LockScreen Icon={Icon} correctPin={pinCode} onUnlock={()=>{ setIsLocked(false); go(user?'MAIN':'SIGN_IN', user?'HOME':null); }} /></div>;
 
             const p = { user, setUser, go, t, lang, setLang, themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, pinCode, setPinCode, showPinModal, setShowPinModal, txs, setTxs, pockets, setPockets, screenData, Icon, LoadingOverlay, translateAuthError, visibleNotifications: notifications, clearAllNotifs: ()=>setDismissedNotifs(notifications.map(n=>n.id)), safeToSpend, db, userCategories, setUserCategories, defaultCatIds, onResetData: handleResetData, onUpdateTx: handleUpdateTx };
