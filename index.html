@@ -5,23 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>QR Scanner</title>
     
-    <!-- Standard Favicons -->
     <link rel="icon" type="image/png" sizes="512x512" href="iconApp512.png">
     <link rel="icon" type="image/png" sizes="256x256" href="iconApp256.png">
     <link rel="shortcut icon" href="iconApp120.png">
-    
-    <!-- Apple Touch Icons (iOS/iPadOS) -->
     <link rel="apple-touch-icon" href="iconApp120.png">
-    <link rel="apple-touch-icon" sizes="40x40" href="iconApp40.png">
-    <link rel="apple-touch-icon" sizes="80x80" href="iconApp80.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="iconApp120.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="iconApp167.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="iconApp180.png">
-    <link rel="apple-touch-icon" sizes="1024x1024" href="iconApp1024.png">
-
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="QR Scanner">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -44,9 +34,8 @@
                     colors: {
                         primary: 'var(--color-primary)',
                         primaryLight: 'var(--color-primary-light)',
-                        danger: '#ff9494',
-                        dark: '#1e1e24',
-                        light: '#fffdfb'
+                        danger: '#FF4D4D',
+                        dark: '#121212'
                     }
                 }
             }
@@ -57,39 +46,17 @@
         :root {
             --color-primary: #8cb1ff;
             --color-primary-light: rgba(140, 177, 255, 0.15);
-            --bg-color: #fffdfb;
+            --bg-color: #f8fafc;
         }
-        .dark {
-            --bg-color: #1e1e24;
-        }
+        .dark { --bg-color: #121212; }
         
         * { font-family: 'Plus Jakarta Sans', 'CS Prajad', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
-        body, html, #root { 
-            width: 100%; 
-            height: 100dvh; 
-            margin: 0; 
-            padding: 0;
-            overflow: hidden; 
-            background-color: var(--bg-color);
-        }
-
+        body, html, #root { width: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden; background-color: var(--bg-color); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        .app-container { 
-            width: 100%; 
-            height: 100%; 
-            position: relative; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-            background-color: var(--bg-color);
-            color: #475569; /* Soft Slate 600 */
-            transition: background-color 0.5s ease;
-        }
-        
+        .app-container { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; overflow: hidden; background-color: var(--bg-color); color: #475569; transition: background-color 0.5s ease; }
         .dark .app-container { color: #f8fafc; }
-
         video { object-fit: cover; width: 100%; height: 100%; position: absolute; inset: 0; pointer-events: none; }
         
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -101,8 +68,7 @@
         .soft-shadow { box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
         .dark .soft-shadow { box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3); }
         
-        /* Scan Overlay */
-        .scan-frame { position: absolute; top: 15%; bottom: 30%; left: 10%; right: 10%; border-radius: 36px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); z-index: 10; border: 2px solid rgba(255,255,255,0.4); transition: border-color 0.3s; }
+        .scan-frame { position: absolute; top: 15%; bottom: 30%; left: 10%; right: 10%; border-radius: 36px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); z-index: 10; border: 2px solid rgba(255,255,255,0.4); }
         @keyframes scanLine { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         .laser { position: absolute; width: 100%; height: 3px; background: var(--color-primary); box-shadow: 0 0 20px var(--color-primary); animation: scanLine 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; z-index: 11; border-radius: 10px; }
 
@@ -112,6 +78,7 @@
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -123,70 +90,50 @@
         // ==========================================
         // 1. FIREBASE INIT
         // ==========================================
-        const fbConfig = {
-            apiKey: "AIzaSyCv1D7XjSuSYWJxpFxT7umaCAb9o8fY2o8",
-            authDomain: "qr-scanner-a29e3.firebaseapp.com",
-            projectId: "qr-scanner-a29e3",
-            storageBucket: "qr-scanner-a29e3.firebasestorage.app",
-            messagingSenderId: "1070573788877",
-            appId: "1:1070573788877:web:cd65246772c629f380d384"
-        };
+        const fbConfig = { apiKey: "AIzaSyCv1D7XjSuSYWJxpFxT7umaCAb9o8fY2o8", authDomain: "qr-scanner-a29e3.firebaseapp.com", projectId: "qr-scanner-a29e3", storageBucket: "qr-scanner-a29e3.firebasestorage.app", messagingSenderId: "1070573788877", appId: "1:1070573788877:web:cd65246772c629f380d384" };
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        const auth = firebase.auth(); const db = firebase.firestore();
 
         // ==========================================
-        // 2. GLOBALS & CONFIG
+        // 2. GLOBALS & HELPERS
         // ==========================================
-        // อัปเดตสี Pastel
-        const ACCENT_COLORS = [
-            { name: 'Blue', hex: '#8cb1ff' },
-            { name: 'Yellow', hex: '#ffde6a' },
-            { name: 'Pink', hex: '#ffb0cd' },
-            { name: 'Green', hex: '#94e4ae' },
-            { name: 'Purple', hex: '#cda8ff' },
-            { name: 'Red', hex: '#ff9494' }
-        ];
-
-        const PASTEL_POCKET_ICONS = [
-            { icon: 'plane', bg: '#e0f5e5', color: '#558763' },
-            { icon: 'car', bg: '#ffe5ee', color: '#9e5772' },
-            { icon: 'gift', bg: '#efe5ff', color: '#6d4c99' },
-            { icon: 'home', bg: '#fff8cc', color: '#998822' },
-            { icon: 'coffee', bg: '#f0f0f0', color: '#555555' },
-            { icon: 'piggy-bank', bg: '#ffe5ee', color: '#9e5772' },
-            { icon: 'shopping-bag', bg: '#e0f5e5', color: '#558763' }
-        ];
-
-        const lineIconsList = ['wallet', 'plane', 'car', 'gift', 'home', 'coffee', 'piggy-bank', 'shopping-bag', 'heart', 'star', 'music', 'book', 'smartphone', 'monitor', 'camera', 'zap', 'umbrella', 'scissors', 'trending-up', 'award'];
+        const ACCENT_COLORS = [ { name: 'Blue', hex: '#8cb1ff' }, { name: 'Yellow', hex: '#ffde6a' }, { name: 'Pink', hex: '#ffb0cd' }, { name: 'Green', hex: '#94e4ae' }, { name: 'Purple', hex: '#cda8ff' }, { name: 'Red', hex: '#ff9494' } ];
+        const PASTEL_COLORS = ['#ffb0cd', '#ffde6a', '#94e4ae', '#8cb1ff', '#cda8ff', '#ff9494', '#e2e8f0', '#fbcfe8', '#fde047', '#86efac'];
+        const lineIconsList = ['wallet', 'plane', 'car', 'gift', 'home', 'coffee', 'piggy-bank', 'shopping-bag', 'heart', 'star', 'music', 'book', 'smartphone', 'monitor', 'camera', 'zap', 'umbrella', 'scissors', 'trending-up', 'award', 'briefcase', 'bus', 'clapperboard', 'gamepad-2', 'headphones', 'key', 'laptop', 'lightbulb', 'map-pin', 'palette', 'pizza', 'shirt', 'smile', 'ticket', 'tv', 'watch', 'wifi', 'utensils', 'train', 'tag'];
 
         const formatMoney = (num) => Number(num || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         
-        const translateAuthError = (code) => {
-            if(code.includes('api-key-not-valid')) return 'API Key ไม่ถูกต้อง';
-            if(code.includes('operation-not-supported')) return 'ไม่ได้เปิดใช้งาน Email/Password Auth ใน Firebase';
-            switch(code) {
-                case 'auth/invalid-credential':
-                case 'auth/user-not-found':
-                case 'auth/wrong-password': return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
-                case 'auth/email-already-in-use': return 'อีเมลนี้ถูกใช้งานแล้ว';
-                case 'auth/weak-password': return 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
-                case 'auth/invalid-email': return 'รูปแบบอีเมลไม่ถูกต้อง';
-                default: return `เกิดข้อผิดพลาด: ${code}`;
+        const getDeviceName = () => {
+            const ua = navigator.userAgent;
+            if (/iPhone/.test(ua)) return 'iPhone';
+            if (/iPad/.test(ua)) return 'iPad';
+            if (/Macintosh/.test(ua)) return 'MacBook / Mac';
+            if (/Windows/.test(ua)) {
+                if (/Windows NT 10.0/.test(ua)) return 'Windows 10/11 PC';
+                return 'Windows PC';
             }
+            if (/Android/.test(ua)) {
+                const match = ua.match(/Android.*?; (.*?) Build/);
+                return match ? match[1] : 'Android Device';
+            }
+            if (/Linux/.test(ua)) return 'Linux PC';
+            return 'Web Browser';
         };
 
-        // เปลี่ยน strokeWidth ให้บางลง (1.5) เพื่อความเป็นมินิมอลพาสเทล
+        const translateAuthError = (code) => {
+            if(code.includes('invalid-credential') || code.includes('user-not-found') || code.includes('wrong-password')) return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+            if(code.includes('email-already-in-use')) return 'อีเมลนี้ถูกใช้งานแล้ว';
+            if(code.includes('weak-password')) return 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+            if(code.includes('invalid-email')) return 'รูปแบบอีเมลไม่ถูกต้อง';
+            return `เกิดข้อผิดพลาด: ${code}`;
+        };
+
         const Icon = ({ name, size=24, className="", strokeWidth=1.5 }) => {
             const spanRef = useRef(null);
             useEffect(() => { 
                 if(spanRef.current && window.lucide) {
-                    try {
-                        spanRef.current.innerHTML = `<i data-lucide="${name}" class="${className}"></i>`;
-                        lucide.createIcons({ root: spanRef.current, attrs: { 'stroke-width': strokeWidth, size: size } }); 
-                    } catch (e) {
-                        spanRef.current.innerHTML = `<span style="display:inline-block; width:${size}px; height:${size}px; border-radius:50%;"></span>`;
-                    }
+                    try { spanRef.current.innerHTML = `<i data-lucide="${name}" class="${className}"></i>`; lucide.createIcons({ root: spanRef.current, attrs: { 'stroke-width': strokeWidth, size: size } }); } 
+                    catch (e) { spanRef.current.innerHTML = `<span style="display:inline-block; width:${size}px; height:${size}px; border-radius:50%;"></span>`; }
                 }
             }, [name, size, strokeWidth, className]);
             return <span ref={spanRef} className={`inline-flex items-center justify-center ${className}`} style={{width: size, height: size}}></span>;
@@ -198,16 +145,6 @@
                 <h2 className="font-bold text-xl tracking-widest uppercase text-slate-700 dark:text-white">{text}</h2>
             </div>
         );
-
-        const getDeviceName = () => {
-            const ua = navigator.userAgent;
-            if (/iPhone|iPod/.test(ua)) return 'iPhone';
-            if (/iPad/.test(ua)) return 'iPad';
-            if (/android/i.test(ua)) return 'Android Device';
-            if (/Macintosh/.test(ua)) return 'Mac';
-            if (/Windows/.test(ua)) return 'Windows PC';
-            return 'Web Browser';
-        };
 
         const categorizeText = (text) => {
             const tText = text.toLowerCase();
@@ -221,103 +158,64 @@
 
         const processReceiptImage = async (file, onComplete) => {
             try {
-                const worker = await Tesseract.createWorker('tha+eng');
-                const ret = await worker.recognize(file);
-                const rawText = ret.data.text;
-                const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                await worker.terminate();
-
-                let finalAmount = ''; let merchant = ''; let dateStr = new Date().toLocaleDateString('th-TH'); let memoText = '';
+                const worker = await Tesseract.createWorker('tha+eng'); const ret = await worker.recognize(file); const rawText = ret.data.text; const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0); await worker.terminate();
+                let finalAmount = ''; let merchant = ''; let dateStr = new Date().toISOString().split('T')[0]; let memoText = '';
                 const amountRegex = /(?:จำนวนเงิน|จำนวน|ยอดรวม|ยอดเงิน|รวมทั้งสิ้น|Total|Amount|฿|B)[^\d]*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i;
-                for(let line of lines) {
-                    const match = line.match(amountRegex);
-                    if(match && match[1]) { finalAmount = parseFloat(match[1].replace(/,/g, '')).toFixed(2); break; }
-                }
-                if (!finalAmount || finalAmount === '0.00') {
-                    const numbers = rawText.match(/\b\d{1,3}(?:,\d{3})*\.\d{2}\b/g);
-                    if (numbers && numbers.length > 0) {
-                        const vals = numbers.map(n => parseFloat(n.replace(/,/g, '')));
-                        finalAmount = Math.max(...vals).toFixed(2);
-                    }
-                }
-
+                for(let line of lines) { const match = line.match(amountRegex); if(match && match[1]) { finalAmount = parseFloat(match[1].replace(/,/g, '')).toFixed(2); break; } }
+                if (!finalAmount || finalAmount === '0.00') { const numbers = rawText.match(/\b\d{1,3}(?:,\d{3})*\.\d{2}\b/g); if (numbers && numbers.length > 0) { const vals = numbers.map(n => parseFloat(n.replace(/,/g, ''))); finalAmount = Math.max(...vals).toFixed(2); } }
                 let foundTo = false;
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
-                    if (line.match(/(บันทึกช่วยจำ|บันทึก|Memo)/i)) {
-                        const cleanMemo = line.replace(/(บันทึกช่วยจำ|บันทึก|Memo)[\s.:]*/i, '').trim();
-                        if (cleanMemo) memoText = cleanMemo; else if (i + 1 < lines.length) memoText = lines[i+1];
+                    if (line.match(/(บันทึกช่วยจำ|บันทึก|Memo)/i)) { const cleanMemo = line.replace(/(บันทึกช่วยจำ|บันทึก|Memo)[\s.:]*/i, '').trim(); if (cleanMemo) memoText = cleanMemo; else if (i + 1 < lines.length) memoText = lines[i+1]; }
+                    const dateMatch = line.match(/(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})|(\d{1,2}[\/\-\. ]\d{1,2}[\/\-\. ]\d{2,4})/);
+                    if(dateMatch) {
+                        let d = dateMatch[0];
+                        if(d.includes('/')) d = d.split('/').reverse().join('-');
+                        dateStr = d;
                     }
-                    const dateMatch = line.match(/(\d{1,2}[\/\-\. ]\d{1,2}[\/\-\. ]\d{2,4})|(\d{1,2}\s+(ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.|มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)\s+\d{2,4})/);
-                    if(dateMatch) dateStr = dateMatch[0];
-                    if (line.match(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)/i)) {
-                        let cleanMerchant = line.replace(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)[\s.:]*/i, '').trim();
-                        if (cleanMerchant.length < 3 && i + 1 < lines.length) cleanMerchant = lines[i+1].trim();
-                        cleanMerchant = cleanMerchant.replace(/(ธนาคาร|พร้อมเพย์|PromptPay|KBank|SCB|KTB|BBL|GSB)/ig, '').trim();
-                        if (cleanMerchant.length > 2) { merchant = cleanMerchant; foundTo = true; }
-                    }
-                    if (!foundTo && !merchant && line.match(/(นาย|นาง|น\.ส\.|บจก|หจก|บริษัท|ร้าน|SHOP|ครัว|คาเฟ่|cafe|มินิมาร์ท|ตลาด)/i)) {
-                         if(!line.match(/^(จาก|ผู้โอน)/i)) merchant = line.replace(/^(จาก|ผู้โอน)[\s.:]*/i, '').trim();
-                    }
+                    if (line.match(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)/i)) { let cleanMerchant = line.replace(/^(ถึง|ไปยัง|ผู้รับโอน|ชื่อบัญชี|To)[\s.:]*/i, '').trim(); if (cleanMerchant.length < 3 && i + 1 < lines.length) cleanMerchant = lines[i+1].trim(); cleanMerchant = cleanMerchant.replace(/(ธนาคาร|พร้อมเพย์|PromptPay|KBank|SCB|KTB|BBL|GSB)/ig, '').trim(); if (cleanMerchant.length > 2) { merchant = cleanMerchant; foundTo = true; } }
+                    if (!foundTo && !merchant && line.match(/(นาย|นาง|น\.ส\.|บจก|หจก|บริษัท|ร้าน|SHOP|ครัว|คาเฟ่|cafe|มินิมาร์ท|ตลาด)/i)) { if(!line.match(/^(จาก|ผู้โอน)/i)) merchant = line.replace(/^(จาก|ผู้โอน)[\s.:]*/i, '').trim(); }
                 }
-                if (!merchant && finalAmount) {
-                    if(lines.length > 0) merchant = lines[0];
-                    if(merchant.match(/ใบเสร็จ|Receipt|รับเงิน/i) && lines.length > 1) merchant = lines[1];
-                }
-
-                let finalTitle = memoText || merchant || 'รายการใช้จ่าย';
-                finalTitle = finalTitle.replace(/(รหัสอ้างอิง|เลขอ้างอิง|Ref|วันที่).*/i, '').trim();
+                if (!merchant && finalAmount) { if(lines.length > 0) merchant = lines[0]; if(merchant.match(/ใบเสร็จ|Receipt|รับเงิน/i) && lines.length > 1) merchant = lines[1]; }
+                let finalTitle = memoText || merchant || 'รายการใช้จ่าย'; finalTitle = finalTitle.replace(/(รหัสอ้างอิง|เลขอ้างอิง|Ref|วันที่).*/i, '').trim();
                 const categoryInfo = categorizeText(finalTitle + ' ' + rawText);
-
                 const resultData = { amount: finalAmount || '', merchant: finalTitle, date: dateStr, categoryKey: categoryInfo.cat, icon: categoryInfo.icon, color: categoryInfo.color, isAuto: true };
-
-                if (typeof file === 'string') {
-                    onComplete({ ...resultData, imageUrl: file });
-                } else {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => onComplete({ ...resultData, imageUrl: ev.target.result });
-                    reader.readAsDataURL(file);
-                }
+                
+                if (typeof file === 'string') { onComplete({ ...resultData, imageUrl: file }); } 
+                else { const reader = new FileReader(); reader.onload = (ev) => onComplete({ ...resultData, imageUrl: ev.target.result }); reader.readAsDataURL(file); }
             } catch (error) {
-                let imgData = null;
-                if (typeof file === 'string') imgData = file;
-                else if (file instanceof Blob) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => onComplete({ amount: '', merchant: '', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', icon: 'receipt', color: '#64748b', isAuto: false, imageUrl: e.target.result });
-                    reader.readAsDataURL(file);
-                    return;
-                }
-                onComplete({ amount: '', merchant: '', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', icon: 'receipt', color: '#64748b', isAuto: false, imageUrl: imgData });
+                let imgData = null; if (typeof file === 'string') imgData = file; else if (file instanceof Blob) { const reader = new FileReader(); reader.onload = (e) => onComplete({ amount: '', merchant: '', date: new Date().toISOString().split('T')[0], categoryKey: 'General', icon: 'receipt', color: '#64748b', isAuto: false, imageUrl: e.target.result }); reader.readAsDataURL(file); return; }
+                onComplete({ amount: '', merchant: '', date: new Date().toISOString().split('T')[0], categoryKey: 'General', icon: 'receipt', color: '#64748b', isAuto: false, imageUrl: imgData });
             }
         };
 
         const TRANSLATIONS = {
             TH: {
-                welcome: 'ยินดีต้อนรับ', home: 'หน้าหลัก', wallet: 'กระเป๋าเงิน', scan: 'สแกน', history: 'ประวัติ', profile: 'โปรไฟล์',
+                welcome: 'ยินดีต้อนรับ', home: 'หน้าหลัก', wallet: 'กระเป๋า', scan: 'สแกน', history: 'ประวัติ', profile: 'โปรไฟล์',
                 totalSpend: 'ยอดใช้จ่ายรวม', safeSpend: 'ยอดเงินคงเหลือ', recent: 'รายการล่าสุด', seeAll: 'ดูทั้งหมด',
                 noData: 'ยังไม่มีรายการ', newPocket: 'สร้างกระเป๋าใหม่', scanReceipt: 'สแกนสลิป', gallery: 'อัลบั้ม',
                 manual: 'กรอกเอง', reviewDetails: 'ตรวจสอบข้อมูล', merchant: 'ร้านค้า/ผู้รับ', date: 'วันที่',
-                confirmSave: 'ยืนยันและบันทึก', addTx: 'บันทึกรายการ', amount: 'จำนวนเงิน', saveTx: 'บันทึกรายการ',
+                confirmSave: 'บันทึกข้อมูล', addTx: 'บันทึกรายการ', amount: 'จำนวนเงิน', saveTx: 'บันทึกรายการ',
                 splitBill: 'หารบิลกับเพื่อน', totalAmount: 'ยอดรวมบิล', addFriend: 'เพิ่มเพื่อน', confirmSplit: 'ยืนยันการหารบิล',
                 txDetail: 'รายละเอียด', status: 'สถานะ', category: 'หมวดหมู่', editProfile: 'แก้ไขโปรไฟล์',
                 security: 'ความปลอดภัย', language: 'ภาษา', theme: 'ธีมแอป', logout: 'ออกจากระบบ',
-                light: 'สว่าง', dark: 'มืด', system: 'ระบบ', reduceMotion: 'ลดการเคลื่อนไหว', changePass: 'เปลี่ยนรหัสผ่าน',
+                light: 'สว่าง', dark: 'มืด', system: 'ตามระบบ', reduceMotion: 'ลดการเคลื่อนไหว', changePass: 'เปลี่ยนรหัสผ่าน',
                 pinCode: 'รหัส PIN', setPin: 'ตั้งรหัส PIN', changePin: 'เปลี่ยน PIN',
                 yourDevices: 'อุปกรณ์ของคุณ', currentDevice: 'อุปกรณ์นี้', pocketName: 'ชื่อกระเป๋า', targetAmount: 'เป้าหมาย (บาท)',
                 savePocket: 'บันทึกกระเป๋า', passMismatch: 'รหัสผ่านไม่ตรงกัน', fillAll: 'กรุณากรอกให้ครบ', loading: 'กำลังประมวลผล...',
                 guestLogin: 'ทดลองใช้งาน (Guest)', aiSelected: 'AI เลือกให้', 
-                searchPlaceholder: 'ค้นหา...', all: 'ทั้งหมด', notFound: 'ไม่พบรายการที่ค้นหา',
+                searchPlaceholder: 'ค้นหาจากชื่อ, หมวดหมู่ หรือบันทึก...', all: 'ทั้งหมด', notFound: 'ไม่พบรายการที่ค้นหา',
                 notifications: 'การแจ้งเตือน', recentAlerts: 'รายการแจ้งเตือน', clearAll: 'ล้าง', caughtUp: 'ไม่มีการแจ้งเตือนใหม่',
-                billReminder: 'แจ้งเตือนเป้าหมาย', newTx: 'รายการใหม่', lowBalance: 'เตือนเงินเหลือน้อย', safeThreshold: 'ยอดเงินในบัญชีต่ำกว่าเกณฑ์',
-                initialAmount: 'เงินเริ่มต้น', setMonthlyTarget: 'ตั้งเป้าหมายรายเดือน', optionalGoal: 'เลือกได้', chooseIcon: 'เลือกไอคอน & สี',
-                yourPockets: 'กระเป๋าเงินของคุณ', keepOrganized: 'จัดการเงินให้เป็นระเบียบ', createNewPocket: 'สร้างกระเป๋า',
+                billReminder: 'แจ้งเตือนเป้าหมาย', newTx: 'รายการใหม่', lowBalance: 'เตือนเงินเหลือน้อย', safeThreshold: 'ยอดเงินในบัญชีต่ำกว่าเกณฑ์ (฿500)',
+                initialAmount: 'เงินเริ่มต้น', setMonthlyTarget: 'ตั้งเป้าหมายรายเดือน', optionalGoal: 'เลือกได้', chooseIcon: 'ไอคอน & สี',
+                yourPockets: 'กระเป๋าเงินของคุณ', keepOrganized: 'จัดการเงินให้เป็นระเบียบสนุกๆ', createNewPocket: 'สร้างกระเป๋าใหม่',
                 pocketDetails: 'รายละเอียดกระเป๋า', saved: 'เก็บแล้ว', left: 'เหลือ', spendingTrend: 'แนวโน้มการใช้จ่าย', recentActivity: 'รายการในกระเป๋า', viewAll: 'ดูทั้งหมด',
-                pocketSettings: 'ตั้งค่ากระเป๋า', manageDetails: 'จัดการข้อมูล', general: 'ทั่วไป', iconColor: 'ไอคอน & สี', accentColor: 'สีประจำแอป',
+                pocketSettings: 'ตั้งค่ากระเป๋า', manageDetails: 'จัดการข้อมูลกระเป๋า', general: 'ทั่วไป', iconColor: 'ไอคอน & สี', customizeApp: 'ปรับแต่งตามใจชอบ',
                 budgeting: 'เป้าหมาย', monthlyGoal: 'เป้าหมาย', setTargetAmount: 'ยอดเป้าหมาย', notifSettings: 'การแจ้งเตือน', spendingAlerts: 'แจ้งเตือนการใช้เงิน', notify80: 'เตือนเมื่อถึง 80%',
                 archivePocket: 'ซ่อนกระเป๋า', deletePocket: 'ลบกระเป๋านี้', cannotUndone: 'ลบแล้วกู้คืนไม่ได้', saveChanges: 'บันทึกการเปลี่ยนแปลง',
                 customIcon: 'ไอคอนลายเส้น:', pickColor: 'เลือกสีสัน:', tapToUpload: 'แตะเพื่อเลือกรูป', preview: 'ตัวอย่างสลิป', attachReceipt: 'แนบสลิป',
                 extractedAmount: 'ยอดเงินที่สแกนได้', notes: 'บันทึกช่วยจำ', alignReceipt: 'จัดวางสลิปให้อยู่ในกรอบสี่เหลี่ยม', camera: 'กล้อง', pocketDeducted: 'หักจากกระเป๋า', noPocket: 'ไม่ระบุ',
-                transactions: 'รายการใช้จ่าย', income: 'รายรับ', expense: 'รายจ่าย', today: 'วันนี้', yesterday: 'เมื่อวาน', completed: 'สำเร็จ', addCategory: 'สร้างหมวดหมู่', categoryName: 'ชื่อหมวดหมู่...', cancel: 'ยกเลิก', add: 'เพิ่ม',
+                transactions: 'รายการใช้จ่าย', income: 'รายรับ', expense: 'รายจ่าย', today: 'วันนี้', yesterday: 'เมื่อวาน', completed: 'สำเร็จ', addCategory: 'เพิ่ม/แก้ไข หมวดหมู่', categoryName: 'ชื่อหมวดหมู่...', cancel: 'ยกเลิก', add: 'เพิ่ม/บันทึก',
                 accountTitle: 'บัญชี', accountSettings: 'ตั้งค่าบัญชี', preferencesTitle: 'การปรับแต่ง', appTheme: 'ธีมแอป', bio: 'ประวัติย่อ',
                 transactionAlerts: 'เตือนการทำรายการ', everyPurchase: 'ทุกรายการใช้จ่าย', budgetAlerts: 'เตือนงบประมาณ',
                 budgetWarnings: 'เตือนเมื่อใกล้หมดงบ', monthlySummaries: 'สรุปยอดรายเดือน', newLogins: 'การเข้าระบบใหม่', passwordChanges: 'เปลี่ยนรหัสผ่าน',
@@ -338,18 +236,18 @@
                 yourDevices: 'Your Devices', currentDevice: 'Current Device', pocketName: 'Pocket Name', targetAmount: 'Target Amount',
                 savePocket: 'Save Pocket', passMismatch: 'Passwords mismatch', fillAll: 'Please fill all fields', loading: 'Loading...',
                 guestLogin: 'Guest Login', aiSelected: 'AI Selected', 
-                searchPlaceholder: 'Search...', all: 'All', notFound: 'Not found',
+                searchPlaceholder: 'Search name, category, or notes...', all: 'All', notFound: 'Not found',
                 notifications: 'Notifications', recentAlerts: 'Recent Alerts', clearAll: 'Clear All', caughtUp: 'You are caught up.',
-                billReminder: 'Goal Reminder', newTx: 'New Transaction', lowBalance: 'Low Balance', safeThreshold: 'Balance below safe limit',
+                billReminder: 'Goal Reminder', newTx: 'New Transaction', lowBalance: 'Low Balance', safeThreshold: 'Balance below safe limit (฿500)',
                 initialAmount: 'Initial Amount', setMonthlyTarget: 'Monthly Target', optionalGoal: 'Optional', chooseIcon: 'Icon & Color',
                 yourPockets: 'Your Pockets', keepOrganized: 'Keep funds organized.', createNewPocket: 'Create Pocket',
                 pocketDetails: 'Pocket Details', saved: 'Saved', left: 'left', spendingTrend: 'Spending Trend', recentActivity: 'Recent Activity', viewAll: 'View All',
-                pocketSettings: 'Settings', manageDetails: 'Manage details', general: 'GENERAL', iconColor: 'Icon & Color', accentColor: 'Accent Color', customizeApp: 'Customize',
+                pocketSettings: 'Settings', manageDetails: 'Manage details', general: 'GENERAL', iconColor: 'Icon & Color', customizeApp: 'Customize',
                 budgeting: 'BUDGETING', monthlyGoal: 'Monthly Goal', setTargetAmount: 'Target Amount', notifSettings: 'NOTIFICATIONS', spendingAlerts: 'Spending Alerts', notify80: 'Notify at 80%',
                 archivePocket: 'Archive', deletePocket: 'Delete', cannotUndone: 'Cannot be undone', saveChanges: 'Save Changes',
                 customIcon: 'Choose Icon:', pickColor: 'Pick Color:', tapToUpload: 'Tap to Upload', preview: 'Preview', attachReceipt: 'Attach',
                 extractedAmount: 'Extracted', notes: 'Notes', alignReceipt: 'Align receipt within the frame', camera: 'Camera', pocketDeducted: 'Pocket', noPocket: 'None',
-                transactions: 'Transactions', income: 'Income', expense: 'Expense', today: 'Today', yesterday: 'Yesterday', completed: 'Completed', addCategory: 'Add Category', categoryName: 'Category Name...', cancel: 'Cancel', add: 'Add',
+                transactions: 'Transactions', income: 'Income', expense: 'Expense', today: 'Today', yesterday: 'Yesterday', completed: 'Completed', addCategory: 'Add/Edit Category', categoryName: 'Category Name...', cancel: 'Cancel', add: 'Save',
                 accountTitle: 'ACCOUNT', accountSettings: 'Account Settings', preferencesTitle: 'PREFERENCES', appTheme: 'App Theme', bio: 'Bio',
                 transactionAlerts: 'Transaction Alerts', everyPurchase: 'Every purchase', budgetAlerts: 'Budget Alerts',
                 budgetWarnings: 'Budget warnings', monthlySummaries: 'Monthly summaries', newLogins: 'New device logins', passwordChanges: 'Password changes',
@@ -360,26 +258,8 @@
         const getT = (lang) => (key) => TRANSLATIONS[lang]?.[key] || key;
 
         // ==========================================
-        // 4. UI COMPONENTS
+        // 4. SHARED UI COMPONENTS
         // ==========================================
-        class ErrorBoundary extends React.Component {
-            constructor(props) { super(props); this.state = { hasError: false, error: null }; }
-            static getDerivedStateFromError(error) { return { hasError: true, error }; }
-            render() {
-                if (this.state.hasError) {
-                    return (
-                        <div className="p-8 bg-dark text-white h-screen w-screen flex flex-col items-center justify-center">
-                            <h1 className="text-4xl font-bold mb-4 text-danger">Oops!</h1>
-                            <h2 className="text-xl font-bold mb-2">Something went wrong</h2>
-                            <p className="text-slate-400 text-center mb-8 text-xs bg-slate-800 p-4 rounded-xl">{this.state.error?.toString()}</p>
-                            <button onClick={()=>window.location.reload()} className="px-8 py-4 bg-primary text-white rounded-full font-bold">Reload App</button>
-                        </div>
-                    );
-                }
-                return this.props.children;
-            }
-        }
-
         const SwitchToggle = ({ isOn, onToggle }) => (
             <div onClick={onToggle} className={`w-12 h-7 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${isOn ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}>
                 <div className={`bg-white w-5 h-5 rounded-full shadow-sm transform transition-transform duration-300 ${isOn ? 'translate-x-5' : ''}`}></div>
@@ -391,25 +271,25 @@
             return <div className={`flex items-center justify-center rounded-full shadow-sm`} style={{backgroundColor: pocket.bg || 'var(--color-primary-light)', color: pocket.color || 'var(--color-primary)', width: size*2.5, height: size*2.5}}><Icon name={pocket.icon || 'wallet'} size={size} /></div>;
         };
 
-        const CustomIconModal = ({ onClose, onSelect, Icon, t }) => {
+        const CustomIconModal = ({ onClose, onSelect, t }) => {
             const [hex, setHex] = useState('#8cb1ff');
             return (
                 <div className="absolute inset-0 bg-black/40 z-[100] flex flex-col justify-end fade-in">
                     <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-6 pb-12 flex flex-col slide-up h-[70vh]">
                         <div className="flex justify-between items-center w-full mb-6">
                             <h3 className="font-bold text-xl dark:text-white">{t('chooseIcon')}</h3>
-                            <button onClick={onClose} className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-100 transition-colors"><Icon name="x" size={20}/></button>
+                            <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-200 transition-colors"><Icon name="x" size={20}/></button>
                         </div>
                         <div className="flex-1 overflow-y-auto no-scrollbar space-y-6">
-                            <div className="bg-slate-50 dark:bg-slate-800 rounded-3xl p-5 border border-slate-100 dark:border-slate-700">
+                            <div className="bg-slate-50 dark:bg-slate-800 rounded-[28px] p-5 border border-slate-100 dark:border-slate-700">
                                 <label className="text-xs font-bold text-slate-500 mb-3 block">{t('pickColor')}</label>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 rounded-full overflow-hidden relative shrink-0 shadow-sm border-2 border-white"><input type="color" value={hex} onChange={e=>setHex(e.target.value)} /></div>
-                                    <div className="flex-1 h-14 rounded-2xl flex items-center justify-center font-bold text-white shadow-sm transition-colors" style={{backgroundColor: hex}}>Preview</div>
+                                <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2">
+                                    <div className="w-12 h-12 rounded-full overflow-hidden relative shrink-0 shadow-sm border-2 border-white"><input type="color" value={hex} onChange={e=>setHex(e.target.value)} /></div>
+                                    {PASTEL_COLORS.map(c => <div key={c} onClick={()=>setHex(c)} className="w-10 h-10 rounded-full cursor-pointer shrink-0" style={{backgroundColor: c}}></div>)}
                                 </div>
                             </div>
-                            <div className="bg-slate-50 dark:bg-slate-800 rounded-3xl p-5 border border-slate-100 dark:border-slate-700">
-                                <label className="text-xs font-bold text-slate-500 mb-3 block">{t('customIcon')}</label>
+                            <div className="bg-slate-50 dark:bg-slate-800 rounded-[28px] p-5 border border-slate-100 dark:border-slate-700">
+                                <label className="text-xs font-bold text-slate-500 mb-4 block">{t('customIcon')}</label>
                                 <div className="grid grid-cols-5 gap-4">
                                     {lineIconsList.map((iconName, i) => (
                                         <div key={i} onClick={() => { onSelect({ type: 'lucide', icon: iconName, bg: `${hex}33`, color: hex }); onClose(); }} className="aspect-square rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-sm" style={{backgroundColor: `${hex}33`, color: hex}}>
@@ -424,24 +304,51 @@
             )
         };
 
-        const AddCategoryModal = ({ onClose, onAdd, t, Icon }) => {
-            const [newCat, setNewCat] = useState('');
+        const CategoryModal = ({ onClose, onSave, t, Icon, initialCategory }) => {
+            const [name, setName] = useState(initialCategory?.id || '');
+            const [hex, setHex] = useState(initialCategory?.color || '#8cb1ff');
+            const [icon, setIcon] = useState(initialCategory?.icon || 'tag');
+
             return (
-                <div className="absolute inset-0 bg-black/40 z-[100] flex items-center justify-center fade-in p-6">
-                    <div className="bg-white dark:bg-dark w-full rounded-[32px] p-6 slide-up shadow-2xl">
-                        <h3 className="font-bold text-xl mb-4 dark:text-white">{t('addCategory')}</h3>
-                        <input autoFocus value={newCat} onChange={e=>setNewCat(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl font-bold text-sm mb-6 outline-none focus:border-primary transition-colors text-slate-800 dark:text-white" placeholder={t('categoryName')} />
-                        <div className="flex gap-4">
-                            <button onClick={onClose} className="flex-1 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-bold py-4 rounded-full transition-colors hover:bg-slate-100">{t('cancel')}</button>
-                            <button onClick={()=>onAdd(newCat)} disabled={!newCat} className="flex-1 bg-primary text-white py-4 rounded-full font-bold disabled:opacity-50 transition-colors hover:opacity-90">{t('add')}</button>
+                <div className="absolute inset-0 bg-black/40 z-[100] flex items-end justify-center fade-in">
+                    <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-6 pb-12 slide-up h-[85vh] flex flex-col">
+                        <div className="flex justify-between items-center w-full mb-6">
+                            <h3 className="font-bold text-xl dark:text-white">{t('addCategory')}</h3>
+                            <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white"><Icon name="x" size={20}/></button>
                         </div>
+                        <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
+                            <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-4 rounded-[24px]">
+                                <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm" style={{backgroundColor: `${hex}33`, color: hex}}><Icon name={icon} size={28}/></div>
+                                <input autoFocus value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-lg outline-none text-slate-800 dark:text-white" placeholder={t('categoryName')} />
+                            </div>
+                            
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">{t('pickColor')}</label>
+                                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
+                                    <div className="w-10 h-10 rounded-full overflow-hidden relative shrink-0 shadow-sm border-2 border-white"><input type="color" value={hex} onChange={e=>setHex(e.target.value)} /></div>
+                                    {PASTEL_COLORS.map(c => <div key={c} onClick={()=>setHex(c)} className={`w-10 h-10 rounded-full cursor-pointer shrink-0 transition-transform ${hex===c?'scale-110 ring-2 ring-primary/50':''}`} style={{backgroundColor: c}}></div>)}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">{t('customIcon')}</label>
+                                <div className="grid grid-cols-6 gap-3">
+                                    {lineIconsList.map((ic, i) => (
+                                        <div key={i} onClick={() => setIcon(ic)} className={`aspect-square rounded-full flex items-center justify-center cursor-pointer transition-transform shadow-sm ${icon===ic?'scale-110 ring-2 ring-primary/50':''}`} style={{backgroundColor: `${hex}15`, color: hex}}>
+                                            <Icon name={ic} size={20} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        <button onClick={()=>onSave({id: name, icon: icon, color: hex})} disabled={!name} className="w-full bg-primary text-white py-5 rounded-full font-bold text-lg disabled:opacity-50 transition-all hover:shadow-lg active:scale-95">{t('add')}</button>
                     </div>
                 </div>
             );
         };
 
         const Section = ({ title, children }) => (
-            <div className="mb-6"><h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-4">{title}</h4><div className="bg-white dark:bg-slate-800 rounded-[28px] border border-slate-100 dark:border-slate-700 soft-shadow overflow-hidden">{children}</div></div>
+            <div className="mb-6"><h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-4">{title}</h4><div className="bg-white dark:bg-slate-800 rounded-[28px] border border-slate-100 dark:border-slate-700 soft-shadow overflow-hidden">{children}</div></div>
         );
 
         const PinPadModal = ({ onClose, onSave, isSet, t, Icon }) => {
@@ -452,7 +359,7 @@
             return (
                 <div className="absolute inset-0 bg-black/40 z-[100] flex flex-col justify-end fade-in">
                     <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center slide-up shadow-2xl">
-                        <div className="flex justify-between w-full mb-8"><div className="w-10"></div><h3 className="font-bold text-xl dark:text-white">{isSet?t('changePin'):t('setPin')}</h3><button onClick={onClose} className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-100 transition-colors"><Icon name="x" size={20}/></button></div>
+                        <div className="flex justify-between w-full mb-8"><div className="w-10"></div><h3 className="font-bold text-xl dark:text-white">{isSet?t('changePin'):t('setPin')}</h3><button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-200 transition-colors"><Icon name="x" size={20}/></button></div>
                         <div className="flex gap-4 mb-10">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}></div>)}</div>
                         <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
                             {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100">{n}</button>)}
@@ -463,9 +370,6 @@
             );
         };
 
-        // ==========================================
-        // 5. SCREENS
-        // ==========================================
         const LockScreen = ({ Icon, correctPin, onUnlock }) => {
             const [pin, setPin] = useState(''); const [err, setErr] = useState('');
             const press = (n) => { if(pin.length < 6) { setPin(p => p + n); setErr(''); } };
@@ -479,8 +383,8 @@
                         <div className="flex gap-4 mb-8">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? (err?'bg-danger':'bg-primary') : 'bg-slate-100 dark:bg-slate-800'}`}></div>)}</div>
                         {err && <p className="text-danger text-xs font-bold mb-4 bg-red-50 dark:bg-red-500/10 px-3 py-1 rounded-full">{err}</p>}
                         <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
-                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100">{n}</button>)}
-                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-slate-50 dark:bg-slate-800 active:scale-95 transition-transform rounded-full text-slate-400 hover:bg-slate-100"><Icon name="delete" size={28}/></button>
+                            {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">{n}</button>)}
+                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-slate-50 dark:bg-slate-800 active:scale-95 transition-transform rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"><Icon name="delete" size={28}/></button>
                         </div>
                     </div>
                 </div>
@@ -490,16 +394,16 @@
         const MainLayout = ({ children, tab, go, t, Icon }) => (
             <div className="flex flex-col h-full relative fade-in">
                 <div className="flex-1 overflow-y-auto pb-[90px] no-scrollbar">{children}</div>
-                <div className="fixed bottom-0 left-0 right-0 w-full bg-white/90 dark:bg-dark/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.02)]">
+                <div className="fixed bottom-0 left-0 right-0 w-full bg-white/90 dark:bg-dark/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50 pb-[env(safe-area-inset-bottom)]">
                     <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} Icon={Icon} />
                     <NavBtn icon="layout-grid" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} Icon={Icon} />
-                    <div className="relative -top-6"><button onClick={()=>go('SCAN')} className="bg-primary text-white w-14 h-14 flex items-center justify-center rounded-full shadow-[0_8px_20px_var(--color-primary-light)] hover:-translate-y-1 active:scale-95 transition-all"><Icon name="scan-line" size={24} /></button></div>
+                    <div className="relative -top-6"><button onClick={()=>go('SCAN')} className="bg-primary text-white w-14 h-14 flex items-center justify-center rounded-[20px] shadow-[0_8px_20px_var(--color-primary-light)] hover:-translate-y-1 active:scale-95 transition-all"><Icon name="scan-line" size={24} /></button></div>
                     <NavBtn icon="clock" label={t('history')} active={tab==='HISTORY'} onClick={()=>go('MAIN','HISTORY')} Icon={Icon} />
                     <NavBtn icon="user" label={t('profile')} active={tab==='PROFILE'} onClick={()=>go('MAIN','PROFILE')} Icon={Icon} />
                 </div>
             </div>
         );
-        const NavBtn = ({ icon, label, active, onClick, Icon }) => (<button onClick={onClick} className={`flex flex-col items-center gap-1 w-12 transition-all hover:scale-105 ${active?'text-primary':'text-slate-400 dark:text-slate-500'}`}><Icon name={icon} size={22} strokeWidth={active?2.5:1.5} /><span className="text-[10px] font-bold">{label}</span></button>);
+        const NavBtn = ({ icon, label, active, onClick, Icon }) => (<button onClick={onClick} className={`flex flex-col items-center gap-1 w-12 transition-all hover:scale-105 ${active?'text-primary':'text-slate-400 dark:text-slate-500'}`}><Icon name={icon} size={22} strokeWidth={active?2.5:1.5} /><span className="text-[9px] font-bold">{label}</span></button>);
 
         const LoginScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
             const [email, setEmail] = useState(''); const [password, setPassword] = useState('');
@@ -540,19 +444,20 @@
             return (
                 <div className="flex-1 p-8 flex flex-col justify-center fade-in bg-white dark:bg-dark relative">
                     {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <div className="text-center mb-10"><div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mb-6"><Icon name="scan-face" size={40}/></div><h1 className="text-3xl font-bold dark:text-white">QR Scanner</h1><p className="text-slate-400 font-bold mt-2">{t('subWelcome')}</p></div>
+                    <div className="text-center mb-10"><div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mb-6"><Icon name="scan-face" size={40}/></div><h1 className="text-3xl font-bold dark:text-white">QR Scanner</h1><p className="text-slate-400 font-bold mt-2">{t('welcome')}</p></div>
                     <form onSubmit={handleLogin} className="space-y-4">
-                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
-                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('password')} /></div>
+                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
+                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('password')} /></div>
                         <div className="text-right"><button type="button" onClick={()=>go('FORGOT_PASS')} className="text-xs font-bold text-slate-400 hover:text-primary transition-colors">{t('forgotPass')}</button></div>
                         <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-2 tracking-widest shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all">{t('login')}</button>
                     </form>
                     {err && <div className="bg-red-50 dark:bg-red-500/10 text-danger p-3 rounded-2xl text-xs font-bold text-center mt-4">{err}</div>}
                     <div className="flex items-center gap-4 my-8"><div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"/><span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">OR</span><div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"/></div>
-                    <button onClick={googleLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700">
-                        <Icon name="chrome" size={20}/> {t('loginGoogle')}
+                    <button onClick={googleLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700">
+                        <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                        {t('loginGoogle')}
                     </button>
-                    <button onClick={guestLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700"><Icon name="user" size={20} className="text-slate-400"/> {t('guestLogin')}</button>
+                    <button onClick={guestLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700"><Icon name="user" size={20} className="text-slate-400"/> {t('guestLogin')}</button>
                     <button onClick={()=>go('SIGN_UP')} className="mt-6 text-sm font-bold text-slate-400 text-center w-full transition-colors hover:text-primary">{t('noAccount')} <span className="text-primary underline">{t('signUp')}</span></button>
                 </div>
             );
@@ -580,13 +485,13 @@
             return (
                 <div className="flex-1 p-8 flex flex-col relative fade-in bg-white dark:bg-dark">
                     {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <button onClick={()=>go('SIGN_IN')} className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 active:scale-95 transition-transform dark:text-white hover:bg-slate-100"><Icon name="arrow-left"/></button>
+                    <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 active:scale-95 transition-transform dark:text-white hover:bg-slate-100"><Icon name="arrow-left"/></button>
                     <h1 className="text-3xl font-bold mb-8 dark:text-white">{t('createAccount')}</h1>
                     <form onSubmit={handleSignUp} className="space-y-4">
-                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors"><Icon name="user" size={20} className="text-slate-400 mr-3"/><input required value={name} onChange={e=>setName(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('name')} /></div>
-                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
-                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input required type="password" value={pass} onChange={e=>setPass(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={`${t('password')} (min 6)`} /></div>
-                        <div className={`bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors ${(pass&&confirm&&pass!==confirm)?'!border-danger':''}`}><Icon name="lock" size={20} className={(pass&&confirm&&pass!==confirm)?'text-danger mr-3':'text-slate-400 mr-3'}/><input required type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('confirmPass')} /></div>
+                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="user" size={20} className="text-slate-400 mr-3"/><input required value={name} onChange={e=>setName(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('name')} /></div>
+                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
+                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input required type="password" value={pass} onChange={e=>setPass(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={`${t('password')} (min 6)`} /></div>
+                        <div className={`bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm ${(pass&&confirm&&pass!==confirm)?'!border-danger':''}`}><Icon name="lock" size={20} className={(pass&&confirm&&pass!==confirm)?'text-danger mr-3':'text-slate-400 mr-3'}/><input required type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('confirmPass')} /></div>
                         {err && <p className="text-xs font-bold text-danger text-center bg-red-50 dark:bg-red-500/10 p-2 rounded-xl">{err}</p>}
                         <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full mt-8 tracking-widest shadow-md hover:-translate-y-0.5 active:scale-95 transition-all">{t('createAccount')}</button>
                     </form>
@@ -604,12 +509,12 @@
             return (
                 <div className="flex-1 p-8 flex flex-col text-center relative fade-in bg-white dark:bg-dark">
                     {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <button onClick={()=>go('SIGN_IN')} className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 absolute active:scale-95 transition-transform dark:text-white hover:bg-slate-100"><Icon name="arrow-left"/></button>
+                    <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center mb-8 absolute active:scale-95 transition-transform dark:text-white hover:bg-slate-50"><Icon name="arrow-left"/></button>
                     <div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mt-20 mb-8"><Icon name="key" size={40}/></div>
                     <h1 className="text-3xl font-bold mb-2 dark:text-white">{t('forgotPass')}</h1>
                     {sent ? <div className="bg-green-50 dark:bg-green-500/10 text-[#4ADE80] p-4 rounded-2xl font-bold flex items-center justify-center gap-2 animate-pulse mt-10"><Icon name="check-circle"/> Email Sent!</div> : 
                     <form onSubmit={handleReset} className="space-y-6 mt-10">
-                        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center text-left focus-within:border-primary transition-colors"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
+                        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 rounded-2xl flex items-center text-left focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
                         {err && <p className="text-xs font-bold text-danger bg-red-50 dark:bg-red-500/10 p-2 rounded-xl">{err}</p>}
                         <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-full tracking-widest shadow-md hover:-translate-y-0.5 active:scale-95 transition-all">{t('sendLink')}</button>
                     </form>}
@@ -623,7 +528,7 @@
                 <div className="p-6 pt-10 fade-in">
                     <div className="flex justify-between items-center mb-8">
                         <div className="flex items-center gap-3">
-                            <div className="rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm w-12 h-12"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
+                            <div className="rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm w-12 h-12 flex items-center justify-center bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
                             <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('welcome')},</p><h2 className="text-lg font-bold leading-none dark:text-white">{user?.displayName}</h2></div>
                         </div>
                         <button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 relative active:scale-95 transition-transform hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700">
@@ -635,12 +540,12 @@
                         <p className="text-xs font-bold text-white/80 uppercase tracking-widest mb-1">{t('totalSpend')}</p><h1 className="text-4xl font-bold mb-8">฿ {formatMoney(totalSpend)}</h1>
                         <div className="mt-8"><p className="text-xs font-bold text-white/80 uppercase tracking-widest mb-1 flex items-center gap-1"><Icon name="wallet" size={14}/> {t('safeSpend')}</p><h2 className="text-3xl font-bold">฿ {formatMoney(Math.max(safeToSpend, 0))}</h2></div>
                     </div>
-                    <div className="flex justify-between items-end mb-4"><h3 className="text-xl font-bold dark:text-white">{t('recent')}</h3><button onClick={()=>go('MAIN','HISTORY')} className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-primary transition-colors">{t('seeAll')}</button></div>
+                    <div className="flex justify-between items-end mb-4"><h3 className="text-xl font-bold dark:text-white">{t('recent')}</h3><button onClick={()=>go('MAIN','HISTORY')} className="text-xs font-bold text-primary uppercase tracking-widest hover:underline px-3 py-1 rounded-full">{t('seeAll')}</button></div>
                     <div className="space-y-3">
                         {txs.length === 0 ? <div className="bg-white dark:bg-slate-800 rounded-[28px] text-center p-8 soft-shadow border border-slate-100 dark:border-slate-700"><p className="font-bold text-slate-400">{t('noData')}</p></div> : 
                         txs.slice(0,4).map(tx => (
                             <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white dark:bg-slate-800 p-4 rounded-[24px] flex justify-between items-center soft-shadow cursor-pointer active:scale-95 transition-all border border-slate-100 dark:border-slate-700 hover:-translate-y-1 hover:shadow-md">
-                                <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20} /><div><h4 className="font-bold text-sm dark:text-white">{tx.title}</h4><p className="text-[10px] font-bold text-slate-400 mt-1">{tx.category}</p></div></div>
+                                <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20} /><div><h4 className="font-bold text-sm dark:text-white">{tx.title}</h4><p className="text-[10px] font-bold text-slate-500 mt-1">{tx.category}</p></div></div>
                                 <div className="font-bold text-sm dark:text-white">฿ {formatMoney(tx.amount)}</div>
                             </div>
                         ))}
@@ -655,7 +560,7 @@
                 <div className="px-6 pt-12 flex justify-between items-center relative z-10 mb-8">
                     <button onClick={() => go('MAIN', 'HOME')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors border border-slate-100 dark:border-slate-700"><Icon name="arrow-left" size={20}/></button>
                     <h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2>
-                    <div className="w-10 h-10 rounded-full overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
+                    <div className="w-10 h-10 rounded-full overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 bg-white flex items-center justify-center"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
                 </div>
                 <div className="px-6 flex-1 overflow-y-auto no-scrollbar relative z-10 pb-10">
                     <div className="flex justify-between items-end mb-8">
@@ -725,7 +630,7 @@
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('initialAmount')}</label><div className="w-full bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-xl font-bold text-slate-400 mr-3">฿</span><input type="number" value={balance} onChange={e=>setBalance(e.target.value)} className="w-full bg-transparent font-bold text-2xl outline-none dark:text-white" placeholder="0.00"/></div></div>
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700">
                             <div className="flex justify-between items-center mb-2"><h4 className="font-bold text-sm dark:text-white">{t('setMonthlyTarget')}</h4><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>
-                            {hasTarget && (<div className="pt-4 border-t border-slate-50 dark:border-slate-700 fade-in"><div className="w-full bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-lg font-bold text-slate-400 mr-3">฿</span><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-transparent font-bold text-xl outline-none dark:text-white" placeholder="0.00"/></div></div>)}
+                            {hasTarget && (<div className="pt-4 border-t border-slate-100 dark:border-slate-700 fade-in"><div className="w-full bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-lg font-bold text-slate-400 mr-3">฿</span><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-transparent font-bold text-xl outline-none dark:text-white" placeholder="0.00"/></div></div>)}
                         </div>
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700">
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">{t('chooseIcon')}</label>
@@ -792,11 +697,11 @@
             return (
                 <div className="p-6 pt-12 h-full flex flex-col fade-in relative bg-[var(--bg-color)]">
                     {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={(ic)=>{setSelectedIcon({type:'lucide', icon:ic.icon, bg:`${ic.color}33`, color:ic.color})}} t={t} Icon={Icon} />}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketSettings')}</h2><div className="w-10"></div></div>
-                    <div className="flex flex-col items-center mb-8"><div className="mb-4"><PocketIcon pocket={selectedIcon} size={32} /></div><h2 className="text-xl font-bold dark:text-white">{pocket.name}</h2></div>
+                    <div className="flex items-center justify-between mb-6"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketSettings')}</h2><div className="w-10"></div></div>
+                    <div className="flex flex-col items-center mb-8"><div className="mb-4"><PocketIcon pocket={selectedIcon} size={36} /></div><h2 className="text-2xl font-bold dark:text-white">{pocket.name}</h2></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <Section title={t('general')}><div className="p-4 border-b border-slate-50 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors"/></div><div onClick={()=>setShowCustomModal(true)} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><span className="font-bold text-sm dark:text-white">{t('iconColor')}</span><div className="bg-slate-100 dark:bg-slate-700 p-2 rounded-full text-slate-400 dark:text-white"><Icon name="edit-2" size={14}/></div></div></Section>
-                        <Section title={t('budgeting')}><div className="p-4 flex justify-between items-center"><span className="font-bold text-sm dark:text-white">{t('monthlyGoal')}</span><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>{hasTarget && <div className="p-4 border-t border-slate-50 dark:border-slate-700 fade-in"><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-base outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="0.00"/></div>}</Section>
+                        <Section title={t('general')}><div className="p-4 border-b border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors"/></div><div onClick={()=>setShowCustomModal(true)} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><span className="font-bold text-sm dark:text-white">{t('iconColor')}</span><div className="bg-slate-100 dark:bg-slate-700 p-2 rounded-full text-slate-400 dark:text-white"><Icon name="edit-2" size={14}/></div></div></Section>
+                        <Section title={t('budgeting')}><div className="p-4 flex justify-between items-center"><span className="font-bold text-sm dark:text-white">{t('monthlyGoal')}</span><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>{hasTarget && <div className="p-4 border-t border-slate-100 dark:border-slate-700 fade-in"><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-base outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="0.00"/></div>}</Section>
                         <div className="pt-2"><button onClick={()=>{ if(window.confirm(t('confirmReset'))) onDelete(pocket.id); }} className="w-full bg-danger/10 text-danger font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-95 transition-colors hover:bg-danger/20 text-sm"><Icon name="trash-2" size={18}/> {t('deletePocket')}</button></div>
                     </div>
                     <button onClick={()=>onUpdate(pocket.id, {name, hasTarget, target: Number(target)||0, iconType: selectedIcon.type, icon: selectedIcon.icon, colorType: selectedIcon.colorType, color: selectedIcon.color, bg: selectedIcon.bg})} className="w-full bg-primary text-white font-bold py-4 rounded-full shadow-md active:scale-95 text-sm tracking-widest uppercase hover:shadow-lg transition-all">{t('saveChanges')}</button>
@@ -807,13 +712,13 @@
         const ProfileScreen = ({ user, go, t, onLogout, Icon, LoadingOverlay, themeMode, onResetData }) => {
             const [loading, setLoading] = useState(false);
             const doLogout = () => { setLoading(true); setTimeout(() => onLogout(), 1000); };
-            const MenuItem = ({ icon, label, onClick, value }) => (<div onClick={onClick} className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-50 dark:border-slate-800 last:border-0 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary"><Icon name={icon} size={18}/></div><span className="font-bold text-sm dark:text-white">{label}</span></div><div className="flex items-center gap-3">{value && <span className="text-[10px] font-bold px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-300 uppercase tracking-widest">{value}</span>}<Icon name="chevron-right" size={16} className="text-slate-300"/></div></div>);
+            const MenuItem = ({ icon, label, onClick, value }) => (<div onClick={onClick} className="flex items-center justify-between p-5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary"><Icon name={icon} size={18}/></div><span className="font-bold text-sm dark:text-white">{label}</span></div><div className="flex items-center gap-3">{value && <span className="text-[10px] font-bold px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-300 uppercase tracking-widest">{value}</span>}<Icon name="chevron-right" size={16} className="text-slate-300"/></div></div>);
             return (
                 <div className="p-6 pt-12 fade-in relative h-full overflow-y-auto no-scrollbar bg-[var(--bg-color)]">
                     {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
                     <div className="flex flex-col items-center mb-8 mt-2 relative">
                         <button onClick={()=>go('NOTIFICATIONS')} className="absolute top-0 right-0 text-slate-400 w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 shadow-sm hover:text-primary transition-colors"><Icon name="bell" size={20}/></button>
-                        <div className="relative mb-4"><div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-md"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-sm cursor-pointer hover:scale-110 transition-transform"><Icon name="edit-2" size={14}/></div></div>
+                        <div className="relative mb-4"><div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-md bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-md cursor-pointer hover:scale-110 transition-transform"><Icon name="edit-2" size={14}/></div></div>
                         <h1 className="text-2xl font-bold mb-1 dark:text-white">{user?.displayName}</h1><p className="text-xs font-bold text-slate-400">{user?.email}</p>
                     </div>
                     <div className="space-y-6 mb-8">
@@ -862,7 +767,7 @@
                     {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
                     <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('editProfile')}</h2><div className="w-10"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
-                        <div className="flex flex-col items-center mb-8 relative"><div className="relative"><div className="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-md overflow-hidden"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><button onClick={()=>fileInputRef.current.click()} className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full shadow-sm flex items-center justify-center hover:scale-110 transition-transform"><Icon name="camera" size={14}/></button></div><input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} /></div>
+                        <div className="flex flex-col items-center mb-8 relative"><div className="relative"><div className="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-md overflow-hidden bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><button onClick={()=>fileInputRef.current.click()} className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full shadow-md flex items-center justify-center hover:scale-110 transition-transform"><Icon name="camera" size={14}/></button></div><input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} /></div>
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('name')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('bio')}</label><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm h-28 resize-none outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="Add bio..." /></div>
                     </div>
@@ -881,12 +786,12 @@
                     <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('security')}</h2><div className="w-10"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
                         <Section title="Account Security">
-                            <div onClick={handleResetPass} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 border-b border-slate-50 dark:border-slate-700 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center"><Icon name="lock" size={18}/></div><h4 className="font-bold text-sm dark:text-white">{t('changePass')}</h4></div><button className="bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest">Update</button></div>
+                            <div onClick={handleResetPass} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-50 dark:border-slate-700 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center"><Icon name="lock" size={18}/></div><h4 className="font-bold text-sm dark:text-white">{t('changePass')}</h4></div><button className="bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest">Update</button></div>
                             <div className="p-4 flex justify-between items-center"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400"><Icon name="layout-grid" size={18}/></div><div><span className="font-bold text-sm block leading-none mb-1 dark:text-white">{t('pinCode')}</span><span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{pinCode ? t('pinStatusSet') : t('pinStatusNotSet')}</span></div></div><div className="flex items-center gap-3">{pinCode && (<button onClick={()=>setShowPinModal(true)} className="text-[10px] font-bold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 uppercase tracking-widest">{t('changePin')}</button>)}<SwitchToggle isOn={!!pinCode} onToggle={handleTogglePin} /></div></div>
                         </Section>
                         <Section title={t('yourDevices')}><div className="p-4 flex justify-between items-center bg-white dark:bg-slate-900"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-[#94e4ae]/20 rounded-full flex items-center justify-center text-[#4ea86a]"><Icon name="smartphone" size={18}/></div><div><h4 className="font-bold text-sm dark:text-white">{deviceName}</h4><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{t('activeNow')}</p></div></div><span className="bg-[#94e4ae]/20 text-[#4ea86a] px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest">THIS DEVICE</span></div></Section>
                     </div>
-                    {msg && <div className="bg-white dark:bg-slate-800 soft-shadow text-center font-bold text-sm p-4 mt-4 text-primary rounded-2xl border border-slate-100 dark:border-slate-700">{msg}</div>}
+                    {msg && <div className="bg-white dark:bg-slate-900 shadow-sm text-center font-bold text-sm p-4 mt-4 text-primary rounded-2xl border border-slate-100 dark:border-slate-700">{msg}</div>}
                 </div>
             );
         };
@@ -917,7 +822,7 @@
                 <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('theme')}</h2><div className="w-10"></div></div>
                 <div className="flex-1 overflow-y-auto no-scrollbar space-y-8 pb-6">
                     <div>
-                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 ml-4">{t('themeMode')}</h4>
+                        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 ml-4">{t('themeMode')}</h4>
                         <div className="flex justify-between gap-4 px-2">
                             <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Light')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col p-2 gap-2 bg-white shadow-sm transition-all hover:-translate-y-1 ${themeMode === 'Light' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-100'}`}><div className="w-full h-1/4 bg-slate-100 rounded-md"></div><div className="w-full flex-1 bg-slate-50 rounded-md flex flex-col gap-1.5 p-1.5"><div className="w-full h-1.5 bg-white rounded-sm"></div><div className="w-2/3 h-1.5 bg-white rounded-sm"></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='Light' ? 'text-primary' : 'text-slate-400'}`}>{t('light')}</span></div>
                             <div className="flex flex-col items-center gap-3 w-1/3"><div onClick={()=>setThemeMode('Dark')} className={`w-full aspect-[1/1.5] rounded-[24px] border-2 cursor-pointer flex flex-col p-2 gap-2 bg-slate-800 shadow-sm transition-all hover:-translate-y-1 ${themeMode === 'Dark' ? 'border-primary ring-4 ring-primaryLight' : 'border-slate-700'}`}><div className="w-full h-1/4 bg-slate-700 rounded-md"></div><div className="w-full flex-1 bg-slate-900 rounded-md flex flex-col gap-1.5 p-1.5"><div className="w-full h-1.5 bg-slate-700 rounded-sm"></div><div className="w-2/3 h-1.5 bg-slate-700 rounded-sm"></div></div></div><span className={`text-[10px] font-bold uppercase tracking-widest ${themeMode==='Dark' ? 'text-primary' : 'text-slate-400'}`}>{t('dark')}</span></div>
@@ -933,7 +838,7 @@
                             ))}
                         </div>
                     </Section>
-                    <Section title="Animations"><div className="p-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary"><Icon name="sparkles" size={18}/></div><span className="font-bold text-sm dark:text-white">{t('reduceMotion')}</span></div><SwitchToggle isOn={reduceMotion} onToggle={()=>setReduceMotion(!reduceMotion)} /></div></Section>
+                    <Section title="Animations"><div className="p-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primaryLight rounded-full flex items-center justify-center text-primary"><Icon name="sparkles" size={18}/></div><span className="font-bold text-sm dark:text-white">{t('reduceMotion')}</span></div><SwitchToggle isOn={reduceMotion} onToggle={()=>setReduceMotion(!reduceMotion)} /></div></Section>
                 </div>
             </div>
         );
@@ -943,8 +848,8 @@
                 <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl ml-4 dark:text-white">{t('language')}</h2></div>
                 <div className="space-y-4">
                     {['TH', 'EN'].map(l => (
-                        <div key={l} onClick={()=>setLang(l)} className={`p-5 rounded-[24px] flex justify-between items-center cursor-pointer transition-transform hover:-translate-y-0.5 shadow-sm border ${lang===l?'bg-primary/10 border-primary dark:bg-primary/20':'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'}`}>
-                            <span className={`font-bold text-sm ${lang===l?'text-primary':'text-slate-600 dark:text-white'}`}>{l === 'TH' ? 'ภาษาไทย' : 'English'}</span>
+                        <div key={l} onClick={()=>setLang(l)} className={`p-5 rounded-[24px] flex justify-between items-center cursor-pointer transition-transform hover:-translate-y-0.5 shadow-sm border ${lang===l?'bg-primaryLight border-primary':'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'}`}>
+                            <span className={`font-bold text-sm ${lang===l?'text-primary':'text-slate-800 dark:text-white'}`}>{l === 'TH' ? 'ภาษาไทย' : 'English'}</span>
                             {lang===l && <div className="bg-primary text-white rounded-full p-1"><Icon name="check" size={16} strokeWidth={3}/></div>}
                         </div>
                     ))}
@@ -967,15 +872,24 @@
             }), [txs, activeFilter, searchQuery, t]);
 
             const grouped = useMemo(() => {
-                const g = {}; const today = new Date().toLocaleDateString('th-TH');
+                const g = {}; const today = new Date().toISOString().split('T')[0];
                 const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-                const yStr = yesterday.toLocaleDateString('th-TH');
-                filteredTxs.forEach(tx => { let d = tx.date === today ? t('today') : tx.date === yStr ? t('yesterday') : tx.date; if(!g[d]) g[d]=[]; g[d].push(tx); });
+                const yStr = yesterday.toISOString().split('T')[0];
+                filteredTxs.forEach(tx => { 
+                    // format date for matching
+                    let dMatch = tx.date;
+                    if(dMatch.includes('/')) {
+                        const parts = dMatch.split('/');
+                        if(parts[2].length === 4) dMatch = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                    }
+                    let d = dMatch === today ? t('today') : dMatch === yStr ? t('yesterday') : tx.date; 
+                    if(!g[d]) g[d]=[]; g[d].push(tx); 
+                });
                 return g;
             }, [filteredTxs, t]);
 
             return (
-                <div className="p-6 pt-12 fade-in flex flex-col h-full bg-[var(--bg-color)]">
+                <div className="p-6 pt-10 fade-in flex flex-col h-full bg-[var(--bg-color)]">
                     <div className="shrink-0 mb-6 z-10 pb-2">
                         <div className="flex justify-end mb-4"><button onClick={()=>go('NOTIFICATIONS')} className="relative w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center text-danger active:scale-95 transition-transform hover:bg-slate-50"><Icon name="bell" size={20}/>{visibleNotifications?.length > 0 && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800"></span>}</button></div>
                         <h2 className="text-3xl font-bold mb-6 leading-none dark:text-white">{t('transactions')}</h2>
@@ -1013,7 +927,7 @@
                         });
                     }
                 };
-            }, []);
+            }, [isTorchOn]);
 
             const toggleFlash = async () => {
                 if (streamRef.current) {
@@ -1034,8 +948,8 @@
                 if (videoRef.current) {
                     const canvas = document.createElement('canvas'); canvas.width = videoRef.current.videoWidth; canvas.height = videoRef.current.videoHeight;
                     const ctx = canvas.getContext('2d'); ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-                    setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใหม่', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', iconType: 'lucide', icon: 'receipt', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: canvas.toDataURL('image/jpeg', 0.8) }); }, 1500);
-                } else { setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใหม่', date: new Date().toLocaleDateString('th-TH'), categoryKey: 'General', iconType: 'lucide', icon: 'receipt', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: null }); }, 1500); }
+                    setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใหม่', date: new Date().toISOString().split('T')[0], categoryKey: 'General', iconType: 'lucide', icon: 'receipt', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: canvas.toDataURL('image/jpeg', 0.8) }); }, 1500);
+                } else { setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใหม่', date: new Date().toISOString().split('T')[0], categoryKey: 'General', iconType: 'lucide', icon: 'receipt', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: null }); }, 1500); }
             };
 
             if(scanning) return <LoadingOverlay text={t('loading')} Icon={Icon} />;
@@ -1044,14 +958,14 @@
                 <div className="flex-1 bg-black relative flex flex-col h-full fade-in">
                     <div className="absolute top-10 left-0 w-full px-6 flex justify-between items-center z-40"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white active:scale-95 backdrop-blur-md transition-colors hover:bg-white/30"><Icon name="x" size={20}/></button><button onClick={toggleFlash} className={`w-10 h-10 rounded-full flex items-center justify-center active:scale-95 backdrop-blur-md transition-colors ${isTorchOn ? 'bg-primary text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}><Icon name={isTorchOn ? 'zap' : 'zap-off'} size={20}/></button></div>
                     <div className="flex-1 relative overflow-hidden flex items-center justify-center"><video ref={videoRef} playsInline webkit-playsinline autoPlay muted className="absolute inset-0 w-full h-full object-cover opacity-90" /><div className="scan-frame"><div className="scan-corner tl"></div><div className="scan-corner tr"></div><div className="scan-corner bl"></div><div className="scan-corner br"></div><div className="laser"></div></div></div>
-                    <div className="bg-white dark:bg-dark rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.3)] z-40 relative border-t border-slate-100 dark:border-slate-800"><div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mb-6"></div><h2 className="text-xl font-bold dark:text-white">{t('scanReceipt')}</h2><p className="text-[10px] font-bold text-slate-400 mt-2 mb-8 uppercase tracking-widest">{t('alignReceipt')}</p><div className="flex justify-between w-full px-4 items-center"><button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="image" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('gallery')}</span></button><button onClick={capture} className="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:-translate-y-1"><Icon name="camera" size={28}/></button><button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="edit-2" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('manual')}</span></button></div></div>
+                    <div className="bg-white dark:bg-slate-900 rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.3)] z-40 relative border-t border-slate-100 dark:border-slate-800"><div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mb-6"></div><h2 className="text-xl font-bold dark:text-white">{t('scanReceipt')}</h2><p className="text-[10px] font-bold text-slate-400 mt-2 mb-8 uppercase tracking-widest">{t('alignReceipt')}</p><div className="flex justify-between w-full px-4 items-center"><button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="image" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('gallery')}</span></button><button onClick={capture} className="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:-translate-y-1"><Icon name="camera" size={28}/></button><button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="edit-2" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('manual')}</span></button></div></div>
                     <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e=>{if(e.target.files[0]){ processReceiptImage(e.target.files[0], (data)=>{ setScanning(false); onNext(data); }); }}} />
                 </div>
             );
         };
 
         const ReviewScreen = ({ go, screenData, onConfirm, t, Icon, pockets, LoadingOverlay, userCategories, setUserCategories, defaultCatIds }) => {
-            const [amount, setAmount] = useState(screenData?.amount || ''); const [merchant, setMerchant] = useState(screenData?.merchant || ''); const [txDate, setTxDate] = useState(screenData?.date || new Date().toLocaleDateString('th-TH')); const [selectedPocket, setSelectedPocket] = useState('none'); const [activeCategory, setActiveCategory] = useState(screenData?.categoryKey || 'General'); const [saving, setSaving] = useState(false); const [showAddCat, setShowAddCat] = useState(false);
+            const [amount, setAmount] = useState(screenData?.amount || ''); const [merchant, setMerchant] = useState(screenData?.merchant || ''); const [txDate, setTxDate] = useState(screenData?.date || new Date().toISOString().split('T')[0]); const [selectedPocket, setSelectedPocket] = useState('none'); const [activeCategory, setActiveCategory] = useState(screenData?.categoryKey || 'General'); const [saving, setSaving] = useState(false); const [showAddCat, setShowAddCat] = useState(false);
             
             const handleSave = async () => { 
                 setSaving(true); 
@@ -1064,21 +978,21 @@
             return (
                 <div className="flex-1 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
                     {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    {showAddCat && <AddCategoryModal onClose={()=>setShowAddCat(false)} onAdd={(cat)=>{setUserCategories([...userCategories, {id: cat, icon: 'tag', color: '#64748b'}]); setActiveCategory(cat); setShowAddCat(false);}} t={t} Icon={Icon}/>}
-                    <div className="px-6 pt-12 flex items-center justify-between mb-6"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('reviewDetails')}</h2><button onClick={handleSave} disabled={!amount} className="bg-primary/10 text-primary px-4 py-2 rounded-full font-bold text-xs disabled:opacity-50 active:scale-95 transition-colors hover:bg-primary/20 uppercase tracking-widest">{t('save')}</button></div>
+                    {showAddCat && <CategoryModal onClose={()=>setShowAddCat(false)} onSave={(cat)=>{setUserCategories([...userCategories.filter(c=>c.id!==cat.id), cat]); setActiveCategory(cat.id); setShowAddCat(false);}} t={t} Icon={Icon}/>}
+                    <div className="px-6 pt-12 flex items-center justify-between mb-6"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('reviewDetails')}</h2><button onClick={handleSave} disabled={!amount} className="bg-primaryLight text-primary px-4 py-2 rounded-full font-bold text-xs disabled:opacity-50 active:scale-95 transition-colors hover:bg-primary/20 uppercase tracking-widest">{t('save')}</button></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-6">
                         {screenData?.imageUrl && (<div className="w-full h-32 bg-white dark:bg-slate-900 rounded-[28px] p-2 flex justify-center items-center soft-shadow border border-slate-100 dark:border-slate-800 relative"><img src={screenData.imageUrl} className="max-w-full max-h-full object-contain rounded-[20px]" /><div className="absolute right-3 bottom-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-primary shadow-sm"><Icon name="scan-line" size={14}/></div></div>)}
-                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center relative">{screenData?.isAuto && <div className="absolute top-4 right-4 bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center"><Icon name="sparkles" size={14}/></div>}<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('extractedAmount')}</p><div className="flex items-center gap-2"><span className="text-2xl font-bold text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-bold bg-transparent text-center w-full outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary transition-colors dark:text-white" placeholder="0.00"/></div></div>
+                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center relative">{screenData?.isAuto && <div className="absolute top-4 right-4 bg-primaryLight text-primary w-8 h-8 rounded-full flex items-center justify-center"><Icon name="sparkles" size={14}/></div>}<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('extractedAmount')}</p><div className="flex items-center gap-2"><span className="text-2xl font-bold text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-bold bg-transparent text-center w-full outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary transition-colors dark:text-white" placeholder="0.00"/></div></div>
                         <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800 soft-shadow space-y-5">
                             <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchant')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="store" size={18} className="text-primary mr-3" /><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="ระบุชื่อร้านค้า"/></div></div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="calendar" size={16} className="text-slate-400 mr-2" /><input value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none dark:text-white"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="calendar" size={16} className="text-slate-400 mr-2" /><input type="date" value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none dark:text-white"/></div></div>
                                 <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center relative focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="wallet" size={16} className="text-primary mr-2" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
                             </div>
                             <div>
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-3">{t('category')}</label>
                                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full shrink-0 transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primary/10 border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{!defaultCatIds.includes(cat.id) && (<button onClick={()=>setUserCategories(userCategories.filter(c=>c.id!==cat.id))} className="pr-3 pl-1 hover:text-danger"><Icon name="x" size={12}/></button>)}</div>))}
+                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full shrink-0 transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primaryLight border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{!defaultCatIds.includes(cat.id) && (<button onClick={()=>setShowAddCat(true)} className="pr-3 pl-1 hover:text-primary"><Icon name="edit-2" size={12}/></button>)}</div>))}
                                     <button onClick={()=>setShowAddCat(true)} className="px-4 py-2 rounded-full text-xs font-bold border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 shrink-0 transition-colors"><Icon name="plus" size={14}/></button>
                                 </div>
                             </div>
@@ -1090,7 +1004,7 @@
         };
 
         const AddTxScreen = ({ go, onSave, t, Icon, LoadingOverlay, pockets, userCategories, setUserCategories, defaultCatIds }) => {
-            const [amount, setAmount] = useState(''); const [notes, setNotes] = useState(''); const [txDate, setTxDate] = useState(new Date().toLocaleDateString('th-TH')); const [activeCategory, setActiveCategory] = useState('Food & Drink'); const [saving, setSaving] = useState(false); const [showAddCat, setShowAddCat] = useState(false); const [selectedPocket, setSelectedPocket] = useState('none');
+            const [amount, setAmount] = useState(''); const [notes, setNotes] = useState(''); const [txDate, setTxDate] = useState(new Date().toISOString().split('T')[0]); const [activeCategory, setActiveCategory] = useState('Food & Drink'); const [saving, setSaving] = useState(false); const [showAddCat, setShowAddCat] = useState(false); const [selectedPocket, setSelectedPocket] = useState('none');
             const handleSave = async () => { 
                 setSaving(true); 
                 try {
@@ -1102,23 +1016,23 @@
             return (
                 <div className="flex-1 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
                     {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    {showAddCat && <AddCategoryModal onClose={()=>setShowAddCat(false)} onAdd={(cat)=>{setUserCategories([...userCategories, {id: cat, icon: 'tag', color: '#64748b'}]); setActiveCategory(cat); setShowAddCat(false);}} t={t} Icon={Icon}/>}
+                    {showAddCat && <CategoryModal onClose={()=>setShowAddCat(false)} onSave={(cat)=>{setUserCategories([...userCategories.filter(c=>c.id!==cat.id), cat]); setActiveCategory(cat.id); setShowAddCat(false);}} t={t} Icon={Icon}/>}
                     <div className="px-6 pt-12 flex items-center justify-between mb-8"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('addTx')}</h2><div className="w-10"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-6">
-                        <div className="bg-white dark:bg-slate-900 rounded-[32px] p-8 text-center relative soft-shadow border border-slate-100 dark:border-slate-800"><div className="absolute top-4 right-4 text-slate-200 dark:text-slate-700"><Icon name="activity" size={32}/></div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">{t('amount')}</label><div className="flex justify-center items-center"><span className="text-3xl font-bold text-slate-300 mr-2">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00" className="text-6xl font-bold w-full max-w-[200px] text-center bg-transparent outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary pb-2 transition-colors dark:text-white"/></div></div>
-                        <div className="bg-white dark:bg-slate-900 rounded-[32px] p-6 soft-shadow border border-slate-100 dark:border-slate-800 space-y-5">
+                        <div className="bg-white dark:bg-slate-900 rounded-[36px] p-10 text-center relative soft-shadow border border-slate-100 dark:border-slate-800"><div className="absolute top-4 right-4 text-slate-200 dark:text-slate-700"><Icon name="activity" size={32}/></div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">{t('amount')}</label><div className="flex justify-center items-center"><span className="text-3xl font-bold text-slate-300 mr-2">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00" className="text-7xl font-bold w-full max-w-[250px] text-center bg-transparent outline-none border-b-2 border-slate-200 dark:border-slate-700 focus:border-primary pb-2 transition-colors dark:text-white"/></div></div>
+                        <div className="bg-white dark:bg-slate-900 rounded-[32px] p-6 soft-shadow border border-slate-100 dark:border-slate-800 space-y-6">
                             <div>
-                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-3">{t('category')}</label>
-                                <div className="flex gap-2 flex-wrap">
-                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primary/10 border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-3 py-1.5 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{!defaultCatIds.includes(cat.id) && <button onClick={()=>setUserCategories(userCategories.filter(c=>c.id!==cat.id))} className="pr-2 pl-1 hover:text-danger"><Icon name="x" size={12}/></button>}</div>))}
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-3">{t('category')}</label>
+                                <div className="flex gap-3 flex-wrap">
+                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primaryLight border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-3 py-1.5 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{!defaultCatIds.includes(cat.id) && <button onClick={()=>setShowAddCat(true)} className="pr-2 pl-1 hover:text-primary"><Icon name="edit-2" size={12}/></button>}</div>))}
                                     <button onClick={()=>setShowAddCat(true)} className="px-3 py-1.5 rounded-full text-xs font-bold border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><Icon name="plus" size={14}/></button>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center transition-colors focus-within:ring-2 ring-primary/20"><Icon name="calendar" size={18} className="text-slate-400 mr-2" /><input value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none dark:text-white"/></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center relative transition-colors focus-within:ring-2 ring-primary/20"><Icon name="wallet" size={18} className="text-primary mr-2" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl flex items-center transition-colors focus-within:ring-2 ring-primary/20"><Icon name="calendar" size={18} className="text-slate-400 mr-3" /><input type="date" value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl flex items-center relative transition-colors focus-within:ring-2 ring-primary/20"><Icon name="wallet" size={18} className="text-primary mr-3" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
                             </div>
-                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-1">{t('notes')}</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="ระบุบันทึกย่อ..." className="w-full bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 text-sm font-bold outline-none resize-none h-24 dark:text-white transition-colors focus:ring-2 ring-primary/20" /></div>
+                            <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-1">{t('notes')}</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="ระบุบันทึกย่อ..." className="w-full bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 text-base font-bold outline-none resize-none h-28 dark:text-white transition-colors focus:ring-2 ring-primary/20" /></div>
                         </div>
                         <button disabled={!amount} onClick={handleSave} className="w-full bg-danger text-white py-5 rounded-full font-bold text-sm tracking-widest uppercase shadow-md active:scale-95 transition-all hover:-translate-y-0.5 disabled:opacity-50">{t('saveTx')}</button>
                     </div>
@@ -1134,16 +1048,16 @@
                     {viewImage && tx.imageUrl && (<div className="absolute inset-0 bg-black/90 z-[100] flex flex-col fade-in pb-10"><div className="p-6 pt-12 flex justify-between items-center w-full"><button onClick={()=>setViewImage(false)} className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white active:scale-95 backdrop-blur-md hover:bg-white/20 transition-colors"><Icon name="x" size={20}/></button></div><div className="flex-1 flex items-center justify-center p-4"><img src={tx.imageUrl} className="max-w-full max-h-full rounded-[24px] object-contain shadow-2xl" /></div></div>)}
                     <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('txDetail')}</h2><div className="w-10"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <div className="flex flex-col items-center mb-4"><div className="mb-4"><PocketIcon pocket={tx} size={40} /></div><h1 className="text-5xl font-bold mb-3 dark:text-white">-{tx.amount > 0 ? '' : ''}฿ {formatMoney(Math.abs(tx.amount))}</h1><p className="bg-white dark:bg-slate-900 soft-shadow px-5 py-2 rounded-full font-bold text-sm dark:text-white border border-slate-100 dark:border-slate-800">{tx.title || tx.merchant}</p></div>
+                        <div className="flex flex-col items-center mb-4"><div className="mb-6"><PocketIcon pocket={tx} size={40} /></div><h1 className="text-5xl font-bold mb-3 dark:text-white">-{tx.amount > 0 ? '' : ''}฿ {formatMoney(Math.abs(tx.amount))}</h1><p className="bg-white dark:bg-slate-900 soft-shadow px-5 py-2 rounded-full font-bold text-sm dark:text-white border border-slate-100 dark:border-slate-800">{tx.title || tx.merchant}</p></div>
                         <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow space-y-5 border border-slate-100 dark:border-slate-800">
                             <div className="flex justify-between items-center border-b border-slate-50 dark:border-slate-800 pb-3"><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('status')}</span><span className="bg-[#94e4ae]/20 text-[#4ea86a] font-bold text-[9px] px-3 py-1 rounded-full flex items-center gap-1.5 uppercase tracking-widest"><Icon name="check" size={12}/>{t('completed')}</span></div>
                             <div className="flex justify-between items-center border-b border-slate-50 dark:border-slate-800 pb-3"><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('date')}</span><span className="font-bold text-sm dark:text-white">{tx.date}</span></div>
                             <div className="flex justify-between items-center"><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('category')}</span><span className="font-bold bg-primaryLight text-primary px-3 py-1 rounded-full text-[10px] flex items-center gap-1.5 uppercase tracking-widest"><Icon name={tx.icon||'coffee'} size={12}/> {tx.category}</span></div>
                         </div>
-                        {tx.notes && (<div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-800"><h4 className="text-[9px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1.5 tracking-widest"><Icon name="align-left" size={14}/> {t('notes')}</h4><p className="text-sm font-bold bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl dark:text-white">{tx.notes}</p></div>)}
+                        {tx.notes && (<div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-800"><h4 className="text-[9px] font-bold text-slate-400 uppercase mb-3 flex items-center gap-1.5 tracking-widest"><Icon name="align-left" size={14}/> {t('notes')}</h4><p className="text-sm font-bold bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl dark:text-white">{tx.notes}</p></div>)}
                         <div className="flex gap-3 pt-2">
                             <button onClick={()=>go('SPLIT_BILL', null, tx)} className="flex-1 bg-white dark:bg-slate-900 dark:text-white font-bold py-4 rounded-full soft-shadow flex items-center justify-center gap-2 active:scale-95 transition-all hover:-translate-y-0.5 text-xs uppercase tracking-widest border border-slate-100 dark:border-slate-800"><Icon name="split-square-horizontal" size={16}/> {t('splitBill')}</button>
-                            {tx.imageUrl && (<button onClick={()=>setViewImage(true)} className="flex-1 bg-primary/10 text-primary font-bold py-4 rounded-full shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-all hover:-translate-y-0.5 text-xs uppercase tracking-widest"><Icon name="image" size={16}/> {t('viewReceipt')}</button>)}
+                            {tx.imageUrl && (<button onClick={()=>setViewImage(true)} className="flex-1 bg-primaryLight text-primary font-bold py-4 rounded-full shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-all hover:-translate-y-0.5 text-xs uppercase tracking-widest"><Icon name="image" size={16}/> {t('viewReceipt')}</button>)}
                         </div>
                     </div>
                 </div>
@@ -1159,23 +1073,23 @@
             const updateAmount = (id, val) => setFriends(friends.map(f=>f.id===id?{...f, amount:val}:f));
 
             return (
-                <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
+                <div className="p-6 pt-10 flex flex-col h-full fade-in bg-[var(--bg-color)]">
                     <div className="flex items-center mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-10 h-10 bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl ml-4 dark:text-white">{t('splitBill')}</h2></div>
-                    <div className="bg-white dark:bg-slate-900 rounded-[32px] p-6 text-center mb-6 soft-shadow border border-slate-100 dark:border-slate-800">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('totalAmount')}</p><h1 className="text-4xl font-bold my-2 dark:text-white">฿ {formatMoney(billTotal)}</h1>
-                        <div className="flex justify-between items-center mt-4 px-4 bg-slate-50 dark:bg-slate-800 py-3 rounded-2xl"><span className="text-xs font-bold text-slate-500">แบ่งแล้ว: ฿ {formatMoney(currentSum)}</span><span className={`text-xs font-bold ${isMatch?'text-[#4ea86a]':'text-danger'}`}>เหลือ: ฿ {formatMoney(Math.max(billTotal-currentSum, 0))}</span></div>
+                    <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 text-center mb-6 soft-shadow border border-slate-100 dark:border-slate-800">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('totalAmount')}</p><h1 className="text-5xl font-bold my-2 dark:text-white">฿ {formatMoney(billTotal)}</h1>
+                        <div className="flex justify-between items-center mt-4 px-4 bg-slate-50 dark:bg-slate-800 py-3 rounded-xl border border-slate-100 dark:border-slate-700"><span className="text-sm font-bold text-slate-500">แบ่งแล้ว: ฿ {formatMoney(currentSum)}</span><span className={`text-sm font-bold ${isMatch?'text-[#4ea86a]':'text-danger'}`}>เหลือ: ฿ {formatMoney(Math.max(billTotal-currentSum, 0))}</span></div>
                     </div>
-                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pb-6">
+                    <div className="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-6">
                         {friends.map(f => (
-                            <div key={f.id} className="bg-white dark:bg-slate-900 rounded-[20px] p-3 flex items-center soft-shadow border border-slate-100 dark:border-slate-800">
-                                <div className="flex-1 ml-3 font-bold text-sm dark:text-white">{f.name}</div>
-                                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-2 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-xs font-bold text-slate-400 mr-1">฿</span><input type="number" value={f.amount} onChange={e=>updateAmount(f.id, e.target.value)} className="w-20 bg-transparent text-right font-bold text-primary text-sm outline-none"/></div>
-                                {f.name!=='ฉัน' && <button onClick={()=>setFriends(friends.filter(x=>x.id!==f.id))} className="ml-3 text-slate-400 hover:text-danger transition-colors p-1"><Icon name="x" size={16}/></button>}
+                            <div key={f.id} className="bg-white dark:bg-slate-900 rounded-[20px] p-3 flex items-center soft-shadow border border-slate-100 dark:border-slate-800 hover:-translate-y-0.5 transition-transform">
+                                <div className="flex-1 ml-2 font-bold text-sm dark:text-white">{f.name}</div>
+                                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-2 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-[10px] font-bold text-slate-400 mr-1">฿</span><input type="number" value={f.amount} onChange={e=>updateAmount(f.id, e.target.value)} className="w-16 bg-transparent text-right font-bold text-primary text-sm outline-none"/></div>
+                                {f.name!=='ฉัน' && <button onClick={()=>setFriends(friends.filter(x=>x.id!==f.id))} className="ml-2 text-slate-400 hover:text-danger transition-colors p-1"><Icon name="x" size={16}/></button>}
                             </div>
                         ))}
                         <button onClick={()=>setFriends([...friends,{id:Date.now(), name:`เพื่อน ${friends.length+1}`, amount:0}])} className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-[20px] text-slate-400 font-bold flex items-center justify-center gap-2 hover:bg-white dark:hover:bg-slate-900 transition-colors text-xs uppercase tracking-widest"><Icon name="plus" size={16}/> {t('addFriend')}</button>
                     </div>
-                    <button disabled={!isMatch} onClick={()=>go('MAIN','HISTORY')} className={`w-full py-5 rounded-full font-bold text-sm tracking-widest shadow-md active:scale-95 transition-all uppercase ${isMatch?'bg-primary text-white hover:-translate-y-0.5':'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600'}`}>{t('confirmSplit')}</button>
+                    <button disabled={!isMatch} onClick={()=>go('MAIN','HISTORY')} className={`w-full py-5 rounded-full font-bold text-sm tracking-widest shadow-md active:scale-95 transition-all uppercase ${isMatch?'bg-primary text-white hover:shadow-lg hover:-translate-y-0.5':'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600'}`}>{t('confirmSplit')}</button>
                 </div>
             );
         };
@@ -1189,7 +1103,7 @@
             const [accentColor, setAccentColor] = useState(localStorage.getItem('cozy_accent') || '#8cb1ff');
             
             const defaultCatIds = ['Food & Drink', 'Shopping', 'Transport', 'Bills'];
-            const [userCategories, setUserCategories] = useState([{ id: 'Food & Drink', icon: 'coffee', color: '#ff9800' },{ id: 'Shopping', icon: 'shopping-bag', color: '#FACC15' },{ id: 'Transport', icon: 'car', color: '#4ADE80' },{ id: 'Bills', icon: 'zap', color: '#FF4D4D' }]);
+            const [userCategories, setUserCategories] = useState([{ id: 'Food & Drink', icon: 'coffee', color: '#ff9800' },{ id: 'Shopping', icon: 'shopping-bag', color: '#ffde6a' },{ id: 'Transport', icon: 'car', color: '#94e4ae' },{ id: 'Bills', icon: 'zap', color: '#ff9494' }]);
             
             const t = useCallback((key) => getT(lang)(key), [lang]);
             const go = useCallback((s, tb = null, data = null) => { setScreen(s); if(tb) setTab(tb); if(data!==undefined) setScreenData(data); }, []);
@@ -1198,7 +1112,6 @@
                 localStorage.setItem('cozy_accent', accentColor);
                 document.documentElement.style.setProperty('--color-primary', accentColor);
                 
-                // คำนวณสีอ่อน (Soft variant) ของ Accent Color สำหรับ Background
                 const hex2rgb = (hex) => {
                     const v = parseInt(hex.replace('#', ''), 16);
                     return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
@@ -1209,10 +1122,8 @@
                 const isDark = themeMode === 'Dark' || (themeMode === 'System' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                 if (isDark) {
                     document.documentElement.classList.add('dark');
-                    document.documentElement.style.setProperty('--bg-color', '#1e1e24'); // Soft Dark
                 } else {
                     document.documentElement.classList.remove('dark');
-                    document.documentElement.style.setProperty('--bg-color', '#fffdfb'); // Soft Off-White
                 }
             }, [accentColor, themeMode]);
 
