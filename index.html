@@ -1096,7 +1096,13 @@
             const handleUpdate = () => {
                 setSaving(true);
                 setTimeout(async () => {
-                    if(user && user.uid !== 'mock-uid') { try { await user.updateProfile({ displayName: name }); await getUserRef(user.uid).set({ displayName: name, bio }, { merge: true }); } catch(e) { console.error(e); } } 
+                    if(user && user.uid !== 'mock-uid') { 
+                        try { 
+                            const currentUser = firebase.auth().currentUser;
+                            if (currentUser) await currentUser.updateProfile({ displayName: name }); 
+                            await getUserRef(user.uid).set({ displayName: name, bio }, { merge: true }); 
+                        } catch(e) { console.error(e); } 
+                    } 
                     else { const guestData = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...guestData, displayName: name, bio})); }
                     setUser(prev => ({...prev, displayName: name, bio})); go('MAIN','PROFILE');
                 }, 1000);
@@ -1107,10 +1113,16 @@
                     setSaving(true); const reader = new FileReader(); reader.readAsDataURL(file);
                     reader.onload = (event) => {
                         const img = new Image(); img.src = event.target.result;
-                        img.onload = () => {
+                        img.onload = async () => {
                             const canvas = document.createElement('canvas'); const scaleSize = 300 / img.width; canvas.width = 300; canvas.height = img.height * scaleSize;
                             const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); const b64 = canvas.toDataURL('image/jpeg', 0.8);
-                            if(user && user.uid !== 'mock-uid') { getUserRef(user.uid).set({ photoURL: b64 }, { merge: true }); } 
+                            if(user && user.uid !== 'mock-uid') { 
+                                try {
+                                    const currentUser = firebase.auth().currentUser;
+                                    if (currentUser) await currentUser.updateProfile({ photoURL: b64 });
+                                    await getUserRef(user.uid).set({ photoURL: b64 }, { merge: true }); 
+                                } catch(e) { console.error(e); }
+                            } 
                             else { const g = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...g, photoURL: b64})); }
                             setUser(prev => ({...prev, photoURL: b64})); setSaving(false);
                         }
@@ -1579,7 +1591,16 @@
                 const unsub = auth.onAuthStateChanged(u => {
                     setIsAuthReady(true);
                     if(u) {
-                        getUserRef(u.uid).onSnapshot(doc => { const d = doc.data() || {}; setUser({ uid: u.uid, email: u.email, displayName: d.displayName || u.email.split('@')[0], photoURL: d.photoURL || 'https://ui-avatars.com/api/?name=U&background=8cb1ff&color=fff', bio: d.bio || '' }); });
+                        getUserRef(u.uid).onSnapshot(doc => { 
+                            const d = doc.data() || {}; 
+                            setUser({ 
+                                uid: u.uid, 
+                                email: u.email, 
+                                displayName: d.displayName || u.displayName || u.email.split('@')[0], 
+                                photoURL: d.photoURL || u.photoURL || 'https://ui-avatars.com/api/?name=U&background=8cb1ff&color=fff', 
+                                bio: d.bio || '' 
+                            }); 
+                        });
                         if(!isLocked) go('MAIN', 'HOME');
                         getUserRef(u.uid).collection('transactions').orderBy('timestamp', 'desc').onSnapshot(snap => setTxs(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
                         getUserRef(u.uid).collection('pockets').onSnapshot(snap => setPockets(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
