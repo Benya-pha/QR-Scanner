@@ -1721,7 +1721,7 @@
                 return notifs.filter(n => !dismissedNotifs.includes(n.id));
             }, [safeToSpend, pockets, txs, t, dismissedNotifs]);
 
-            if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-slate-900 text-white"><div className="pure-css-spinner"></div></div>;
+            if (!isAuthReady) return <div className="flex justify-center items-center h-full w-full bg-[var(--bg-color)] text-primary"><div className="pure-css-spinner"></div></div>;
             if (isLocked) return <div className="app-container"><LockScreen Icon={Icon} correctPin={pinCode} onUnlock={()=>{ setIsLocked(false); go(user?'MAIN':'SIGN_IN', user?'HOME':null); }} /></div>;
 
             const p = { user, setUser, go, t, lang, setLang, themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, pinCode, setPinCode, showPinModal, setShowPinModal, txs, setTxs, pockets, setPockets, screenData, Icon, LoadingOverlay, translateAuthError, visibleNotifications: notifications, clearAllNotifs: ()=>setDismissedNotifs(notifications.map(n=>n.id)), safeToSpend, db, userCategories, setUserCategories, defaultCatIds, onResetData: handleResetData, onUpdateTx: handleUpdateTx };
