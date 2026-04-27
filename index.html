@@ -142,21 +142,22 @@
 
         const formatMoney = (num) => Number(num || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         
-        const getDeviceName = () => {
+        // 🌟 ปรับปรุงฟังก์ชันเช็คอุปกรณ์ ให้รองรับทั้งชื่อและไอคอน
+        const getDeviceInfo = () => {
             const ua = navigator.userAgent;
-            if (/iPhone/.test(ua)) return 'iPhone';
-            if (/iPad/.test(ua)) return 'iPad';
-            if (/Macintosh/.test(ua)) return 'MacBook / Mac';
+            if (/iPhone/.test(ua)) return { name: 'iPhone', icon: 'smartphone' };
+            if (/iPad/.test(ua)) return { name: 'iPad', icon: 'tablet' };
+            if (/Macintosh/.test(ua)) return { name: 'MacBook / Mac', icon: 'laptop' };
             if (/Windows/.test(ua)) {
-                if (/Windows NT 10.0/.test(ua)) return 'Windows 10/11 PC';
-                return 'Windows PC';
+                if (/Windows NT 10.0/.test(ua)) return { name: 'Windows 10/11 PC', icon: 'monitor' };
+                return { name: 'Windows PC', icon: 'monitor' };
             }
             if (/Android/.test(ua)) {
                 const match = ua.match(/Android.*?; (.*?) Build/);
-                return match ? match[1] : 'Android Device';
+                return { name: match ? `Android (${match[1].trim()})` : 'Android Device', icon: 'smartphone' };
             }
-            if (/Linux/.test(ua)) return 'Linux PC';
-            return 'Web Browser';
+            if (/Linux/.test(ua)) return { name: 'Linux PC', icon: 'monitor' };
+            return { name: 'Web Browser', icon: 'globe' };
         };
 
         const translateAuthError = (code) => {
@@ -1144,7 +1145,7 @@
         };
 
         const SecuritySettingsScreen = ({ go, pinCode, setPinCode, setShowPinModal, t, Icon, user }) => {
-            const deviceName = useMemo(() => getDeviceName(), []);
+            const deviceInfo = useMemo(() => getDeviceInfo(), []);
             const handleTogglePin = () => { if (pinCode) { setPinCode(''); localStorage.removeItem('cozy_pin'); } else { setShowPinModal(true); } };
             const [msg, setMsg] = useState('');
             const handleResetPass = async () => { if(user && user.uid !== 'mock-uid') { try { await auth.sendPasswordResetEmail(user.email); setMsg('Sent!'); } catch(e) { setMsg('Error'); } } else setMsg('Not supported in Guest'); setTimeout(()=>setMsg(''), 3000); };
@@ -1156,7 +1157,7 @@
                             <div onClick={handleResetPass} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-50 dark:border-slate-700 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center shrink-0"><Icon name="lock" size={18}/></div><h4 className="font-bold text-sm dark:text-white">{t('changePass')}</h4></div><button className="bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest">Update</button></div>
                             <div className="p-4 flex justify-between items-center"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 shrink-0"><Icon name="layout-grid" size={18}/></div><div><span className="font-bold text-sm block leading-none mb-1 dark:text-white">{t('pinCode')}</span><span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{pinCode ? t('pinStatusSet') : t('pinStatusNotSet')}</span></div></div><div className="flex items-center gap-3">{pinCode && (<button onClick={()=>setShowPinModal(true)} className="text-[10px] font-bold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 uppercase tracking-widest">{t('changePin')}</button>)}<SwitchToggle isOn={!!pinCode} onToggle={handleTogglePin} /></div></div>
                         </Section>
-                        <Section title={t('yourDevices')}><div className="p-4 flex justify-between items-center bg-white dark:bg-slate-900"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-[#94e4ae]/20 rounded-full flex items-center justify-center text-[#4ea86a] shrink-0"><Icon name="smartphone" size={18}/></div><div><h4 className="font-bold text-sm dark:text-white">{deviceName}</h4><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{t('activeNow')}</p></div></div><span className="bg-[#94e4ae]/20 text-[#4ea86a] px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest">THIS DEVICE</span></div></Section>
+                        <Section title={t('yourDevices')}><div className="p-4 flex justify-between items-center bg-white dark:bg-slate-900"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-[#94e4ae]/20 rounded-full flex items-center justify-center text-[#4ea86a] shrink-0"><Icon name={deviceInfo.icon} size={18}/></div><div><h4 className="font-bold text-sm dark:text-white">{deviceInfo.name}</h4><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{t('activeNow')}</p></div></div><span className="bg-[#94e4ae]/20 text-[#4ea86a] px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest">THIS DEVICE</span></div></Section>
                     </div>
                     {msg && <div className="bg-white dark:bg-slate-900 shadow-sm text-center font-bold text-sm p-4 mt-4 text-primary rounded-2xl border border-slate-100 dark:border-slate-700">{msg}</div>}
                 </div>
