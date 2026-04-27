@@ -89,6 +89,21 @@
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
+
+        /* Pure CSS Spinner 100% Centered */
+        .pure-css-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--color-primary-light);
+            border-top: 4px solid var(--color-primary);
+            border-radius: 50%;
+            animation: pure-spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        @keyframes pure-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -149,6 +164,7 @@
             return `เกิดข้อผิดพลาด: ${code}`;
         };
 
+        // ล็อกขนาด Min-Width / Min-Height และใส่ shrink-0 ป้องกันไอคอนโดนบีบเล็ก
         const Icon = ({ name, size=24, className="", strokeWidth=1.5 }) => {
             const spanRef = useRef(null);
             useEffect(() => { 
@@ -157,12 +173,13 @@
                     catch (e) { spanRef.current.innerHTML = `<span style="display:inline-block; width:${size}px; height:${size}px; border-radius:50%;"></span>`; }
                 }
             }, [name, size, strokeWidth, className]);
-            return <span ref={spanRef} className={`inline-flex items-center justify-center ${className}`} style={{width: size, height: size}}></span>;
+            return <span ref={spanRef} className={`inline-flex items-center justify-center shrink-0 ${className}`} style={{width: size, height: size, minWidth: size, minHeight: size}}></span>;
         };
 
-        const LoadingOverlay = ({ text, Icon }) => (
+        // ใช้ Pure CSS Spinner เพื่อความตรงเป๊ะ 100%
+        const LoadingOverlay = ({ text }) => (
             <div className="fixed inset-0 bg-white/70 dark:bg-dark/70 backdrop-blur-md z-[100] flex flex-col items-center justify-center fade-in">
-                <Icon name="loader-2" size={48} className="animate-spin text-primary mb-6"/>
+                <div className="pure-css-spinner"></div>
                 <h2 className="font-bold text-xl tracking-widest uppercase text-slate-700 dark:text-white">{text}</h2>
             </div>
         );
@@ -175,6 +192,38 @@
             if (tText.match(/บิล|การไฟฟ้า|การประปา|ais|true|dtac|ค่าเน็ต|ค่าไฟ|ค่าน้ำ|bill|ประกัน|สินเชื่อ|บัตรเครดิต|ชำระ/)) return { cat: 'Bills', icon: 'zap', color: '#ff9494' };
             if (tText.match(/น้ำมัน|ปั๊ม|ptt|pt|shell|bangchak|caltex|gas/)) return { cat: 'Transport', icon: 'car', color: '#94e4ae' };
             return { cat: 'General', icon: 'receipt', color: '#94a3b8' };
+        };
+
+        // 🌟 Component กราฟแท่ง Interactive (ใช้ร่วมกันได้ทุกหน้า) 🌟
+        const InteractiveBarChart = ({ data, color, defaultColor = 'var(--color-primary-light)' }) => {
+            const [activeIndex, setActiveIndex] = useState(null);
+            const maxVal = Math.max(...data.map(d => d.value), 1);
+
+            return (
+                <div className="relative h-full w-full flex items-end justify-between gap-1 sm:gap-2 pt-10 pb-1">
+                    {activeIndex !== null && data[activeIndex] && (
+                        <div className="absolute top-0 left-0 right-0 flex justify-center z-20 pointer-events-none fade-in">
+                            <div className="bg-slate-800 dark:bg-white text-white dark:text-slate-900 text-xs font-bold py-1.5 px-4 rounded-full shadow-lg flex flex-col items-center">
+                                <span className="text-[9px] opacity-80 font-medium mb-0.5">{data[activeIndex].fullLabel}</span>
+                                <span>฿ {formatMoney(data[activeIndex].value)}</span>
+                            </div>
+                        </div>
+                    )}
+                    {data.map((item, i) => {
+                        const heightPct = item.value === 0 ? 0 : Math.max(5, (item.value / maxVal) * 100);
+                        const isActive = activeIndex === i;
+                        // ปรับ Opacity เมื่อไม่ Hover ให้เข้มขึ้นเป็น 0.6 แทน 0.4 (เข้มขึ้น 20%)
+                        const barColor = item.value > 0 ? (isActive ? color : defaultColor) : defaultColor;
+                        const opacity = item.value > 0 ? (isActive ? 1 : 0.6) : 0.2;
+                        return (
+                            <div key={i} className="flex flex-col items-center flex-1 h-full justify-end cursor-pointer group" onMouseEnter={() => setActiveIndex(i)} onMouseLeave={() => setActiveIndex(null)} onTouchStart={() => setActiveIndex(i)}>
+                                <div className="w-full rounded-t-md transition-all duration-300 ease-out" style={{ height: `${heightPct}%`, backgroundColor: barColor, opacity: opacity, transform: isActive && item.value > 0 ? 'scaleY(1.05)' : 'scaleY(1)', transformOrigin: 'bottom' }}></div>
+                                <span className={`text-[9px] font-bold mt-1.5 truncate max-w-[120%] text-center transition-colors ${isActive ? 'text-slate-800 dark:text-white' : 'text-slate-400'}`}>{item.label}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
         };
 
         const processReceiptImage = async (file, onComplete) => {
@@ -307,7 +356,7 @@
 
         const PocketIcon = ({ pocket, size = 20 }) => {
             if (!pocket) return null;
-            return <div className={`flex items-center justify-center rounded-full shadow-sm`} style={{backgroundColor: pocket.bg || 'var(--color-primary-light)', color: pocket.color || 'var(--color-primary)', width: size*2.5, height: size*2.5}}><Icon name={pocket.icon || 'wallet'} size={size} /></div>;
+            return <div className={`flex items-center justify-center rounded-full shadow-sm shrink-0`} style={{backgroundColor: pocket.bg || 'var(--color-primary-light)', color: pocket.color || 'var(--color-primary)', width: size*2.5, height: size*2.5}}><Icon name={pocket.icon || 'wallet'} size={size} /></div>;
         };
 
         const CustomIconModal = ({ onClose, onSelect, t }) => {
@@ -317,7 +366,7 @@
                     <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-6 pb-12 flex flex-col slide-up h-[70vh]">
                         <div className="flex justify-between items-center w-full mb-6">
                             <h3 className="font-bold text-xl dark:text-white">{t('chooseIcon')}</h3>
-                            <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-200 transition-colors"><Icon name="x" size={20}/></button>
+                            <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-200 transition-colors shrink-0"><Icon name="x" size={20}/></button>
                         </div>
                         <div className="flex-1 overflow-y-auto no-scrollbar space-y-6">
                             <div className="bg-slate-50 dark:bg-slate-800 rounded-[28px] p-5 border border-slate-100 dark:border-slate-700">
@@ -331,7 +380,7 @@
                                 <label className="text-xs font-bold text-slate-500 mb-4 block">{t('customIcon')}</label>
                                 <div className="grid grid-cols-5 gap-4">
                                     {lineIconsList.map((iconName, i) => (
-                                        <div key={i} onClick={() => { onSelect({ type: 'lucide', icon: iconName, bg: `${hex}33`, color: hex }); onClose(); }} className="aspect-square rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-sm" style={{backgroundColor: `${hex}33`, color: hex}}>
+                                        <div key={i} onClick={() => { onSelect({ type: 'lucide', icon: iconName, bg: `${hex}33`, color: hex }); onClose(); }} className="aspect-square rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-sm shrink-0" style={{backgroundColor: `${hex}33`, color: hex}}>
                                             <Icon name={iconName} size={24} />
                                         </div>
                                     ))}
@@ -353,11 +402,11 @@
                     <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-6 pb-12 slide-up h-[85vh] flex flex-col">
                         <div className="flex justify-between items-center w-full mb-6">
                             <h3 className="font-bold text-xl dark:text-white">{t('addCategory')}</h3>
-                            <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white"><Icon name="x" size={20}/></button>
+                            <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white shrink-0"><Icon name="x" size={20}/></button>
                         </div>
                         <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
                             <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-4 rounded-[24px]">
-                                <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm" style={{backgroundColor: `${hex}33`, color: hex}}><Icon name={icon} size={28}/></div>
+                                <div className="w-14 h-14 rounded-full flex items-center justify-center shadow-sm shrink-0" style={{backgroundColor: `${hex}33`, color: hex}}><Icon name={icon} size={28}/></div>
                                 <input autoFocus value={name} onChange={e=>setName(e.target.value)} className="w-full bg-transparent font-bold text-lg outline-none text-slate-800 dark:text-white" placeholder={t('categoryName')} />
                             </div>
                             
@@ -373,7 +422,7 @@
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">{t('customIcon')}</label>
                                 <div className="grid grid-cols-6 gap-3">
                                     {lineIconsList.map((ic, i) => (
-                                        <div key={i} onClick={() => setIcon(ic)} className={`aspect-square rounded-full flex items-center justify-center cursor-pointer transition-transform shadow-sm ${icon===ic?'scale-110 ring-2 ring-primary/50':''}`} style={{backgroundColor: `${hex}15`, color: hex}}>
+                                        <div key={i} onClick={() => setIcon(ic)} className={`aspect-square rounded-full flex items-center justify-center cursor-pointer transition-transform shadow-sm shrink-0 ${icon===ic?'scale-110 ring-2 ring-primary/50':''}`} style={{backgroundColor: `${hex}15`, color: hex}}>
                                             <Icon name={ic} size={20} />
                                         </div>
                                     ))}
@@ -398,11 +447,11 @@
             return (
                 <div className="absolute inset-0 bg-black/40 z-[100] flex flex-col justify-end fade-in">
                     <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center slide-up shadow-2xl">
-                        <div className="flex justify-between w-full mb-8"><div className="w-10"></div><h3 className="font-bold text-xl dark:text-white">{isSet?t('changePin'):t('setPin')}</h3><button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-200 transition-colors"><Icon name="x" size={20}/></button></div>
-                        <div className="flex gap-4 mb-10">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}></div>)}</div>
+                        <div className="flex justify-between w-full mb-8"><div className="w-10"></div><h3 className="font-bold text-xl dark:text-white">{isSet?t('changePin'):t('setPin')}</h3><button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center dark:text-white hover:bg-slate-200 transition-colors shrink-0"><Icon name="x" size={20}/></button></div>
+                        <div className="flex gap-4 mb-10">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors shrink-0 ${pin.length >= i ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}></div>)}</div>
                         <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
                             {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100">{n}</button>)}
-                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-slate-50 dark:bg-slate-800 text-slate-500 active:scale-95 transition-transform rounded-full hover:bg-slate-100"><Icon name="delete" size={28}/></button>
+                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-slate-50 dark:bg-slate-800 text-slate-500 active:scale-95 transition-transform rounded-full hover:bg-slate-100 shrink-0"><Icon name="delete" size={28}/></button>
                         </div>
                     </div>
                 </div>
@@ -417,13 +466,13 @@
 
             return (
                 <div className="flex-1 flex flex-col justify-end bg-primary/10 fade-in">
-                    <div className="flex-1 flex flex-col items-center justify-center pt-20"><div className="w-24 h-24 bg-white text-primary rounded-full flex items-center justify-center mb-6 shadow-md"><Icon name="lock" size={40}/></div><h2 className="text-primary text-2xl font-bold mb-2 tracking-wide">LOCKED</h2></div>
+                    <div className="flex-1 flex flex-col items-center justify-center pt-20"><div className="w-24 h-24 bg-white text-primary rounded-full flex items-center justify-center mb-6 shadow-md shrink-0"><Icon name="lock" size={40}/></div><h2 className="text-primary text-2xl font-bold mb-2 tracking-wide">LOCKED</h2></div>
                     <div className="bg-white dark:bg-dark w-full rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.05)]">
-                        <div className="flex gap-4 mb-8">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors ${pin.length >= i ? (err?'bg-danger':'bg-primary') : 'bg-slate-100 dark:bg-slate-800'}`}></div>)}</div>
+                        <div className="flex gap-4 mb-8">{[1,2,3,4,5,6].map(i => <div key={i} className={`w-4 h-4 rounded-full transition-colors shrink-0 ${pin.length >= i ? (err?'bg-danger':'bg-primary') : 'bg-slate-100 dark:bg-slate-800'}`}></div>)}</div>
                         {err && <p className="text-danger text-xs font-bold mb-4 bg-red-50 dark:bg-red-500/10 px-3 py-1 rounded-full">{err}</p>}
                         <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
                             {[1,2,3,4,5,6,7,8,9].map(n => <button key={n} onClick={()=>press(n)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">{n}</button>)}
-                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-slate-50 dark:bg-slate-800 active:scale-95 transition-transform rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"><Icon name="delete" size={28}/></button>
+                            <div></div><button onClick={()=>press(0)} className="h-16 rounded-full bg-slate-50 dark:bg-slate-800 text-2xl font-bold active:scale-95 transition-transform dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">0</button><button onClick={del} className="h-16 flex items-center justify-center bg-slate-50 dark:bg-slate-800 active:scale-95 transition-transform rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 shrink-0"><Icon name="delete" size={28}/></button>
                         </div>
                     </div>
                 </div>
@@ -435,15 +484,88 @@
         // ==========================================
         const HomeScreen = ({ user, txs, pockets, safeToSpend, visibleNotifications, go, t, Icon }) => {
             const totalSpend = txs.reduce((a,c) => a + Number(c.amount), 0);
+            
+            // การจัดการกราฟหน้า Home
+            const [homeChartRange, setHomeChartRange] = useState('Weekly');
+            const { homeChartData, avgPerDay } = useMemo(() => {
+                const getD = (dStr) => { const [y,m,d] = dStr.split('-'); return new Date(y, m-1, d); };
+                let data = []; let sum = 0; let days = 1;
+                const today = new Date(); today.setHours(0,0,0,0);
+                if (homeChartRange === 'Daily') {
+                    const recent = [...txs].slice(0, 7).reverse(); 
+                    data = recent.map(tx => ({ label: (tx.title || 'Tx').substring(0, 4) + '..', fullLabel: tx.date + ' ' + (tx.title || ''), value: Math.abs(Number(tx.amount)) }));
+                    sum = data.reduce((a, b) => a + b.value, 0);
+                    if (recent.length > 1) {
+                        const minDate = getD(recent[0].date); const maxDate = getD(recent[recent.length-1].date);
+                        days = Math.max(1, Math.floor((maxDate.getTime() - minDate.getTime()) / (1000*60*60*24)) + 1);
+                    } else { days = 1; }
+                } else if (homeChartRange === 'Weekly') {
+                    days = 7;
+                    for (let i = 6; i >= 0; i--) {
+                        const d = new Date(today); d.setDate(d.getDate() - i);
+                        const dStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                        const dayTxs = txs.filter(t => {
+                            let txDMatch = t.date;
+                            if(txDMatch && txDMatch.includes('/')) {
+                                const parts = txDMatch.split('/');
+                                if(parts[2] && parts[2].length === 4) txDMatch = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                            }
+                            return txDMatch === dStr;
+                        });
+                        const daySum = dayTxs.reduce((a, b) => a + Math.abs(Number(b.amount)), 0);
+                        data.push({ label: i === 0 ? 'วันนี้' : `${d.getDate()}/${d.getMonth()+1}`, fullLabel: `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`, value: daySum });
+                        sum += daySum;
+                    }
+                } else if (homeChartRange === 'Monthly') {
+                    days = 28;
+                    for (let i = 3; i >= 0; i--) {
+                        const startD = new Date(today); startD.setDate(startD.getDate() - (i*7 + 6));
+                        const endD = new Date(today); endD.setDate(endD.getDate() - (i*7));
+                        let weekSum = 0;
+                        txs.forEach(t => { 
+                            let txDMatch = t.date;
+                            if(txDMatch && txDMatch.includes('/')) {
+                                const parts = txDMatch.split('/');
+                                if(parts[2] && parts[2].length === 4) txDMatch = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                            }
+                            const td = getD(txDMatch); 
+                            if (td >= startD && td <= endD) weekSum += Math.abs(Number(t.amount)); 
+                        });
+                        data.push({ label: `W${4-i}`, fullLabel: `${startD.getDate()}/${startD.getMonth()+1} - ${endD.getDate()}/${endD.getMonth()+1}`, value: weekSum });
+                        sum += weekSum;
+                    }
+                } else if (homeChartRange === 'Yearly') {
+                    days = 365;
+                    for (let i = 11; i >= 0; i--) {
+                        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                        const targetY = d.getFullYear(); const targetM = d.getMonth() + 1;
+                        let monthSum = 0;
+                        txs.forEach(t => { 
+                            let txDMatch = t.date;
+                            if(txDMatch && txDMatch.includes('/')) {
+                                const parts = txDMatch.split('/');
+                                if(parts[2] && parts[2].length === 4) txDMatch = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                            }
+                            const td = getD(txDMatch); 
+                            if (td.getFullYear() === targetY && (td.getMonth()+1) === targetM) monthSum += Math.abs(Number(t.amount)); 
+                        });
+                        const monthNames = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+                        data.push({ label: monthNames[d.getMonth()], fullLabel: `${monthNames[d.getMonth()]} ${targetY}`, value: monthSum });
+                        sum += monthSum;
+                    }
+                }
+                return { homeChartData: data, avgPerDay: sum / days };
+            }, [txs, homeChartRange]);
+
             return (
                 <div className="p-6 pt-10 fade-in">
                     <div className="flex justify-between items-center mb-8">
                         <div className="flex items-center gap-3">
-                            <div className="rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm w-12 h-12 flex items-center justify-center bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
+                            <div className="rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm w-12 h-12 flex items-center justify-center bg-white shrink-0"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
                             <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('welcome')},</p><h2 className="text-lg font-bold leading-none dark:text-white">{user?.displayName}</h2></div>
                         </div>
-                        <button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 relative active:scale-95 transition-transform hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700">
-                            <Icon name="bell" size={20}/>{visibleNotifications.length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800"></span>}
+                        <button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 relative active:scale-95 transition-transform hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700 shrink-0">
+                            <Icon name="bell" size={20}/>{visibleNotifications.length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800 shrink-0"></span>}
                         </button>
                     </div>
                     
@@ -453,20 +575,25 @@
                         <h1 className="text-4xl font-bold">฿ {formatMoney(totalSpend)}</h1>
                     </div>
                     
-                    {pockets.length > 0 && (
-                        <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] soft-shadow mb-8 border border-slate-100 dark:border-slate-800">
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1"><Icon name="wallet" size={14}/> {t('safeSpend')}</p>
-                            <h2 className="text-3xl font-bold mb-4 dark:text-white">฿ {formatMoney(safeToSpend)}</h2>
-                            <div className="grid grid-cols-2 gap-3 mt-4">
-                                {pockets.map(p => (
-                                    <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl cursor-pointer active:scale-95 transition-transform hover:bg-slate-100 dark:hover:bg-slate-700">
-                                        <div className="flex items-center gap-2 mb-2"><PocketIcon pocket={p} size={14} /><span className="text-xs font-bold dark:text-white truncate">{p.name}</span></div>
-                                        <div className="text-sm font-bold text-primary">฿ {formatMoney(p.balance)}</div>
-                                    </div>
-                                ))}
-                            </div>
+                    {/* กล่องภาพรวมรายจ่าย แทนที่กล่องกระเป๋าเดิม */}
+                    <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] soft-shadow mb-8 border border-slate-100 dark:border-slate-800">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-bold text-sm dark:text-white flex items-center gap-2"><Icon name="bar-chart-3" size={16}/> ภาพรวมรายจ่าย</h3>
+                            <select value={homeChartRange} onChange={e=>setHomeChartRange(e.target.value)} className="bg-slate-50 dark:bg-slate-800 text-[10px] font-bold px-3 py-1.5 rounded-full outline-none text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700">
+                                <option value="Daily">รายวัน</option>
+                                <option value="Weekly">รายอาทิตย์</option>
+                                <option value="Monthly">รายเดือน</option>
+                                <option value="Yearly">รายปี</option>
+                            </select>
                         </div>
-                    )}
+                        <div className="h-40">
+                            {homeChartData.length > 0 ? (<InteractiveBarChart data={homeChartData} color="var(--color-primary)" />) : (<div className="flex items-center justify-center h-full text-xs font-bold text-slate-400">ไม่มีข้อมูล</div>)}
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex justify-between items-center">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Average / Day</span>
+                            <span className="font-bold text-sm text-slate-700 dark:text-white">฿ {formatMoney(avgPerDay)}</span>
+                        </div>
+                    </div>
                     
                     <div className="flex justify-between items-end mb-4"><h3 className="text-xl font-bold dark:text-white">{t('recent')}</h3><button onClick={()=>go('MAIN','HISTORY')} className="text-xs font-bold text-primary uppercase tracking-widest hover:underline px-3 py-1 rounded-full">{t('seeAll')}</button></div>
                     <div className="space-y-3">
@@ -488,13 +615,13 @@
                 <div className="fixed bottom-0 left-0 right-0 w-full bg-white/90 dark:bg-dark/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50 pb-[env(safe-area-inset-bottom)]">
                     <NavBtn icon="home" label={t('home')} active={tab==='HOME'} onClick={()=>go('MAIN','HOME')} Icon={Icon} />
                     <NavBtn icon="layout-grid" label={t('wallet')} active={tab==='POCKETS'} onClick={()=>go('MAIN','POCKETS')} Icon={Icon} />
-                    <div className="relative -top-6"><button onClick={()=>go('SCAN')} className="bg-primary text-white w-14 h-14 flex items-center justify-center rounded-[20px] shadow-[0_8px_20px_var(--color-primary-light)] hover:-translate-y-1 active:scale-95 transition-all"><Icon name="scan-line" size={28} /></button></div>
+                    <div className="relative -top-6 shrink-0"><button onClick={()=>go('SCAN')} className="bg-primary text-white w-14 h-14 flex items-center justify-center rounded-[20px] shadow-[0_8px_20px_var(--color-primary-light)] hover:-translate-y-1 active:scale-95 transition-all"><Icon name="scan-line" size={28} /></button></div>
                     <NavBtn icon="clock" label={t('history')} active={tab==='HISTORY'} onClick={()=>go('MAIN','HISTORY')} Icon={Icon} />
                     <NavBtn icon="user" label={t('profile')} active={tab==='PROFILE'} onClick={()=>go('MAIN','PROFILE')} Icon={Icon} />
                 </div>
             </div>
         );
-        const NavBtn = ({ icon, label, active, onClick, Icon }) => (<button onClick={onClick} className={`flex flex-col items-center gap-1 w-12 transition-all hover:scale-105 ${active?'text-primary':'text-slate-400 dark:text-slate-500'}`}><Icon name={icon} size={22} strokeWidth={active?2.5:1.5} /><span className="text-[9px] font-bold">{label}</span></button>);
+        const NavBtn = ({ icon, label, active, onClick, Icon }) => (<button onClick={onClick} className={`flex flex-col items-center gap-1 w-12 shrink-0 transition-all hover:scale-105 ${active?'text-primary':'text-slate-400 dark:text-slate-500'}`}><Icon name={icon} size={22} strokeWidth={active?2.5:1.5} /><span className="text-[9px] font-bold">{label}</span></button>);
 
         const LoginScreen = ({ go, setUser, t, Icon, LoadingOverlay, translateAuthError }) => {
             const [email, setEmail] = useState(''); const [password, setPassword] = useState('');
@@ -535,8 +662,8 @@
             return (
                 <div className="flex-1 overflow-y-auto bg-white dark:bg-dark fade-in relative no-scrollbar">
                     <div className="min-h-full flex flex-col justify-center p-8 pb-12">
-                        {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                        <div className="text-center mb-10 mt-4"><div className="w-32 h-32 bg-primary/10 text-primary rounded-[40px] flex items-center justify-center mx-auto mb-6 shadow-sm"><Icon name="scan-face" size={64}/></div><h1 className="text-3xl font-bold dark:text-white">QR Scanner</h1><p className="text-slate-400 font-bold mt-2">{t('welcome')}</p></div>
+                        {loading && <LoadingOverlay text={t('loading')} />}
+                        <div className="text-center mb-10 mt-4"><div className="w-32 h-32 bg-primary/10 text-primary rounded-[40px] flex items-center justify-center mx-auto mb-6 shadow-sm shrink-0"><Icon name="scan-face" size={64}/></div><h1 className="text-3xl font-bold dark:text-white">QR Scanner</h1><p className="text-slate-400 font-bold mt-2">{t('welcome')}</p></div>
                         <form onSubmit={handleLogin} className="space-y-4">
                             <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="mail" size={20} className="text-slate-400 mr-3"/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('email')} /></div>
                             <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="lock" size={20} className="text-slate-400 mr-3"/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('password')} /></div>
@@ -545,11 +672,11 @@
                         </form>
                         {err && <div className="bg-red-50 dark:bg-red-500/10 text-danger p-3 rounded-2xl text-xs font-bold text-center mt-4">{err}</div>}
                         <div className="flex items-center gap-4 my-8"><div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"/><span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">OR</span><div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"/></div>
-                        <button onClick={googleLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700">
-                            <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                        <button onClick={googleLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 shrink-0">
+                            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                             {t('loginGoogle')}
                         </button>
-                        <button onClick={guestLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700"><Icon name="user" size={20} className="text-slate-400"/> {t('guestLogin')}</button>
+                        <button onClick={guestLogin} className="w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 font-bold py-4 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform mb-4 shadow-sm dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 shrink-0"><Icon name="user" size={20} className="text-slate-400"/> {t('guestLogin')}</button>
                         <button onClick={()=>go('SIGN_UP')} className="mt-4 pb-8 text-sm font-bold text-slate-400 text-center w-full transition-colors hover:text-primary">{t('noAccount')} <span className="text-primary underline">{t('signUp')}</span></button>
                     </div>
                 </div>
@@ -578,8 +705,8 @@
             return (
                 <div className="flex-1 overflow-y-auto bg-white dark:bg-dark fade-in relative no-scrollbar">
                     <div className="min-h-full flex flex-col p-8 pb-12">
-                        {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                        <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 active:scale-95 transition-transform dark:text-white hover:bg-slate-100"><Icon name="arrow-left"/></button>
+                        {loading && <LoadingOverlay text={t('loading')} />}
+                        <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 active:scale-95 transition-transform dark:text-white hover:bg-slate-100 shrink-0"><Icon name="arrow-left"/></button>
                         <h1 className="text-3xl font-bold mb-8 dark:text-white">{t('createAccount')}</h1>
                         <form onSubmit={handleSignUp} className="space-y-4">
                             <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-2xl flex items-center focus-within:border-primary transition-colors shadow-sm"><Icon name="user" size={20} className="text-slate-400 mr-3"/><input required value={name} onChange={e=>setName(e.target.value)} className="bg-transparent w-full font-bold outline-none dark:text-white" placeholder={t('name')} /></div>
@@ -603,9 +730,9 @@
             };
             return (
                 <div className="flex-1 p-8 flex flex-col text-center relative fade-in bg-white dark:bg-dark">
-                    {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 absolute active:scale-95 transition-transform dark:text-white hover:bg-slate-100"><Icon name="arrow-left"/></button>
-                    <div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mt-20 mb-8"><Icon name="key" size={40}/></div>
+                    {loading && <LoadingOverlay text={t('loading')} />}
+                    <button onClick={()=>go('SIGN_IN')} className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-8 absolute active:scale-95 transition-transform dark:text-white hover:bg-slate-100 shrink-0"><Icon name="arrow-left"/></button>
+                    <div className="w-24 h-24 bg-primary/10 text-primary rounded-[32px] flex items-center justify-center mx-auto mt-20 mb-8 shrink-0"><Icon name="key" size={40}/></div>
                     <h1 className="text-3xl font-bold mb-2 dark:text-white">{t('forgotPass')}</h1>
                     {sent ? <div className="bg-green-50 dark:bg-green-500/10 text-[#4ADE80] p-4 rounded-2xl font-bold flex items-center justify-center gap-2 animate-pulse mt-10"><Icon name="check-circle"/> Email Sent!</div> : 
                     <form onSubmit={handleReset} className="space-y-6 mt-10">
@@ -621,14 +748,14 @@
             <div className="flex-1 flex flex-col h-full fade-in relative overflow-hidden bg-[var(--bg-color)]">
                 <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-primaryLight via-transparent to-transparent z-0 pointer-events-none"></div>
                 <div className="px-6 pt-12 flex justify-between items-center relative z-10 mb-8">
-                    <button onClick={() => go('MAIN', 'HOME')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button>
+                    <button onClick={() => go('MAIN', 'HOME')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20}/></button>
                     <h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2>
-                    <div className="w-10 h-10 rounded-full overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 bg-white flex items-center justify-center"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
+                    <div className="w-10 h-10 rounded-full overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 bg-white flex items-center justify-center shrink-0"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
                 </div>
                 <div className="px-6 flex-1 overflow-y-auto no-scrollbar relative z-10 pb-10">
                     <div className="flex justify-between items-end mb-8">
                         <div><h1 className="text-3xl font-bold mb-1 dark:text-white">{t('recentAlerts')}</h1><p className="text-sm font-bold text-slate-400">{t('caughtUp')}</p></div>
-                        {visibleNotifications.length > 0 && (<button onClick={clearAllNotifs} className="bg-danger/10 text-danger px-4 py-2 rounded-full font-bold active:scale-95 transition-transform text-xs">ล้าง</button>)}
+                        {visibleNotifications.length > 0 && (<button onClick={clearAllNotifs} className="bg-danger/10 text-danger px-4 py-2 rounded-full font-bold active:scale-95 transition-transform text-xs shrink-0">ล้าง</button>)}
                     </div>
                     <div className="space-y-4">
                         {visibleNotifications.length === 0 ? (<div className="bg-white dark:bg-slate-800 rounded-[28px] text-center p-8 soft-shadow border border-slate-100 dark:border-slate-700"><p className="font-bold text-slate-400">{t('caughtUp')}</p></div>) : (
@@ -649,7 +776,7 @@
 
         const PocketsScreen = ({ pockets, go, t, Icon }) => (
             <div className="p-6 pt-12 fade-in flex flex-col h-full bg-[var(--bg-color)]">
-                <div className="flex justify-between items-center mb-8"><h2 className="text-3xl font-bold leading-none dark:text-white">{t('yourPockets')}</h2><button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 active:scale-95 transition-transform hover:bg-slate-50 border border-slate-100 dark:border-slate-700"><Icon name="bell" size={20}/></button></div>
+                <div className="flex justify-between items-center mb-8"><h2 className="text-3xl font-bold leading-none dark:text-white">{t('yourPockets')}</h2><button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 active:scale-95 transition-transform hover:bg-slate-50 border border-slate-100 dark:border-slate-700 shrink-0"><Icon name="bell" size={20}/></button></div>
                 <div className="grid grid-cols-2 gap-4 mb-6 flex-1 overflow-y-auto no-scrollbar">
                     {pockets.length===0 ? <div className="col-span-2 bg-white dark:bg-slate-800 soft-shadow border border-slate-100 dark:border-slate-700 rounded-[28px] text-center p-8"><p className="font-bold text-slate-400">{t('noData')}</p></div> : pockets.map(p => {
                         const pct = p.hasTarget && p.target > 0 ? Math.min((p.balance / p.target) * 100, 100) : 0;
@@ -683,10 +810,10 @@
 
             return (
                 <div className="p-6 pt-12 h-full flex flex-col fade-in relative bg-[var(--bg-color)]">
-                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    {saving && <LoadingOverlay text={t('loading')} />}
                     {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={setSelectedIcon} t={t} Icon={Icon} />}
                     
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('newPocket')}</h2><div className="w-10"></div></div>
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50 shrink-0"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('newPocket')}</h2><div className="w-10"></div></div>
 
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 font-bold text-sm outline-none dark:text-white transition-colors focus:ring-2 ring-primary/20" placeholder="e.g. Holiday Fund"/></div>
@@ -698,12 +825,12 @@
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700">
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">{t('chooseIcon')}</label>
                             <div className="grid grid-cols-4 gap-6 px-2">
-                                {PASTEL_POCKET_ICONS.map((ic, i) => (<div key={i} onClick={()=>setSelectedIcon(ic)} className={`w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all ${selectedIcon.icon === ic.icon ? 'ring-2 ring-offset-2 ring-slate-400 dark:ring-slate-500 scale-105' : 'hover:scale-105'}`} style={{backgroundColor: ic.bg, color: ic.color}}><Icon name={ic.icon} size={20} /></div>))}
-                                <div onClick={()=>setShowCustomModal(true)} className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer border border-dashed border-slate-300 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"><Icon name="plus" size={20} /></div>
+                                {PASTEL_POCKET_ICONS.map((ic, i) => (<div key={i} onClick={()=>setSelectedIcon(ic)} className={`w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all shrink-0 ${selectedIcon.icon === ic.icon ? 'ring-2 ring-offset-2 ring-slate-400 dark:ring-slate-500 scale-105' : 'hover:scale-105'}`} style={{backgroundColor: ic.bg, color: ic.color}}><Icon name={ic.icon} size={20} /></div>))}
+                                <div onClick={()=>setShowCustomModal(true)} className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer border border-dashed border-slate-300 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shrink-0"><Icon name="plus" size={20} /></div>
                             </div>
                         </div>
                     </div>
-                    <button disabled={!name || (hasTarget && !target)} onClick={handleSave} className="w-full bg-primary text-white py-4 mt-2 text-sm font-bold rounded-full shadow-md active:scale-95 transition-transform disabled:opacity-50 tracking-widest uppercase hover:shadow-lg">{t('savePocket')}</button>
+                    <button disabled={!name || (hasTarget && !target)} onClick={handleSave} className="w-full bg-primary text-white py-4 mt-2 text-sm font-bold rounded-full shadow-md active:scale-95 transition-transform disabled:opacity-50 tracking-widest uppercase hover:shadow-lg shrink-0">{t('savePocket')}</button>
                 </div>
             );
         };
@@ -714,26 +841,72 @@
             const pct = pocket.hasTarget && pocket.target > 0 ? Math.min((pocket.balance / pocket.target) * 100, 100) : 0;
             const barColor = pocket.color || 'var(--color-primary)';
             const bgColor = pocket.bg || 'var(--color-primary-light)';
+            const [trendRange, setTrendRange] = useState('Weekly');
             
             const chartData = useMemo(() => {
-                if (pocketTxs.length === 0) return [10, 10, 10, 10, 10];
-                const amounts = pocketTxs.slice(0, 5).map(t => Math.min(100, Math.max(10, (Math.abs(t.amount) / (pocket.initialAmount || pocket.balance || 100)) * 100 * 2)));
-                while(amounts.length < 5) amounts.unshift(10);
-                return amounts.reverse();
-            }, [pocketTxs, pocket.balance, pocket.initialAmount]);
+                const getD = (dStr) => { const [y,m,d] = dStr.split('-'); return new Date(y, m-1, d); };
+                let data = [];
+                const today = new Date(); today.setHours(0,0,0,0);
+                
+                if (trendRange === 'Weekly') {
+                    for (let i = 6; i >= 0; i--) {
+                        const d = new Date(today); d.setDate(d.getDate() - i);
+                        const dStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                        const dayTxs = pocketTxs.filter(t => {
+                            let txDMatch = t.date;
+                            if(txDMatch && txDMatch.includes('/')) {
+                                const parts = txDMatch.split('/');
+                                if(parts[2] && parts[2].length === 4) txDMatch = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                            }
+                            return txDMatch === dStr;
+                        });
+                        const daySum = dayTxs.reduce((a, b) => a + Math.abs(Number(b.amount)), 0);
+                        data.push({ label: i === 0 ? 'วันนี้' : `${d.getDate()}/${d.getMonth()+1}`, fullLabel: `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`, value: daySum });
+                    }
+                } else if (trendRange === 'Monthly') {
+                    for (let i = 3; i >= 0; i--) {
+                        const startD = new Date(today); startD.setDate(startD.getDate() - (i*7 + 6));
+                        const endD = new Date(today); endD.setDate(endD.getDate() - (i*7));
+                        let weekSum = 0;
+                        pocketTxs.forEach(t => { 
+                            let txDMatch = t.date;
+                            if(txDMatch && txDMatch.includes('/')) {
+                                const parts = txDMatch.split('/');
+                                if(parts[2] && parts[2].length === 4) txDMatch = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                            }
+                            const td = getD(txDMatch); 
+                            if (td >= startD && td <= endD) weekSum += Math.abs(Number(t.amount)); 
+                        });
+                        data.push({ label: `W${4-i}`, fullLabel: `${startD.getDate()}/${startD.getMonth()+1} - ${endD.getDate()}/${endD.getMonth()+1}`, value: weekSum });
+                    }
+                }
+                return data;
+            }, [pocketTxs, trendRange]);
 
             return (
                 <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketDetails')}</h2><button onClick={()=>go('POCKET_SETTINGS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="settings" size={20} /></button></div>
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','POCKETS')} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketDetails')}</h2><button onClick={()=>go('POCKET_SETTINGS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="settings" size={20} /></button></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
                         <div className="rounded-[36px] p-8 relative overflow-hidden shadow-sm" style={{backgroundColor: bgColor}}>
                             <div className="absolute top-0 right-0 w-40 h-40 bg-white/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                            <div className="flex items-center gap-4 mb-6 relative z-10"><div className="bg-white/50 rounded-[20px] w-14 h-14 flex items-center justify-center backdrop-blur-sm shadow-sm" style={{color:barColor}}><Icon name={pocket.icon} size={24}/></div><h3 className="font-bold text-slate-800 text-xl">{pocket.name}</h3></div>
+                            <div className="flex items-center gap-4 mb-6 relative z-10"><div className="bg-white/50 rounded-[20px] w-14 h-14 flex items-center justify-center backdrop-blur-sm shadow-sm shrink-0" style={{color:barColor}}><Icon name={pocket.icon} size={24}/></div><h3 className="font-bold text-slate-800 text-xl">{pocket.name}</h3></div>
                             <h1 className="text-4xl font-bold text-slate-800 mb-2 relative z-10">฿ {formatMoney(pocket.balance)}</h1>
                             {pocket.hasTarget && <p className="text-xs font-bold text-slate-600 mb-6 relative z-10">Goal: ฿ {formatMoney(pocket.target)}</p>}
                             {pocket.hasTarget && (<div className="relative z-10 bg-white/40 p-4 rounded-[20px] backdrop-blur-sm shadow-sm border border-white/20"><div className="flex justify-between text-[10px] font-bold text-slate-700 mb-2"><span>{Math.round(pct)}% {t('saved')}</span><span>฿ {formatMoney(pocket.target - pocket.balance)} {t('left')}</span></div><div className="h-1.5 w-full bg-slate-800/10 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`, backgroundColor: barColor}}></div></div></div>)}
                         </div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700"><h3 className="font-bold text-sm mb-4 dark:text-white">{t('spendingTrend')}</h3><div className="flex items-end justify-between gap-3 h-24">{chartData.map((h, i) => (<div key={i} className="flex flex-col items-center gap-2 flex-1"><div className="w-full rounded-t-lg transition-all duration-500 ease-out" style={{height: `${h}%`, backgroundColor: i===4 ? barColor : 'var(--color-primary-light)'}}></div><span className="text-[9px] font-bold text-slate-400">W{i+1}</span></div>))}</div></div>
+                        
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
+                            <div className="flex justify-between items-center mb-2">
+                                <h3 className="font-bold text-sm dark:text-white">{t('spendingTrend')}</h3>
+                                <select value={trendRange} onChange={e=>setTrendRange(e.target.value)} className="bg-slate-50 dark:bg-slate-900 text-[10px] font-bold px-2 py-1 rounded-full outline-none text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700">
+                                    <option value="Weekly">รายอาทิตย์</option>
+                                    <option value="Monthly">รายเดือน</option>
+                                </select>
+                            </div>
+                            <div className="h-32 pt-2">
+                                <InteractiveBarChart data={chartData} color={barColor} />
+                            </div>
+                        </div>
                         
                         <div>
                             <h3 className="font-bold text-sm mb-4 ml-2 dark:text-white uppercase tracking-widest">{t('recentActivity')}</h3>
@@ -755,45 +928,85 @@
             const [name, setName] = useState(pocket?.name || ''); const [hasTarget, setHasTarget] = useState(pocket?.hasTarget || false); const [target, setTarget] = useState(pocket?.target || '');
             const [selectedIcon, setSelectedIcon] = useState({ type: pocket?.iconType || 'lucide', icon: pocket?.icon || 'wallet', colorType: pocket?.colorType || 'hex', color: pocket?.color || '#ffffff', bg: pocket?.bg || 'var(--color-primary-light)' });
             const [showCustomModal, setShowCustomModal] = useState(false);
+            const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // เพิ่ม State สำหรับ Modal ยืนยันลบ
             if(!pocket) return null;
 
             return (
                 <div className="p-6 pt-12 h-full flex flex-col fade-in relative bg-[var(--bg-color)]">
                     {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={(ic)=>{setSelectedIcon({type:'lucide', icon:ic.icon, bg:`${ic.color}33`, color:ic.color})}} t={t} Icon={Icon} />}
-                    <div className="flex items-center justify-between mb-6"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketSettings')}</h2><div className="w-10"></div></div>
+                    
+                    {/* Modal ยืนยันการลบกระเป๋า (แทนที่ window.confirm) */}
+                    {showDeleteConfirm && (
+                        <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-6 fade-in backdrop-blur-sm">
+                            <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 w-full max-w-sm slide-up shadow-2xl">
+                                <div className="w-16 h-16 bg-danger/10 text-danger rounded-full flex items-center justify-center mb-6 mx-auto"><Icon name="alert-triangle" size={32}/></div>
+                                <h3 className="text-xl font-bold text-center mb-2 dark:text-white">ยืนยันการลบ</h3>
+                                <p className="text-slate-500 text-center text-sm font-medium mb-8 leading-relaxed">คุณแน่ใจหรือไม่ว่าจะลบกระเป๋านี้? ข้อมูลธุรกรรมที่เกี่ยวข้องจะยังคงอยู่ในประวัติรวม</p>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 dark:bg-slate-700 rounded-full active:scale-95 transition-transform">{t('cancel')}</button>
+                                    <button onClick={() => { setShowDeleteConfirm(false); onDelete(pocket.id); }} className="flex-1 py-4 font-bold text-white bg-danger rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all">ลบกระเป๋า</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex items-center justify-between mb-6"><button onClick={()=>go('POCKET_DETAILS', null, pocket)} className="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50 shrink-0"><Icon name="arrow-left" size={20} /></button><h2 className="font-bold text-xl dark:text-white">{t('pocketSettings')}</h2><div className="w-10"></div></div>
                     <div className="flex flex-col items-center mb-8"><div className="mb-4"><PocketIcon pocket={selectedIcon} size={36} /></div><h2 className="text-2xl font-bold dark:text-white">{pocket.name}</h2></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
-                        <Section title={t('general')}><div className="p-4 border-b border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors"/></div><div onClick={()=>setShowCustomModal(true)} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><span className="font-bold text-sm dark:text-white">{t('iconColor')}</span><div className="bg-slate-100 dark:bg-slate-700 p-2 rounded-full text-slate-400 dark:text-white"><Icon name="edit-2" size={14}/></div></div></Section>
+                        <Section title={t('general')}>
+                            <div className="p-4 border-b border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('pocketName')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors"/></div>
+                            <div onClick={()=>setShowCustomModal(true)} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                <span className="font-bold text-sm dark:text-white">{t('iconColor')}</span>
+                                <div className="w-8 h-8 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-300 shrink-0 shadow-sm"><Icon name="pencil" size={14}/></div>
+                            </div>
+                        </Section>
                         <Section title={t('budgeting')}><div className="p-4 flex justify-between items-center"><span className="font-bold text-sm dark:text-white">{t('monthlyGoal')}</span><SwitchToggle isOn={hasTarget} onToggle={()=>setHasTarget(!hasTarget)} /></div>{hasTarget && <div className="p-4 border-t border-slate-100 dark:border-slate-700 fade-in"><input type="number" value={target} onChange={e=>setTarget(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-base outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="0.00"/></div>}</Section>
-                        <div className="pt-2"><button onClick={()=>{ if(window.confirm(t('confirmReset'))) onDelete(pocket.id); }} className="w-full bg-danger/10 text-danger font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-95 transition-colors hover:bg-danger/20 text-sm"><Icon name="trash-2" size={18}/> {t('deletePocket')}</button></div>
+                        <div className="pt-2"><button onClick={() => setShowDeleteConfirm(true)} className="w-full bg-[#FFE5E5] dark:bg-red-500/10 text-[#FF4D4D] font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-95 transition-colors hover:bg-[#FFD1D1] dark:hover:bg-red-500/20 text-sm shrink-0"><Icon name="trash-2" size={18}/> {t('deletePocket')}</button></div>
                     </div>
-                    <button onClick={()=>onUpdate(pocket.id, {name, hasTarget, target: Number(target)||0, iconType: selectedIcon.type, icon: selectedIcon.icon, colorType: selectedIcon.colorType, color: selectedIcon.color, bg: selectedIcon.bg})} className="w-full bg-primary text-white font-bold py-4 rounded-full shadow-md active:scale-95 text-sm tracking-widest uppercase hover:shadow-lg transition-all">{t('saveChanges')}</button>
+                    <button onClick={()=>onUpdate(pocket.id, {name, hasTarget, target: Number(target)||0, iconType: selectedIcon.type, icon: selectedIcon.icon, colorType: selectedIcon.colorType, color: selectedIcon.color, bg: selectedIcon.bg})} className="w-full bg-primary text-white font-bold py-4 rounded-full shadow-md active:scale-95 text-sm tracking-widest uppercase hover:shadow-lg transition-all shrink-0">{t('saveChanges')}</button>
                 </div>
             );
         };
 
         const ProfileScreen = ({ user, go, t, onLogout, Icon, LoadingOverlay, themeMode, onResetData }) => {
             const [loading, setLoading] = useState(false);
+            const [showResetConfirm, setShowResetConfirm] = useState(false); // เพิ่ม State สำหรับ Modal ล้างข้อมูล
             const doLogout = () => { setLoading(true); setTimeout(() => onLogout(), 1000); };
-            const MenuItem = ({ icon, label, onClick, value }) => (<div onClick={onClick} className="flex items-center justify-between p-5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary"><Icon name={icon} size={18}/></div><span className="font-bold text-sm dark:text-white">{label}</span></div><div className="flex items-center gap-3">{value && <span className="text-[10px] font-bold px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-300 uppercase tracking-widest">{value}</span>}<Icon name="chevron-right" size={16} className="text-slate-300"/></div></div>);
+            const MenuItem = ({ icon, label, onClick, value }) => (<div onClick={onClick} className="flex items-center justify-between p-5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0"><Icon name={icon} size={18}/></div><span className="font-bold text-sm dark:text-white">{label}</span></div><div className="flex items-center gap-3">{value && <span className="text-[10px] font-bold px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-300 uppercase tracking-widest">{value}</span>}<Icon name="chevron-right" size={16} className="text-slate-300 shrink-0"/></div></div>);
             return (
                 <div className="p-6 pt-12 fade-in relative h-full overflow-y-auto no-scrollbar bg-[var(--bg-color)]">
-                    {loading && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    {loading && <LoadingOverlay text={t('loading')} />}
+                    
+                    {/* Modal ยืนยันการล้างข้อมูลทั้งหมด (แทนที่ window.confirm) */}
+                    {showResetConfirm && (
+                        <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-6 fade-in backdrop-blur-sm">
+                            <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 w-full max-w-sm slide-up shadow-2xl">
+                                <div className="w-16 h-16 bg-danger/10 text-danger rounded-full flex items-center justify-center mb-6 mx-auto"><Icon name="alert-triangle" size={32}/></div>
+                                <h3 className="text-xl font-bold text-center mb-2 dark:text-white">ล้างข้อมูลทั้งหมด</h3>
+                                <p className="text-slate-500 text-center text-sm font-medium mb-8 leading-relaxed">{t('confirmReset')}</p>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setShowResetConfirm(false)} className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 dark:bg-slate-700 rounded-full active:scale-95 transition-transform">{t('cancel')}</button>
+                                    <button onClick={() => { setShowResetConfirm(false); onResetData(); }} className="flex-1 py-4 font-bold text-white bg-danger rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all">ยืนยัน</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="flex flex-col items-center mb-8 mt-2 relative">
-                        <button onClick={()=>go('NOTIFICATIONS')} className="absolute top-0 right-0 text-slate-400 w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 shadow-sm hover:text-primary transition-colors"><Icon name="bell" size={20}/></button>
-                        <div className="relative mb-4"><div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-md"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-md cursor-pointer hover:scale-110 transition-transform"><Icon name="edit-2" size={14}/></div></div>
+                        <button onClick={()=>go('NOTIFICATIONS')} className="absolute top-0 right-0 text-slate-400 w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-full flex items-center justify-center active:scale-95 shadow-sm hover:text-primary transition-colors shrink-0"><Icon name="bell" size={20}/></button>
+                        <div className="relative mb-4"><div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-md shrink-0"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><div onClick={()=>go('EDIT_PROFILE')} className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-md cursor-pointer hover:scale-110 transition-transform shrink-0"><Icon name="edit-2" size={14}/></div></div>
                         <h1 className="text-2xl font-bold mb-1 dark:text-white">{user?.displayName}</h1><p className="text-xs font-bold text-slate-400">{user?.email}</p>
                     </div>
                     <div className="space-y-6 mb-8">
                         <Section title={t('accountTitle')}><MenuItem icon="user" label={t('accountSettings')} onClick={()=>go('EDIT_PROFILE')} /><MenuItem icon="shield" label={t('security')} onClick={()=>go('SECURITY')} /></Section>
                         <Section title={t('preferencesTitle')}><MenuItem icon="globe" label={t('language')} onClick={()=>go('LANGUAGE')} /><MenuItem icon="palette" label={t('appTheme')} onClick={()=>go('THEME')} /></Section>
                         <Section title="Data Management">
-                            <div onClick={onResetData} className="flex items-center justify-between p-4 cursor-pointer hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                                <div className="flex items-center gap-4"><div className="w-10 h-10 bg-danger/10 rounded-full flex items-center justify-center text-danger"><Icon name="trash-2" size={18}/></div><span className="font-bold text-sm text-danger">{t('resetData')}</span></div>
+                            <div onClick={() => setShowResetConfirm(true)} className="flex items-center justify-between p-4 cursor-pointer hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                                <div className="flex items-center gap-4"><div className="w-10 h-10 bg-danger/10 rounded-full flex items-center justify-center text-danger shrink-0"><Icon name="trash-2" size={18}/></div><span className="font-bold text-sm text-danger">{t('resetData')}</span></div>
                             </div>
                         </Section>
                     </div>
-                    <button onClick={doLogout} className="w-full bg-slate-50 dark:bg-slate-800 text-slate-500 font-bold py-4 rounded-full flex items-center justify-center gap-2 text-sm tracking-widest mb-10 active:scale-95 transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 uppercase"><Icon name="log-out" size={18}/> {t('logout')}</button>
+                    <button onClick={doLogout} className="w-full bg-slate-50 dark:bg-slate-800 text-slate-500 font-bold py-4 rounded-full flex items-center justify-center gap-2 text-sm tracking-widest mb-10 active:scale-95 transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 uppercase shrink-0"><Icon name="log-out" size={18}/> {t('logout')}</button>
                 </div>
             );
         };
@@ -827,14 +1040,14 @@
             };
             return (
                 <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('editProfile')}</h2><div className="w-10"></div></div>
+                    {saving && <LoadingOverlay text={t('loading')} />}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('editProfile')}</h2><div className="w-10"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
-                        <div className="flex flex-col items-center mb-8 relative"><div className="relative"><div className="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-md overflow-hidden bg-white"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><button onClick={()=>fileInputRef.current.click()} className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full shadow-md flex items-center justify-center hover:scale-110 transition-transform"><Icon name="camera" size={14}/></button></div><input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} /></div>
+                        <div className="flex flex-col items-center mb-8 relative"><div className="relative"><div className="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-md overflow-hidden bg-white shrink-0"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><button onClick={()=>fileInputRef.current.click()} className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full shadow-md flex items-center justify-center hover:scale-110 transition-transform shrink-0"><Icon name="camera" size={14}/></button></div><input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} /></div>
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('name')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('bio')}</label><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm h-28 resize-none outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="Add bio..." /></div>
                     </div>
-                    <button onClick={handleUpdate} className="w-full bg-primary text-white py-4 rounded-full shadow-md font-bold text-sm uppercase tracking-widest mt-4 active:scale-95 transition-transform hover:shadow-lg">{t('saveChanges')}</button>
+                    <button onClick={handleUpdate} className="w-full bg-primary text-white py-4 rounded-full shadow-md font-bold text-sm uppercase tracking-widest mt-4 active:scale-95 transition-transform hover:shadow-lg shrink-0">{t('saveChanges')}</button>
                 </div>
             );
         };
@@ -846,13 +1059,13 @@
             const handleResetPass = async () => { if(user && user.uid !== 'mock-uid') { try { await auth.sendPasswordResetEmail(user.email); setMsg('Sent!'); } catch(e) { setMsg('Error'); } } else setMsg('Not supported in Guest'); setTimeout(()=>setMsg(''), 3000); };
             return (
                 <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('security')}</h2><div className="w-10"></div></div>
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('security')}</h2><div className="w-10"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
                         <Section title="Account Security">
-                            <div onClick={handleResetPass} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-50 dark:border-slate-700 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center"><Icon name="lock" size={18}/></div><h4 className="font-bold text-sm dark:text-white">{t('changePass')}</h4></div><button className="bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest">Update</button></div>
-                            <div className="p-4 flex justify-between items-center"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400"><Icon name="layout-grid" size={18}/></div><div><span className="font-bold text-sm block leading-none mb-1 dark:text-white">{t('pinCode')}</span><span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{pinCode ? t('pinStatusSet') : t('pinStatusNotSet')}</span></div></div><div className="flex items-center gap-3">{pinCode && (<button onClick={()=>setShowPinModal(true)} className="text-[10px] font-bold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 uppercase tracking-widest">{t('changePin')}</button>)}<SwitchToggle isOn={!!pinCode} onToggle={handleTogglePin} /></div></div>
+                            <div onClick={handleResetPass} className="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-50 dark:border-slate-700 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center shrink-0"><Icon name="lock" size={18}/></div><h4 className="font-bold text-sm dark:text-white">{t('changePass')}</h4></div><button className="bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest">Update</button></div>
+                            <div className="p-4 flex justify-between items-center"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 shrink-0"><Icon name="layout-grid" size={18}/></div><div><span className="font-bold text-sm block leading-none mb-1 dark:text-white">{t('pinCode')}</span><span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{pinCode ? t('pinStatusSet') : t('pinStatusNotSet')}</span></div></div><div className="flex items-center gap-3">{pinCode && (<button onClick={()=>setShowPinModal(true)} className="text-[10px] font-bold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 uppercase tracking-widest">{t('changePin')}</button>)}<SwitchToggle isOn={!!pinCode} onToggle={handleTogglePin} /></div></div>
                         </Section>
-                        <Section title={t('yourDevices')}><div className="p-4 flex justify-between items-center bg-white dark:bg-slate-900"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-[#94e4ae]/20 rounded-full flex items-center justify-center text-[#4ea86a]"><Icon name="smartphone" size={18}/></div><div><h4 className="font-bold text-sm dark:text-white">{deviceName}</h4><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{t('activeNow')}</p></div></div><span className="bg-[#94e4ae]/20 text-[#4ea86a] px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest">THIS DEVICE</span></div></Section>
+                        <Section title={t('yourDevices')}><div className="p-4 flex justify-between items-center bg-white dark:bg-slate-900"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-[#94e4ae]/20 rounded-full flex items-center justify-center text-[#4ea86a] shrink-0"><Icon name="smartphone" size={18}/></div><div><h4 className="font-bold text-sm dark:text-white">{deviceName}</h4><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{t('activeNow')}</p></div></div><span className="bg-[#94e4ae]/20 text-[#4ea86a] px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest">THIS DEVICE</span></div></Section>
                     </div>
                     {msg && <div className="bg-white dark:bg-slate-900 shadow-sm text-center font-bold text-sm p-4 mt-4 text-primary rounded-2xl border border-slate-100 dark:border-slate-700">{msg}</div>}
                 </div>
@@ -864,7 +1077,7 @@
             const toggle = (k) => setOpts({...opts, [k]: !opts[k]});
             return (
                 <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2><div className="w-10"></div></div>
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('notifications')}</h2><div className="w-10"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
                         <Section title={t('transactionAlerts')}><div className="p-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><h4 className="font-bold text-sm dark:text-white">{t('everyPurchase')}</h4><SwitchToggle isOn={opts.p} onToggle={()=>toggle('p')} /></div></Section>
                         <Section title={t('budgetAlerts')}>
@@ -882,7 +1095,7 @@
 
         const ThemeSettingsScreen = ({ themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, go, t, Icon }) => (
             <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
-                <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('theme')}</h2><div className="w-10"></div></div>
+                <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('theme')}</h2><div className="w-10"></div></div>
                 <div className="flex-1 overflow-y-auto no-scrollbar space-y-8 pb-6">
                     <div>
                         <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 ml-4">{t('themeMode')}</h4>
@@ -901,19 +1114,19 @@
                             ))}
                         </div>
                     </Section>
-                    <Section title="Animations"><div className="p-4 flex justify-between items-center hover:bg-slate-50 dark:bg-slate-800 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary"><Icon name="sparkles" size={18}/></div><span className="font-bold text-sm dark:text-white">{t('reduceMotion')}</span></div><SwitchToggle isOn={reduceMotion} onToggle={()=>setReduceMotion(!reduceMotion)} /></div></Section>
+                    <Section title="Animations"><div className="p-4 flex justify-between items-center hover:bg-slate-50 dark:bg-slate-800 transition-colors"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0"><Icon name="sparkles" size={18}/></div><span className="font-bold text-sm dark:text-white">{t('reduceMotion')}</span></div><SwitchToggle isOn={reduceMotion} onToggle={()=>setReduceMotion(!reduceMotion)} /></div></Section>
                 </div>
             </div>
         );
 
         const LanguageSettingsScreen = ({ lang, setLang, go, t, Icon }) => (
             <div className="p-6 pt-12 flex flex-col h-full fade-in bg-[var(--bg-color)]">
-                <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl ml-4 dark:text-white">{t('language')}</h2></div>
+                <div className="flex items-center mb-10"><button onClick={()=>go('MAIN','PROFILE')} className="w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white hover:bg-slate-50 transition-colors shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl ml-4 dark:text-white">{t('language')}</h2></div>
                 <div className="space-y-4">
                     {['TH', 'EN'].map(l => (
                         <div key={l} onClick={()=>setLang(l)} className={`p-5 rounded-[24px] flex justify-between items-center cursor-pointer transition-transform hover:-translate-y-0.5 shadow-sm border ${lang===l?'bg-primaryLight border-primary':'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'}`}>
                             <span className={`font-bold text-sm ${lang===l?'text-primary':'text-slate-800 dark:text-white'}`}>{l === 'TH' ? 'ภาษาไทย' : 'English'}</span>
-                            {lang===l && <div className="bg-primary text-white rounded-full p-1"><Icon name="check" size={16} strokeWidth={3}/></div>}
+                            {lang===l && <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center shrink-0 shadow-sm"><Icon name="check" size={14} strokeWidth={3.5}/></div>}
                         </div>
                     ))}
                 </div>
@@ -935,34 +1148,83 @@
             }), [txs, activeFilter, searchQuery, t]);
 
             const grouped = useMemo(() => {
-                const g = {}; const today = new Date().toISOString().split('T')[0];
-                const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+                const g = {}; 
+                const dateTotals = {};
+                const today = new Date(); today.setHours(0,0,0,0);
+                const todayStr = today.toISOString().split('T')[0];
+                const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
                 const yStr = yesterday.toISOString().split('T')[0];
+
+                txs.forEach(tx => {
+                    let dMatch = tx.date;
+                    if(dMatch && dMatch.includes('/')) {
+                        const parts = dMatch.split('/');
+                        if(parts[2] && parts[2].length === 4) dMatch = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                    }
+                    dateTotals[dMatch] = (dateTotals[dMatch] || 0) + Math.abs(Number(tx.amount));
+                });
+
                 filteredTxs.forEach(tx => { 
                     let dMatch = tx.date;
                     if(dMatch && dMatch.includes('/')) {
                         const parts = dMatch.split('/');
                         if(parts[2] && parts[2].length === 4) dMatch = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
                     }
-                    let d = dMatch === today ? t('today') : dMatch === yStr ? t('yesterday') : tx.date; 
-                    if(!g[d]) g[d]=[]; g[d].push(tx); 
+                    
+                    let dLabel = dMatch === todayStr ? t('today') : dMatch === yStr ? t('yesterday') : tx.date; 
+                    
+                    if(!g[dLabel]) {
+                        // คำนวณ % การเพิ่มขึ้น/ลดลงจากเมื่อวาน
+                        const currentD = new Date(dMatch);
+                        const prevD = new Date(currentD);
+                        prevD.setDate(prevD.getDate() - 1);
+                        const prevDStr = prevD.toISOString().split('T')[0];
+                        
+                        const currTotal = dateTotals[dMatch] || 0;
+                        const prevTotal = dateTotals[prevDStr] || 0;
+                        
+                        let diffText = null;
+                        let diffIsUp = false;
+                        
+                        if (prevTotal > 0) {
+                            const pct = ((currTotal - prevTotal) / prevTotal) * 100;
+                            diffIsUp = pct > 0;
+                            diffText = `${diffIsUp ? '+' : ''}${pct.toFixed(0)}% จากเมื่อวาน`;
+                        } else if (currTotal > 0 && prevTotal === 0) {
+                            diffIsUp = true;
+                            diffText = `+100% จากเมื่อวาน`;
+                        } else if (currTotal === 0 && prevTotal > 0) {
+                            diffIsUp = false;
+                            diffText = `-100% จากเมื่อวาน`;
+                        }
+
+                        g[dLabel] = { txs: [], diffText, diffIsUp };
+                    }
+                    g[dLabel].txs.push(tx); 
                 });
                 return g;
-            }, [filteredTxs, t]);
+            }, [filteredTxs, txs, t]);
 
             return (
                 <div className="p-6 pt-10 fade-in flex flex-col h-full bg-[var(--bg-color)]">
                     <div className="shrink-0 mb-6 z-10 pb-2">
-                        <div className="flex justify-end mb-4"><button onClick={()=>go('NOTIFICATIONS')} className="relative w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center text-danger active:scale-95 transition-transform hover:bg-slate-50"><Icon name="bell" size={20}/>{visibleNotifications?.length > 0 && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800"></span>}</button></div>
+                        <div className="flex justify-end mb-4"><button onClick={()=>go('NOTIFICATIONS')} className="relative w-10 h-10 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm rounded-full flex items-center justify-center text-danger active:scale-95 transition-transform hover:bg-slate-50 shrink-0"><Icon name="bell" size={20}/>{visibleNotifications?.length > 0 && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800 shrink-0"></span>}</button></div>
                         <h2 className="text-3xl font-bold mb-6 leading-none dark:text-white">{t('transactions')}</h2>
-                        <div className="bg-white dark:bg-slate-900 p-3 rounded-[20px] flex items-center soft-shadow border border-slate-100 dark:border-slate-800 mb-6 focus-within:border-primary transition-colors"><Icon name="search" size={20} className="text-slate-400 mr-3 ml-1"/><input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent w-full font-bold text-sm outline-none dark:text-white" placeholder={t('searchPlaceholder')} />{searchQuery && (<button onClick={() => setSearchQuery('')} className="text-slate-400 bg-slate-50 dark:bg-slate-800 rounded-full p-1.5 hover:text-danger"><Icon name="x" size={14} /></button>)}</div>
+                        <div className="bg-white dark:bg-slate-900 p-3 rounded-[20px] flex items-center soft-shadow border border-slate-100 dark:border-slate-800 mb-6 focus-within:border-primary transition-colors"><Icon name="search" size={20} className="text-slate-400 mr-3 ml-1 shrink-0"/><input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-transparent w-full font-bold text-sm outline-none dark:text-white" placeholder={t('searchPlaceholder')} />{searchQuery && (<button onClick={() => setSearchQuery('')} className="text-slate-400 bg-slate-50 dark:bg-slate-800 rounded-full p-1.5 hover:text-danger shrink-0"><Icon name="x" size={14} /></button>)}</div>
                         <div className="flex overflow-x-auto no-scrollbar gap-2 pb-2">{filters.map(cat => (<button key={cat} onClick={() => setActiveFilter(cat)} className={`whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-bold transition-all active:scale-95 ${activeFilter === cat ? 'bg-primary text-white shadow-md' : 'bg-white dark:bg-slate-900 text-slate-500 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-800'}`}>{cat}</button>))}</div>
                     </div>
                     <div className="space-y-6 pb-24 overflow-y-auto flex-1 no-scrollbar -mx-6 px-6">
                         {Object.keys(grouped).length === 0 ? <div className="bg-white dark:bg-slate-900 rounded-[28px] text-center p-8 font-bold text-sm text-slate-400 soft-shadow border border-slate-100 dark:border-slate-800">{t('noData')}</div> : Object.keys(grouped).map(dateLabel => (
                             <div key={dateLabel}>
-                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-2">{dateLabel}</h4>
-                                <div className="space-y-3">{grouped[dateLabel].map(tx => (
+                                <div className="flex justify-between items-baseline mb-3 ml-2 pr-2">
+                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{dateLabel}</h4>
+                                    {grouped[dateLabel].diffText && (
+                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${grouped[dateLabel].diffIsUp ? 'bg-danger/10 text-danger' : 'bg-[#94e4ae]/20 text-[#4ea86a]'}`}>
+                                            {grouped[dateLabel].diffText}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="space-y-3">{grouped[dateLabel].txs.map(tx => (
                                     <div key={tx.id} onClick={()=>go('TX_DETAIL', null, tx)} className="bg-white dark:bg-slate-900 rounded-[24px] soft-shadow border border-slate-100 dark:border-slate-800 p-4 flex justify-between items-center cursor-pointer active:scale-95 transition-all hover:-translate-y-1 hover:shadow-md">
                                         <div className="flex items-center gap-4"><PocketIcon pocket={tx} size={20}/><div><h4 className="font-bold text-sm leading-tight mb-1 dark:text-white">{tx.title}</h4><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{tx.category}</p></div></div>
                                         <div className="font-bold text-base dark:text-white">-{tx.amount > 0 ? '' : ''} ฿ {formatMoney(Math.abs(tx.amount))}</div>
@@ -1014,13 +1276,13 @@
                 } else { setTimeout(() => { setScanning(false); onNext({ amount: '', merchant: 'รายการใหม่', date: new Date().toISOString().split('T')[0], categoryKey: 'General', iconType: 'lucide', icon: 'receipt', colorType: 'hex', color: '#64748b', isAuto: false, imageUrl: null }); }, 1500); }
             };
 
-            if(scanning) return <LoadingOverlay text={t('loading')} Icon={Icon} />;
+            if(scanning) return <LoadingOverlay text={t('loading')} />;
 
             return (
                 <div className="flex-1 bg-black relative flex flex-col h-full fade-in">
-                    <div className="absolute top-10 left-0 w-full px-6 flex justify-between items-center z-40"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white active:scale-95 backdrop-blur-md transition-colors hover:bg-white/30"><Icon name="x" size={20}/></button><button onClick={toggleFlash} className={`w-10 h-10 rounded-full flex items-center justify-center active:scale-95 backdrop-blur-md transition-colors ${isTorchOn ? 'bg-primary text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}><Icon name={isTorchOn ? 'zap' : 'zap-off'} size={20}/></button></div>
+                    <div className="absolute top-10 left-0 w-full px-6 flex justify-between items-center z-40"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white active:scale-95 backdrop-blur-md transition-colors hover:bg-white/30 shrink-0"><Icon name="x" size={20}/></button><button onClick={toggleFlash} className={`w-10 h-10 rounded-full flex items-center justify-center active:scale-95 backdrop-blur-md transition-colors shrink-0 ${isTorchOn ? 'bg-primary text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}><Icon name={isTorchOn ? 'zap' : 'zap-off'} size={20}/></button></div>
                     <div className="flex-1 relative overflow-hidden flex items-center justify-center"><video ref={videoRef} playsInline webkit-playsinline autoPlay muted className="absolute inset-0 w-full h-full object-cover opacity-90" /><div className="scan-frame"><div className="scan-corner tl"></div><div className="scan-corner tr"></div><div className="scan-corner bl"></div><div className="scan-corner br"></div><div className="laser"></div></div></div>
-                    <div className="bg-white dark:bg-dark rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.3)] z-40 relative border-t border-slate-100 dark:border-slate-800"><div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mb-6"></div><h2 className="text-xl font-bold dark:text-white">{t('scanReceipt')}</h2><p className="text-[10px] font-bold text-slate-400 mt-2 mb-8 uppercase tracking-widest">{t('alignReceipt')}</p><div className="flex justify-between w-full px-4 items-center"><button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="image" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('gallery')}</span></button><button onClick={capture} className="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:-translate-y-1"><Icon name="camera" size={28}/></button><button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100"><Icon name="edit-2" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('manual')}</span></button></div></div>
+                    <div className="bg-white dark:bg-dark rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.3)] z-40 relative border-t border-slate-100 dark:border-slate-800"><div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mb-6 shrink-0"></div><h2 className="text-xl font-bold dark:text-white">{t('scanReceipt')}</h2><p className="text-[10px] font-bold text-slate-400 mt-2 mb-8 uppercase tracking-widest">{t('alignReceipt')}</p><div className="flex justify-between w-full px-4 items-center"><button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100 shrink-0"><Icon name="image" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('gallery')}</span></button><button onClick={capture} className="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:-translate-y-1 shrink-0"><Icon name="camera" size={28}/></button><button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100 shrink-0"><Icon name="edit-2" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('manual')}</span></button></div></div>
                     <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e=>{if(e.target.files[0]){ processReceiptImage(e.target.files[0], (data)=>{ setScanning(false); onNext(data); }); }}} />
                 </div>
             );
@@ -1039,27 +1301,27 @@
 
             return (
                 <div className="flex-1 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    {saving && <LoadingOverlay text={t('loading')} />}
                     {showAddCat && <CategoryModal onClose={()=>setShowAddCat(false)} onSave={(cat)=>{setUserCategories([...userCategories.filter(c=>c.id!==cat.id), cat]); setActiveCategory(cat.id); setShowAddCat(false);}} t={t} Icon={Icon} initialCategory={showAddCat !== true ? showAddCat : null}/>}
-                    <div className="px-6 pt-12 flex items-center justify-between mb-6"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('reviewDetails')}</h2><button onClick={handleSave} disabled={!amount} className="bg-primaryLight text-primary px-4 py-2 rounded-full font-bold text-xs disabled:opacity-50 active:scale-95 transition-colors hover:bg-primary/20 uppercase tracking-widest">{t('save')}</button></div>
+                    <div className="px-6 pt-12 flex items-center justify-between mb-6"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50 shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('reviewDetails')}</h2><button onClick={handleSave} disabled={!amount} className="bg-primaryLight text-primary px-4 py-2 rounded-full font-bold text-xs disabled:opacity-50 active:scale-95 transition-colors hover:bg-primary/20 uppercase tracking-widest shrink-0">{t('save')}</button></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-6">
-                        {screenData?.imageUrl && (<div className="w-full h-32 bg-white dark:bg-slate-900 rounded-[28px] p-2 flex justify-center items-center soft-shadow border border-slate-100 dark:border-slate-800 relative"><img src={screenData.imageUrl} className="max-w-full max-h-full object-contain rounded-[20px]" /><div className="absolute right-3 bottom-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-primary shadow-sm"><Icon name="scan-line" size={14}/></div></div>)}
-                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center relative">{screenData?.isAuto && <div className="absolute top-4 right-4 bg-primaryLight text-primary w-8 h-8 rounded-full flex items-center justify-center"><Icon name="sparkles" size={14}/></div>}<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('extractedAmount')}</p><div className="flex items-center gap-2"><span className="text-2xl font-bold text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-bold bg-transparent text-center w-full outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary transition-colors dark:text-white" placeholder="0.00"/></div></div>
+                        {screenData?.imageUrl && (<div className="w-full h-32 bg-white dark:bg-slate-900 rounded-[28px] p-2 flex justify-center items-center soft-shadow border border-slate-100 dark:border-slate-800 relative"><img src={screenData.imageUrl} className="max-w-full max-h-full object-contain rounded-[20px]" /><div className="absolute right-3 bottom-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-primary shadow-sm shrink-0"><Icon name="scan-line" size={14}/></div></div>)}
+                        <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center relative">{screenData?.isAuto && <div className="absolute top-4 right-4 bg-primaryLight text-primary w-8 h-8 rounded-full flex items-center justify-center shrink-0"><Icon name="sparkles" size={14}/></div>}<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('extractedAmount')}</p><div className="flex items-center gap-2"><span className="text-2xl font-bold text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-bold bg-transparent text-center w-full outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary transition-colors dark:text-white" placeholder="0.00"/></div></div>
                         <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800 soft-shadow space-y-5">
-                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchant')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="store" size={18} className="text-primary mr-3" /><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="ระบุชื่อร้านค้า"/></div></div>
+                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchant')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="store" size={18} className="text-primary mr-3 shrink-0" /><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="ระบุชื่อร้านค้า"/></div></div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="calendar" size={16} className="text-slate-400 mr-2" /><input type="date" value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none dark:text-white"/></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center relative focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="wallet" size={16} className="text-primary mr-2" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="calendar" size={16} className="text-slate-400 mr-2 shrink-0" /><input type="date" value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none dark:text-white"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center relative focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="wallet" size={16} className="text-primary mr-2 shrink-0" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
                             </div>
                             <div>
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-3">{t('category')}</label>
                                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full shrink-0 transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primaryLight border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{(<button onClick={()=>setShowAddCat(cat)} className="pr-3 pl-1 hover:text-primary"><Icon name="edit-2" size={12}/></button>)}</div>))}
+                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full shrink-0 transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primaryLight border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-4 py-2 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{(<button onClick={()=>setShowAddCat(cat)} className="pr-3 pl-1 hover:text-primary shrink-0"><Icon name="edit-2" size={12}/></button>)}</div>))}
                                     <button onClick={()=>setShowAddCat(true)} className="px-4 py-2 rounded-full text-xs font-bold border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 shrink-0 transition-colors"><Icon name="plus" size={14}/></button>
                                 </div>
                             </div>
                         </div>
-                        <button disabled={!amount || amount==='0'} onClick={handleSave} className="w-full bg-danger text-white py-5 rounded-full font-bold text-sm tracking-widest uppercase shadow-md active:scale-95 transition-all hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center gap-2">{t('confirmSave')} <Icon name="check" size={18}/></button>
+                        <button disabled={!amount || amount==='0'} onClick={handleSave} className="w-full bg-danger text-white py-5 rounded-full font-bold text-sm tracking-widest uppercase shadow-md active:scale-95 transition-all hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center gap-2 shrink-0">{t('confirmSave')} <Icon name="check" size={18}/></button>
                     </div>
                 </div>
             );
@@ -1077,26 +1339,26 @@
 
             return (
                 <div className="flex-1 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    {saving && <LoadingOverlay text={t('loading')} Icon={Icon} />}
+                    {saving && <LoadingOverlay text={t('loading')} />}
                     {showAddCat && <CategoryModal onClose={()=>setShowAddCat(false)} onSave={(cat)=>{setUserCategories([...userCategories.filter(c=>c.id!==cat.id), cat]); setActiveCategory(cat.id); setShowAddCat(false);}} t={t} Icon={Icon} initialCategory={showAddCat !== true ? showAddCat : null}/>}
-                    <div className="px-6 pt-12 flex items-center justify-between mb-8"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('addTx')}</h2><div className="w-10"></div></div>
+                    <div className="px-6 pt-12 flex items-center justify-between mb-8"><button onClick={()=>go('SCAN')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50 shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('addTx')}</h2><div className="w-10"></div></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar px-6 space-y-6 pb-6">
-                        <div className="bg-white dark:bg-slate-900 rounded-[36px] p-10 text-center relative soft-shadow border border-slate-100 dark:border-slate-800"><div className="absolute top-4 right-4 text-slate-200 dark:text-slate-700"><Icon name="activity" size={32}/></div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">{t('amount')}</label><div className="flex justify-center items-center"><span className="text-3xl font-bold text-slate-300 mr-2">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00" className="text-7xl font-bold w-full max-w-[250px] text-center bg-transparent outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary pb-2 transition-colors dark:text-white"/></div></div>
+                        <div className="bg-white dark:bg-slate-900 rounded-[36px] p-10 text-center relative soft-shadow border border-slate-100 dark:border-slate-800"><div className="absolute top-4 right-4 text-slate-200 dark:text-slate-700 shrink-0"><Icon name="activity" size={32}/></div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">{t('amount')}</label><div className="flex justify-center items-center"><span className="text-3xl font-bold text-slate-300 mr-2">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} placeholder="0.00" className="text-7xl font-bold w-full max-w-[250px] text-center bg-transparent outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary pb-2 transition-colors dark:text-white"/></div></div>
                         <div className="bg-white dark:bg-slate-900 rounded-[32px] p-6 soft-shadow border border-slate-100 dark:border-slate-800 space-y-6">
                             <div>
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-3">{t('category')}</label>
                                 <div className="flex gap-3 flex-wrap">
-                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full transition-transform active:scale-95 border ${activeCategory === cat.id ? 'bg-primaryLight border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-3 py-1.5 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{(<button onClick={()=>setShowAddCat(cat)} className="pr-2 pl-1 hover:text-primary"><Icon name="edit-2" size={12}/></button>)}</div>))}
-                                    <button onClick={()=>setShowAddCat(true)} className="px-3 py-1.5 rounded-full text-xs font-bold border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><Icon name="plus" size={14}/></button>
+                                    {userCategories.map(cat => (<div key={cat.id} className={`flex items-center rounded-full transition-transform active:scale-95 border shrink-0 ${activeCategory === cat.id ? 'bg-primaryLight border-primary text-primary' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}><button onClick={()=>setActiveCategory(cat.id)} className="px-3 py-1.5 text-xs font-bold flex items-center gap-1.5"><Icon name={cat.icon} size={14}/> {cat.id}</button>{(<button onClick={()=>setShowAddCat(cat)} className="pr-2 pl-1 hover:text-primary shrink-0"><Icon name="edit-2" size={12}/></button>)}</div>))}
+                                    <button onClick={()=>setShowAddCat(true)} className="px-3 py-1.5 rounded-full text-xs font-bold border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shrink-0"><Icon name="plus" size={14}/></button>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl flex items-center transition-colors focus-within:ring-2 ring-primary/20"><Icon name="calendar" size={18} className="text-slate-400 mr-3" /><input type="date" value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl flex items-center relative transition-colors focus-within:ring-2 ring-primary/20"><Icon name="wallet" size={18} className="text-primary mr-3" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl flex items-center transition-colors focus-within:ring-2 ring-primary/20"><Icon name="calendar" size={18} className="text-slate-400 mr-3 shrink-0" /><input type="date" value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl flex items-center relative transition-colors focus-within:ring-2 ring-primary/20"><Icon name="wallet" size={18} className="text-primary mr-3 shrink-0" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
                             </div>
                             <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-1">{t('notes')}</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="ระบุบันทึกย่อ..." className="w-full bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 text-base font-bold outline-none resize-none h-28 dark:text-white transition-colors focus:ring-2 ring-primary/20" /></div>
                         </div>
-                        <button disabled={!amount} onClick={handleSave} className="w-full bg-danger text-white py-5 rounded-full font-bold text-sm tracking-widest uppercase shadow-md active:scale-95 transition-all hover:-translate-y-0.5 disabled:opacity-50">{t('saveTx')}</button>
+                        <button disabled={!amount} onClick={handleSave} className="w-full bg-danger text-white py-5 rounded-full font-bold text-sm tracking-widest uppercase shadow-md active:scale-95 transition-all hover:-translate-y-0.5 disabled:opacity-50 shrink-0">{t('saveTx')}</button>
                     </div>
                 </div>
             );
@@ -1127,17 +1389,17 @@
 
             return (
                 <div className="p-6 pt-12 flex flex-col h-full fade-in relative bg-[var(--bg-color)]">
-                    {viewImage && tx.imageUrl && (<div className="absolute inset-0 bg-black/90 z-[100] flex flex-col fade-in pb-10"><div className="p-6 pt-12 flex justify-between items-center w-full"><button onClick={()=>setViewImage(false)} className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white active:scale-95 backdrop-blur-md hover:bg-white/20 transition-colors"><Icon name="x" size={20}/></button></div><div className="flex-1 flex items-center justify-center p-4"><img src={tx.imageUrl} className="max-w-full max-h-full rounded-[24px] object-contain shadow-2xl" /></div></div>)}
-                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('txDetail')}</h2><button onClick={()=>setIsEditing(!isEditing)} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name={isEditing ? 'x' : 'edit-2'} size={18}/></button></div>
+                    {viewImage && tx.imageUrl && (<div className="absolute inset-0 bg-black/90 z-[100] flex flex-col fade-in pb-10"><div className="p-6 pt-12 flex justify-between items-center w-full"><button onClick={()=>setViewImage(false)} className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white active:scale-95 backdrop-blur-md hover:bg-white/20 transition-colors shrink-0"><Icon name="x" size={20}/></button></div><div className="flex-1 flex items-center justify-center p-4"><img src={tx.imageUrl} className="max-w-full max-h-full rounded-[24px] object-contain shadow-2xl" /></div></div>)}
+                    <div className="flex items-center justify-between mb-8"><button onClick={()=>go('MAIN','HISTORY')} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50 shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl dark:text-white">{t('txDetail')}</h2><button onClick={()=>setIsEditing(!isEditing)} className="w-10 h-10 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50 shrink-0"><Icon name={isEditing ? 'x' : 'edit-2'} size={18}/></button></div>
                     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-6">
                         <div className="flex flex-col items-center mb-4"><div className="mb-6"><PocketIcon pocket={tx} size={40} /></div><h1 className="text-5xl font-bold mb-3 dark:text-white">-{tx.amount > 0 ? '' : ''}฿ {formatMoney(Math.abs(tx.amount))}</h1></div>
                         
                         {isEditing ? (
                             <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow space-y-5 border border-slate-100 dark:border-slate-800 fade-in">
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">ชื่อรายการ / ร้านค้า</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="edit-3" size={18} className="text-primary mr-3" /><input value={editTitle} onChange={e=>setEditTitle(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="calendar" size={18} className="text-primary mr-3" /><input type="date" value={editDate} onChange={e=>setEditDate(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="tag" size={18} className="text-primary mr-3" /><select value={editCat} onChange={e=>setEditCat(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"><option value="">เลือกหมวดหมู่</option>{userCategories.map(c => <option key={c.id} value={c.id}>{c.id}</option>)}</select></div></div>
-                                <button onClick={handleSaveEdit} className="w-full bg-primary text-white font-bold py-4 rounded-full mt-4 active:scale-95">{t('done')}</button>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">ชื่อรายการ / ร้านค้า</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="edit-3" size={18} className="text-primary mr-3 shrink-0" /><input value={editTitle} onChange={e=>setEditTitle(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="calendar" size={18} className="text-primary mr-3 shrink-0" /><input type="date" value={editDate} onChange={e=>setEditDate(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="tag" size={18} className="text-primary mr-3 shrink-0" /><select value={editCat} onChange={e=>setEditCat(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"><option value="">เลือกหมวดหมู่</option>{userCategories.map(c => <option key={c.id} value={c.id}>{c.id}</option>)}</select></div></div>
+                                <button onClick={handleSaveEdit} className="w-full bg-primary text-white font-bold py-4 rounded-full mt-4 active:scale-95 shrink-0">{t('done')}</button>
                             </div>
                         ) : (
                             <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow space-y-6 border border-slate-100 dark:border-slate-800 fade-in">
@@ -1151,8 +1413,8 @@
                         {!isEditing && tx.notes && (<div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-800 fade-in"><h4 className="text-[9px] font-bold text-slate-400 uppercase mb-3 flex items-center gap-1.5 tracking-widest"><Icon name="align-left" size={14}/> {t('notes')}</h4><p className="text-sm font-bold bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl dark:text-white">{tx.notes}</p></div>)}
                         {!isEditing && (
                             <div className="flex gap-3 pt-2 fade-in">
-                                <button onClick={()=>go('SPLIT_BILL', null, tx)} className="flex-1 bg-white dark:bg-slate-900 dark:text-white font-bold py-4 rounded-full soft-shadow flex items-center justify-center gap-2 active:scale-95 transition-all hover:-translate-y-0.5 text-xs uppercase tracking-widest border border-slate-100 dark:border-slate-800"><Icon name="split-square-horizontal" size={16}/> {t('splitBill')}</button>
-                                {tx.imageUrl && (<button onClick={()=>setViewImage(true)} className="flex-1 bg-primaryLight text-primary font-bold py-4 rounded-full shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-all hover:-translate-y-0.5 text-xs uppercase tracking-widest"><Icon name="image" size={16}/> {t('viewReceipt')}</button>)}
+                                <button onClick={()=>go('SPLIT_BILL', null, tx)} className="flex-1 bg-white dark:bg-slate-900 dark:text-white font-bold py-4 rounded-full soft-shadow flex items-center justify-center gap-2 active:scale-95 transition-all hover:-translate-y-0.5 text-xs uppercase tracking-widest border border-slate-100 dark:border-slate-800 shrink-0"><Icon name="split-square-horizontal" size={16}/> {t('splitBill')}</button>
+                                {tx.imageUrl && (<button onClick={()=>setViewImage(true)} className="flex-1 bg-primaryLight text-primary font-bold py-4 rounded-full shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-all hover:-translate-y-0.5 text-xs uppercase tracking-widest shrink-0"><Icon name="image" size={16}/> {t('viewReceipt')}</button>)}
                             </div>
                         )}
                     </div>
@@ -1170,7 +1432,7 @@
 
             return (
                 <div className="p-6 pt-10 flex flex-col h-full fade-in bg-[var(--bg-color)]">
-                    <div className="flex items-center mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-10 h-10 bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl ml-4 dark:text-white">{t('splitBill')}</h2></div>
+                    <div className="flex items-center mb-8"><button onClick={()=>go('TX_DETAIL', null, tx)} className="w-10 h-10 bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 rounded-full flex items-center justify-center active:scale-95 dark:text-white transition-colors hover:bg-slate-50 shrink-0"><Icon name="arrow-left" size={20}/></button><h2 className="font-bold text-xl ml-4 dark:text-white">{t('splitBill')}</h2></div>
                     <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 text-center mb-6 soft-shadow border border-slate-100 dark:border-slate-800">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('totalAmount')}</p><h1 className="text-4xl font-bold my-2 dark:text-white">฿ {formatMoney(billTotal)}</h1>
                         <div className="flex justify-between items-center mt-4 px-4 bg-slate-50 dark:bg-slate-800 py-3 rounded-xl border border-slate-100 dark:border-slate-700"><span className="text-xs font-bold text-slate-500">แบ่งแล้ว: ฿ {formatMoney(currentSum)}</span><span className={`text-xs font-bold ${isMatch?'text-[#4ea86a]':'text-danger'}`}>เหลือ: ฿ {formatMoney(Math.max(billTotal-currentSum, 0))}</span></div>
@@ -1180,12 +1442,12 @@
                             <div key={f.id} className="bg-white dark:bg-slate-900 rounded-[20px] p-3 flex items-center soft-shadow border border-slate-100 dark:border-slate-800 hover:-translate-y-0.5 transition-transform">
                                 <div className="flex-1 ml-2 font-bold text-sm dark:text-white">{f.name}</div>
                                 <div className="bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-2 flex items-center transition-colors focus-within:ring-2 ring-primary/20"><span className="text-[10px] font-bold text-slate-400 mr-1">฿</span><input type="number" value={f.amount} onChange={e=>updateAmount(f.id, e.target.value)} className="w-16 bg-transparent text-right font-bold text-primary text-sm outline-none"/></div>
-                                {f.name!=='ฉัน' && <button onClick={()=>setFriends(friends.filter(x=>x.id!==f.id))} className="ml-2 text-slate-400 hover:text-danger transition-colors p-1"><Icon name="x" size={16}/></button>}
+                                {f.name!=='ฉัน' && <button onClick={()=>setFriends(friends.filter(x=>x.id!==f.id))} className="ml-2 text-slate-400 hover:text-danger transition-colors p-1 shrink-0"><Icon name="x" size={16}/></button>}
                             </div>
                         ))}
-                        <button onClick={()=>setFriends([...friends,{id:Date.now(), name:`เพื่อน ${friends.length+1}`, amount:0}])} className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-[20px] text-slate-400 font-bold flex items-center justify-center gap-2 hover:bg-white dark:hover:bg-slate-900 transition-colors text-xs uppercase tracking-widest"><Icon name="plus" size={16}/> {t('addFriend')}</button>
+                        <button onClick={()=>setFriends([...friends,{id:Date.now(), name:`เพื่อน ${friends.length+1}`, amount:0}])} className="w-full py-4 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-[20px] text-slate-400 font-bold flex items-center justify-center gap-2 hover:bg-white dark:hover:bg-slate-900 transition-colors text-xs uppercase tracking-widest shrink-0"><Icon name="plus" size={16}/> {t('addFriend')}</button>
                     </div>
-                    <button disabled={!isMatch} onClick={()=>go('MAIN','HISTORY')} className={`w-full py-5 rounded-full font-bold text-sm tracking-widest shadow-md active:scale-95 transition-all uppercase ${isMatch?'bg-primary text-white hover:shadow-lg hover:-translate-y-0.5':'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600'}`}>{t('confirmSplit')}</button>
+                    <button disabled={!isMatch} onClick={()=>go('MAIN','HISTORY')} className={`w-full py-5 rounded-full font-bold text-sm tracking-widest shadow-md active:scale-95 transition-all uppercase shrink-0 ${isMatch?'bg-primary text-white hover:shadow-lg hover:-translate-y-0.5':'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600'}`}>{t('confirmSplit')}</button>
                 </div>
             );
         };
@@ -1242,7 +1504,6 @@
             }, [go, isLocked]);
 
             const handleResetData = async () => {
-                if(!window.confirm(t('confirmReset'))) return;
                 try {
                     if (user && user.uid !== 'mock-uid') {
                         const tSnap = await db.collection('users').doc(user.uid).collection('transactions').get();
@@ -1252,7 +1513,7 @@
                         pSnap.docs.forEach(d => batch.delete(d.ref));
                         await batch.commit();
                     } else { setTxs([]); setPockets([]); }
-                    alert(t('resetSuccess')); go('MAIN', 'HOME');
+                    go('MAIN', 'HOME');
                 } catch(e) { console.error(e); }
             };
 
@@ -1268,19 +1529,81 @@
             };
 
             const safeToSpend = useMemo(() => pockets.reduce((a,c) => a + Number(c.balance), 0), [pockets]);
+            
+            // คำนวณ Notifications ใหม่ เพื่อแจ้งเตือนรายวัน/รายอาทิตย์
             const notifications = useMemo(() => {
                 const notifs = [];
+                // 1. แจ้งเตือนยอดกระเป๋าต่ำ
                 if (safeToSpend > 0 && safeToSpend <= 500) notifs.push({ id: 'low-bal', type: 'alert', title: t('lowBalance'), desc: t('safeThreshold'), time: 'Now' });
                 pockets.filter(p => p.hasTarget && Number(p.target) > 0).forEach(p => { 
                     if ((Number(p.balance) / Number(p.target)) < 0.3) {
                         notifs.push({ id: `pocket-low-${p.id}`, type: 'alert', title: t('lowBalance'), desc: `${p.name} เหลือเงินน้อยกว่า 30% (฿ ${formatMoney(p.balance)})`, time: 'Now' }); 
                     }
                 });
+                
+                // 2. รายการใหม่
                 if (txs.length > 0) { const latest = txs[0]; notifs.push({ id: `tx-${latest.id}`, type: 'receipt', title: t('newTx'), desc: `${latest.title || latest.merchant} ฿ ${formatMoney(latest.amount)}`, time: latest.date }); }
+
+                // 3. สรุปรายจ่ายรายวัน (คำนวณเมื่อวาน เทียบกับ วันก่อนหน้า)
+                const today = new Date();
+                const yest = new Date(today); yest.setDate(yest.getDate() - 1);
+                const dayBefore = new Date(today); dayBefore.setDate(dayBefore.getDate() - 2);
+                
+                const getStr = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                const yestStr = getStr(yest);
+                const dbStr = getStr(dayBefore);
+
+                const totals = {};
+                txs.forEach(tx => {
+                    let dMatch = tx.date;
+                    if(dMatch && dMatch.includes('/')) {
+                        const parts = dMatch.split('/');
+                        if(parts[2] && parts[2].length === 4) dMatch = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                    }
+                    totals[dMatch] = (totals[dMatch] || 0) + Math.abs(Number(tx.amount));
+                });
+
+                const yTotal = totals[yestStr] || 0;
+                const dbTotal = totals[dbStr] || 0;
+                if (yTotal > 0 || dbTotal > 0) {
+                    let diffPct = 0;
+                    if (dbTotal > 0) diffPct = ((yTotal - dbTotal) / dbTotal) * 100;
+                    else if (yTotal > 0) diffPct = 100;
+                    
+                    const dirStr = diffPct > 0 ? 'เพิ่มขึ้น' : 'ลดลง';
+                    notifs.push({
+                        id: `daily-sum-${yestStr}`,
+                        type: 'alert',
+                        title: 'สรุปการใช้จ่ายรายวัน',
+                        desc: `เมื่อวานคุณใช้เงิน${dirStr} ${Math.abs(diffPct).toFixed(0)}% เทียบกับวันก่อนหน้า`,
+                        time: '00:00'
+                    });
+                }
+
+                // 4. สรุปรายจ่ายรายสัปดาห์ (จะเช็คในวันเสาร์ เพื่อสรุป 7 วันล่าสุด เทียบกับ 7 วันก่อนหน้า)
+                if (today.getDay() === 6) { // 6 = Saturday
+                    let thisWeekTotal = 0; let lastWeekTotal = 0;
+                    for(let i=1; i<=7; i++) { const d = new Date(today); d.setDate(d.getDate() - i); thisWeekTotal += (totals[getStr(d)] || 0); }
+                    for(let i=8; i<=14; i++) { const d = new Date(today); d.setDate(d.getDate() - i); lastWeekTotal += (totals[getStr(d)] || 0); }
+                    if (thisWeekTotal > 0 || lastWeekTotal > 0) {
+                        let wDiffPct = 0;
+                        if (lastWeekTotal > 0) wDiffPct = ((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100;
+                        else if (thisWeekTotal > 0) wDiffPct = 100;
+                        const wDirStr = wDiffPct > 0 ? 'เพิ่มขึ้น' : 'ลดลง';
+                        notifs.push({
+                            id: `weekly-sum-${getStr(yest)}`,
+                            type: 'alert',
+                            title: 'สรุปการใช้จ่ายรายสัปดาห์',
+                            desc: `สัปดาห์ที่ผ่านมาใช้เงิน${wDirStr} ${Math.abs(wDiffPct).toFixed(0)}% เทียบกับสัปดาห์ก่อน`,
+                            time: '00:00'
+                        });
+                    }
+                }
+
                 return notifs.filter(n => !dismissedNotifs.includes(n.id));
             }, [safeToSpend, pockets, txs, t, dismissedNotifs]);
 
-            if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-slate-900 text-white"><Icon name="loader-2" size={48} className="animate-spin"/></div>;
+            if (!isAuthReady) return <div className="flex justify-center items-center h-screen w-screen bg-slate-900 text-white"><div className="pure-css-spinner"></div></div>;
             if (isLocked) return <div className="app-container"><LockScreen Icon={Icon} correctPin={pinCode} onUnlock={()=>{ setIsLocked(false); go(user?'MAIN':'SIGN_IN', user?'HOME':null); }} /></div>;
 
             const p = { user, setUser, go, t, lang, setLang, themeMode, setThemeMode, accentColor, setAccentColor, reduceMotion, setReduceMotion, pinCode, setPinCode, showPinModal, setShowPinModal, txs, setTxs, pockets, setPockets, screenData, Icon, LoadingOverlay, translateAuthError, visibleNotifications: notifications, clearAllNotifs: ()=>setDismissedNotifs(notifications.map(n=>n.id)), safeToSpend, db, userCategories, setUserCategories, defaultCatIds, onResetData: handleResetData, onUpdateTx: handleUpdateTx };
@@ -1333,7 +1656,11 @@
                     {screen === 'POCKET_SETTINGS' && <PocketSettingsScreen {...p} pocket={screenData} onUpdate={async (id, data)=>{
                         try { if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').doc(id).set(data, {merge: true}); } else setPockets(pockets.map(p => p.id === id ? {...p, ...data} : p)); go('POCKET_DETAILS', null, {...screenData, ...data}); } catch(e){}
                     }} onDelete={async (id)=>{
-                        try { if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').doc(id).delete(); } else setPockets(pockets.filter(p => p.id !== id)); go('MAIN', 'POCKETS'); } catch(e){}
+                        try { 
+                            if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').doc(id).delete(); } 
+                            setPockets(pockets.filter(p => p.id !== id)); 
+                            go('MAIN', 'POCKETS'); 
+                        } catch(e){ console.error(e); alert('เกิดข้อผิดพลาดในการลบกระเป๋า'); }
                     }} />}
                     {screen === 'EDIT_PROFILE' && <EditProfileScreen {...p} />}
                     {screen === 'SECURITY' && <SecuritySettingsScreen {...p} />}
