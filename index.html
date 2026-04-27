@@ -122,6 +122,9 @@
         // ==========================================
         // 2. GLOBALS & HELPERS
         // ==========================================
+        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'qr-scanner-default';
+        const getUserRef = (uid) => db.collection('artifacts').doc(APP_ID).collection('users').doc(uid);
+
         const ACCENT_COLORS = [ { name: 'Blue', hex: '#8cb1ff' }, { name: 'Yellow', hex: '#ffde6a' }, { name: 'Pink', hex: '#ffb0cd' }, { name: 'Green', hex: '#94e4ae' }, { name: 'Purple', hex: '#cda8ff' }, { name: 'Red', hex: '#ff9494' } ];
         const PASTEL_COLORS = ['#ffb0cd', '#ffde6a', '#94e4ae', '#8cb1ff', '#cda8ff', '#ff9494', '#e2e8f0', '#fbcfe8', '#fde047', '#86efac'];
         const lineIconsList = ['wallet', 'plane', 'car', 'gift', 'home', 'coffee', 'piggy-bank', 'shopping-bag', 'heart', 'star', 'music', 'book', 'smartphone', 'monitor', 'camera', 'zap', 'umbrella', 'scissors', 'trending-up', 'award', 'briefcase', 'bus', 'clapperboard', 'gamepad-2', 'headphones', 'key', 'laptop', 'lightbulb', 'map-pin', 'palette', 'pizza', 'shirt', 'smile', 'ticket', 'tv', 'watch', 'wifi', 'utensils', 'train', 'tag'];
@@ -1093,7 +1096,7 @@
             const handleUpdate = () => {
                 setSaving(true);
                 setTimeout(async () => {
-                    if(user && user.uid !== 'mock-uid') { try { await user.updateProfile({ displayName: name }); await db.collection('users').doc(user.uid).set({ displayName: name, bio }, { merge: true }); } catch(e) {} } 
+                    if(user && user.uid !== 'mock-uid') { try { await user.updateProfile({ displayName: name }); await getUserRef(user.uid).set({ displayName: name, bio }, { merge: true }); } catch(e) { console.error(e); } } 
                     else { const guestData = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...guestData, displayName: name, bio})); }
                     setUser(prev => ({...prev, displayName: name, bio})); go('MAIN','PROFILE');
                 }, 1000);
@@ -1107,7 +1110,7 @@
                         img.onload = () => {
                             const canvas = document.createElement('canvas'); const scaleSize = 300 / img.width; canvas.width = 300; canvas.height = img.height * scaleSize;
                             const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); const b64 = canvas.toDataURL('image/jpeg', 0.8);
-                            if(user && user.uid !== 'mock-uid') { db.collection('users').doc(user.uid).set({ photoURL: b64 }, { merge: true }); } 
+                            if(user && user.uid !== 'mock-uid') { getUserRef(user.uid).set({ photoURL: b64 }, { merge: true }); } 
                             else { const g = JSON.parse(localStorage.getItem('cozy_guest')) || {}; localStorage.setItem('cozy_guest', JSON.stringify({...g, photoURL: b64})); }
                             setUser(prev => ({...prev, photoURL: b64})); setSaving(false);
                         }
@@ -1576,10 +1579,10 @@
                 const unsub = auth.onAuthStateChanged(u => {
                     setIsAuthReady(true);
                     if(u) {
-                        db.collection('users').doc(u.uid).onSnapshot(doc => { const d = doc.data() || {}; setUser({ uid: u.uid, email: u.email, displayName: d.displayName || u.email.split('@')[0], photoURL: d.photoURL || 'https://ui-avatars.com/api/?name=U&background=8cb1ff&color=fff', bio: d.bio || '' }); });
+                        getUserRef(u.uid).onSnapshot(doc => { const d = doc.data() || {}; setUser({ uid: u.uid, email: u.email, displayName: d.displayName || u.email.split('@')[0], photoURL: d.photoURL || 'https://ui-avatars.com/api/?name=U&background=8cb1ff&color=fff', bio: d.bio || '' }); });
                         if(!isLocked) go('MAIN', 'HOME');
-                        db.collection('users').doc(u.uid).collection('transactions').orderBy('timestamp', 'desc').onSnapshot(snap => setTxs(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
-                        db.collection('users').doc(u.uid).collection('pockets').onSnapshot(snap => setPockets(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+                        getUserRef(u.uid).collection('transactions').orderBy('timestamp', 'desc').onSnapshot(snap => setTxs(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+                        getUserRef(u.uid).collection('pockets').onSnapshot(snap => setPockets(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
                     } else {
                         const localGuest = localStorage.getItem('cozy_guest');
                         if (localGuest) { setUser(JSON.parse(localGuest)); if(!isLocked) go('MAIN', 'HOME'); } else { go('SIGN_IN'); setTxs([]); setPockets([]); setDismissedNotifs([]); }
@@ -1599,8 +1602,9 @@
             const handleResetData = async () => {
                 try {
                     if (user && user.uid !== 'mock-uid') {
-                        const tSnap = await db.collection('users').doc(user.uid).collection('transactions').get();
-                        const pSnap = await db.collection('users').doc(user.uid).collection('pockets').get();
+                        const userRef = getUserRef(user.uid);
+                        const tSnap = await userRef.collection('transactions').get();
+                        const pSnap = await userRef.collection('pockets').get();
                         const batch = db.batch();
                         tSnap.docs.forEach(d => batch.delete(d.ref));
                         pSnap.docs.forEach(d => batch.delete(d.ref));
@@ -1613,7 +1617,7 @@
             const handleUpdateTx = async (id, newData) => {
                 try {
                     if(user && user.uid !== 'mock-uid') {
-                        await db.collection('users').doc(user.uid).collection('transactions').doc(id).update(newData);
+                        await getUserRef(user.uid).collection('transactions').doc(id).update(newData);
                     } else {
                         setTxs(txs.map(t => t.id === id ? {...t, ...newData} : t));
                     }
@@ -1720,8 +1724,8 @@
                     {screen === 'REVIEW' && <ReviewScreen {...p} onConfirm={async (d)=>{ 
                         try {
                             if(user && user.uid !== 'mock-uid') {
-                                await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
-                                if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: Number(pkt.balance) - Number(d.amount) }); }
+                                await getUserRef(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
+                                if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await getUserRef(user.uid).collection('pockets').doc(d.pocketId).update({ balance: Number(pkt.balance) - Number(d.amount) }); }
                             } else {
                                 setTxs([{id: Date.now().toString(), ...d}, ...txs]);
                                 if (d.pocketId && d.pocketId !== 'none') setPockets(pockets.map(pk => pk.id === d.pocketId ? {...pk, balance: Number(pk.balance) - Number(d.amount)} : pk));
@@ -1732,8 +1736,8 @@
                     {screen === 'ADD_TX' && <AddTxScreen {...p} onSave={async (d)=>{ 
                         try {
                             if(user && user.uid !== 'mock-uid') {
-                                await db.collection('users').doc(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
-                                if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await db.collection('users').doc(user.uid).collection('pockets').doc(d.pocketId).update({ balance: Number(pkt.balance) - Number(d.amount) }); }
+                                await getUserRef(user.uid).collection('transactions').add({...d, timestamp: firebase.firestore.FieldValue.serverTimestamp()});
+                                if (d.pocketId && d.pocketId !== 'none') { const pkt = pockets.find(pk => pk.id === d.pocketId); if (pkt) await getUserRef(user.uid).collection('pockets').doc(d.pocketId).update({ balance: Number(pkt.balance) - Number(d.amount) }); }
                             } else {
                                 setTxs([{id: Date.now().toString(), ...d}, ...txs]); 
                                 if (d.pocketId && d.pocketId !== 'none') setPockets(pockets.map(pk => pk.id === d.pocketId ? {...pk, balance: Number(pk.balance) - Number(d.amount)} : pk));
@@ -1744,14 +1748,14 @@
                     {screen === 'TX_DETAIL' && <TxDetailScreen {...p} tx={screenData || txs[0]} />}
                     {screen === 'SPLIT_BILL' && <SplitBillScreen {...p} tx={screenData || txs[0]} />}
                     {screen === 'ADD_POCKET' && <AddPocketScreen {...p} onSave={async (pData)=>{ 
-                        try { if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').add({...pData, timestamp: firebase.firestore.FieldValue.serverTimestamp()}); } else setPockets([...pockets, {id: Date.now().toString(), ...pData}]); go('MAIN', 'POCKETS'); } catch(e){}
+                        try { if(user && user.uid !== 'mock-uid') { await getUserRef(user.uid).collection('pockets').add({...pData, timestamp: firebase.firestore.FieldValue.serverTimestamp()}); } else setPockets([...pockets, {id: Date.now().toString(), ...pData}]); go('MAIN', 'POCKETS'); } catch(e){}
                     }} />}
                     {screen === 'POCKET_DETAILS' && <PocketDetailsScreen {...p} pocket={screenData || pockets[0]} />}
                     {screen === 'POCKET_SETTINGS' && <PocketSettingsScreen {...p} pocket={screenData} onUpdate={async (id, data)=>{
-                        try { if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').doc(id).set(data, {merge: true}); } else setPockets(pockets.map(p => p.id === id ? {...p, ...data} : p)); go('POCKET_DETAILS', null, {...screenData, ...data}); } catch(e){}
+                        try { if(user && user.uid !== 'mock-uid') { await getUserRef(user.uid).collection('pockets').doc(id).set(data, {merge: true}); } else setPockets(pockets.map(p => p.id === id ? {...p, ...data} : p)); go('POCKET_DETAILS', null, {...screenData, ...data}); } catch(e){}
                     }} onDelete={async (id)=>{
                         try { 
-                            if(user && user.uid !== 'mock-uid') { await db.collection('users').doc(user.uid).collection('pockets').doc(id).delete(); } 
+                            if(user && user.uid !== 'mock-uid') { await getUserRef(user.uid).collection('pockets').doc(id).delete(); } 
                             setPockets(pockets.filter(p => p.id !== id)); 
                             go('MAIN', 'POCKETS'); 
                         } catch(e){ console.error(e); alert('เกิดข้อผิดพลาดในการลบกระเป๋า'); }
