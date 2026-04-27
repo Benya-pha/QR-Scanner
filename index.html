@@ -164,12 +164,12 @@
             return `เกิดข้อผิดพลาด: ${code}`;
         };
 
-        // ล็อกขนาด Min-Width / Min-Height และใส่ shrink-0 ป้องกันไอคอนโดนบีบเล็ก
+        // ล็อกขนาด Min-Width / Min-Height และแก้คำสั่งสร้างไอคอนไม่ให้ถูกบีบ
         const Icon = ({ name, size=24, className="", strokeWidth=1.5 }) => {
             const spanRef = useRef(null);
             useEffect(() => { 
                 if(spanRef.current && window.lucide) {
-                    try { spanRef.current.innerHTML = `<i data-lucide="${name}" class="${className}"></i>`; lucide.createIcons({ root: spanRef.current, attrs: { 'stroke-width': strokeWidth, size: size } }); } 
+                    try { spanRef.current.innerHTML = `<i data-lucide="${name}" class="${className}"></i>`; lucide.createIcons({ root: spanRef.current, attrs: { 'stroke-width': strokeWidth, width: size, height: size } }); } 
                     catch (e) { spanRef.current.innerHTML = `<span style="display:inline-block; width:${size}px; height:${size}px; border-radius:50%;"></span>`; }
                 }
             }, [name, size, strokeWidth, className]);
@@ -183,6 +183,52 @@
                 <h2 className="font-bold text-xl tracking-widest uppercase text-slate-700 dark:text-white">{text}</h2>
             </div>
         );
+
+        // 🌟 ฟังก์ชัน Export เป็นไฟล์ Excel (.csv) 🌟
+        const exportToCSV = (txs, pockets) => {
+            const headers = ['Date', 'Title', 'Category', 'Amount (THB)', 'Pocket', 'Notes'];
+            const rows = txs.map(tx => {
+                const pocket = pockets.find(p => p.id === tx.pocketId);
+                const pocketName = pocket ? pocket.name : 'None';
+                // ป้องกันปัญหาการตัดคำด้วย Comma
+                const title = `"${(tx.title || '').replace(/"/g, '""')}"`;
+                const notes = `"${(tx.notes || '').replace(/"/g, '""')}"`;
+                return `${tx.date},${title},${tx.category},${tx.amount},"${pocketName}",${notes}`;
+            });
+            // \uFEFF คือ UTF-8 BOM เพื่อให้โปรแกรม Excel รองรับภาษาไทยได้สมบูรณ์
+            const csvContent = "\uFEFF" + [headers.join(','), ...rows].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Transactions_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        // 🌟 Component หน้าทักทาย (Greeting Splash Screen) 🌟
+        const GreetingScreen = ({ userName, onComplete }) => {
+            const [fading, setFading] = useState(false);
+            useEffect(() => {
+                const timer1 = setTimeout(() => setFading(true), 2000);
+                const timer2 = setTimeout(() => onComplete(), 2500);
+                return () => { clearTimeout(timer1); clearTimeout(timer2); };
+            }, [onComplete]);
+
+            const hour = new Date().getHours();
+            let greeting = 'Good night';
+            if (hour >= 5 && hour < 12) greeting = 'Good morning';
+            else if (hour === 12) greeting = 'Good noon';
+            else if (hour > 12 && hour < 17) greeting = 'Good afternoon';
+
+            return (
+                <div className={`fixed inset-0 bg-white dark:bg-dark z-[999] flex flex-col items-center justify-center transition-opacity duration-500 ${fading ? 'opacity-0' : 'opacity-100'}`}>
+                    <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-4 slide-up">{greeting}</h1>
+                    <p className="text-2xl font-bold text-primary slide-up" style={{animationDelay: '0.1s', opacity: 0, animationFillMode: 'forwards'}}>{userName}</p>
+                </div>
+            );
+        };
 
         const categorizeText = (text) => {
             const tText = text.toLowerCase();
@@ -263,7 +309,7 @@
             TH: {
                 welcome: 'Welcome', home: 'หน้าหลัก', wallet: 'กระเป๋า', scan: 'สแกน', history: 'ประวัติ', profile: 'โปรไฟล์',
                 totalSpend: 'ยอดใช้จ่ายรวม', safeSpend: 'ยอดเงินคงเหลือ', recent: 'รายการล่าสุด', seeAll: 'ดูทั้งหมด',
-                noData: 'ยังไม่มีรายการ', newPocket: 'สร้างกระเป๋าใหม่', scanReceipt: 'สแกนสลิป', gallery: 'อัลบั้ม',
+                noData: 'ยังไม่มีข้อมูล', newPocket: 'สร้างกระเป๋าใหม่', scanReceipt: 'สแกนสลิป', gallery: 'อัลบั้ม',
                 manual: 'กรอกเอง', reviewDetails: 'ตรวจสอบข้อมูล', merchant: 'ร้านค้า/ผู้รับ', date: 'วันที่',
                 confirmSave: 'บันทึกข้อมูล', addTx: 'บันทึกรายการ', amount: 'จำนวนเงิน', saveTx: 'บันทึกรายการ',
                 splitBill: 'หารบิลกับเพื่อน', totalAmount: 'ยอดรวมบิล', addFriend: 'เพิ่มเพื่อน', confirmSplit: 'ยืนยันการหารบิล',
@@ -290,7 +336,14 @@
                 transactionAlerts: 'เตือนการทำรายการ', everyPurchase: 'ทุกรายการใช้จ่าย', budgetAlerts: 'เตือนงบประมาณ',
                 budgetWarnings: 'เตือนเมื่อใกล้หมดงบ', monthlySummaries: 'สรุปยอดรายเดือน', newLogins: 'การเข้าระบบใหม่', passwordChanges: 'เปลี่ยนรหัสผ่าน',
                 themeMode: 'โหมดหน้าจอ', activeNow: 'กำลังใช้งาน', pinStatusNotSet: 'ยังไม่ตั้งค่า', pinStatusSet: 'ตั้งค่าแล้ว', viewReceipt: 'ดูรูปสลิป',
-                resetData: 'ล้างข้อมูลทั้งหมด', confirmReset: 'คุณแน่ใจหรือไม่ว่าจะล้างประวัติและกระเป๋าเงินทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้', resetSuccess: 'ล้างข้อมูลเรียบร้อยแล้ว!', torchNotSupported: 'ไฟฉายไม่รองรับบนอุปกรณ์นี้', edit: 'แก้ไข', done: 'เสร็จสิ้น'
+                resetData: 'ล้างข้อมูลทั้งหมด', confirmReset: 'คุณแน่ใจหรือไม่ว่าจะล้างประวัติและกระเป๋าเงินทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้', resetSuccess: 'ล้างข้อมูลเรียบร้อยแล้ว!', torchNotSupported: 'ไฟฉายไม่รองรับบนอุปกรณ์นี้', edit: 'แก้ไข', done: 'เสร็จสิ้น',
+                spendingOverview: 'ภาพรวมรายจ่าย', daily: 'รายวัน', weekly: 'รายอาทิตย์', monthly: 'รายเดือน', yearly: 'รายปี',
+                fromYesterday: 'จากเมื่อวาน', fromLastWeek: 'จากสัปดาห์ก่อน', increased: 'เพิ่มขึ้น', decreased: 'ลดลง',
+                dailySummary: 'สรุปการใช้จ่ายรายวัน', weeklySummary: 'สรุปการใช้จ่ายรายสัปดาห์', yesterdayYouSpent: 'เมื่อวานคุณใช้เงิน',
+                lastWeekYouSpent: 'สัปดาห์ที่ผ่านมาใช้เงิน', merchantName: 'ชื่อรายการ / ร้านค้า', selectCategory: 'เลือกหมวดหมู่',
+                enterMerchantName: 'ระบุชื่อร้านค้า', enterNotes: 'ระบุบันทึกย่อ...', confirmDeleteTitle: 'ยืนยันการลบ',
+                confirmDeletePocket: 'คุณแน่ใจหรือไม่ว่าจะลบกระเป๋านี้? ข้อมูลธุรกรรมที่เกี่ยวข้องจะยังคงอยู่ในประวัติรวม',
+                deletePocketBtn: 'ลบกระเป๋า', confirm: 'ยืนยัน', used: 'ใช้ไปแล้ว'
             },
             EN: {
                 welcome: 'Welcome', home: 'Home', wallet: 'Pockets', scan: 'Scan', history: 'History', profile: 'Profile',
@@ -322,7 +375,14 @@
                 transactionAlerts: 'Transaction Alerts', everyPurchase: 'Every purchase', budgetAlerts: 'Budget Alerts',
                 budgetWarnings: 'Budget warnings', monthlySummaries: 'Monthly summaries', newLogins: 'New device logins', passwordChanges: 'Password changes',
                 themeMode: 'Theme Mode', activeNow: 'Active now', pinStatusNotSet: 'Not configured', pinStatusSet: 'Configured', viewReceipt: 'View Receipt',
-                resetData: 'Reset All Data', confirmReset: 'Are you sure you want to clear all transactions and pockets? This cannot be undone.', resetSuccess: 'Data cleared successfully!', torchNotSupported: 'Torch not supported on this device', edit: 'Edit', done: 'Done'
+                resetData: 'Reset All Data', confirmReset: 'Are you sure you want to clear all transactions and pockets? This cannot be undone.', resetSuccess: 'Data cleared successfully!', torchNotSupported: 'Torch not supported on this device', edit: 'Edit', done: 'Done',
+                spendingOverview: 'Spending Overview', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly',
+                fromYesterday: 'from yesterday', fromLastWeek: 'from last week', increased: 'increased by', decreased: 'decreased by',
+                dailySummary: 'Daily Summary', weeklySummary: 'Weekly Summary', yesterdayYouSpent: 'Yesterday you spent',
+                lastWeekYouSpent: 'Last week you spent', merchantName: 'Title / Merchant', selectCategory: 'Select Category',
+                enterMerchantName: 'Enter merchant name', enterNotes: 'Add notes...', confirmDeleteTitle: 'Confirm Deletion',
+                confirmDeletePocket: 'Are you sure you want to delete this pocket? Related transactions will remain in history.',
+                deletePocketBtn: 'Delete Pocket', confirm: 'Confirm', used: 'Used'
             }
         };
         const getT = (lang) => (key) => TRANSLATIONS[lang]?.[key] || key;
@@ -513,7 +573,7 @@
                             return txDMatch === dStr;
                         });
                         const daySum = dayTxs.reduce((a, b) => a + Math.abs(Number(b.amount)), 0);
-                        data.push({ label: i === 0 ? 'วันนี้' : `${d.getDate()}/${d.getMonth()+1}`, fullLabel: `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`, value: daySum });
+                        data.push({ label: i === 0 ? t('today') : `${d.getDate()}/${d.getMonth()+1}`, fullLabel: `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`, value: daySum });
                         sum += daySum;
                     }
                 } else if (homeChartRange === 'Monthly') {
@@ -555,7 +615,7 @@
                     }
                 }
                 return { homeChartData: data, avgPerDay: sum / days };
-            }, [txs, homeChartRange]);
+            }, [txs, homeChartRange, t]);
 
             return (
                 <div className="p-6 pt-10 fade-in">
@@ -564,30 +624,35 @@
                             <div className="rounded-full overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm w-12 h-12 flex items-center justify-center bg-white shrink-0"><img src={user?.photoURL} className="w-full h-full object-cover"/></div>
                             <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('welcome')},</p><h2 className="text-lg font-bold leading-none dark:text-white">{user?.displayName}</h2></div>
                         </div>
-                        <button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 relative active:scale-95 transition-transform hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700 shrink-0">
-                            <Icon name="bell" size={20}/>{visibleNotifications.length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800 shrink-0"></span>}
-                        </button>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <button onClick={() => exportToCSV(txs, pockets)} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-primary relative active:scale-95 transition-transform hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700 shrink-0">
+                                <Icon name="download" size={20}/>
+                            </button>
+                            <button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 relative active:scale-95 transition-transform hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700 shrink-0">
+                                <Icon name="bell" size={20}/>{visibleNotifications.length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800 shrink-0"></span>}
+                            </button>
+                        </div>
                     </div>
                     
-                    <div className="bg-primary p-6 rounded-[32px] text-white shadow-[0_15px_30px_var(--color-primary-light)] mb-4 relative overflow-hidden transition-colors">
+                    <div className="bg-primary p-6 rounded-[32px] text-white shadow-xl shadow-primary/30 dark:shadow-none mb-4 relative overflow-hidden transition-colors">
                         <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
                         <p className="text-xs font-bold text-white/80 uppercase tracking-widest mb-1">{t('totalSpend')}</p>
                         <h1 className="text-4xl font-bold">฿ {formatMoney(totalSpend)}</h1>
                     </div>
                     
-                    {/* กล่องภาพรวมรายจ่าย แทนที่กล่องกระเป๋าเดิม */}
+                    {/* กล่องภาพรวมรายจ่าย */}
                     <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] soft-shadow mb-8 border border-slate-100 dark:border-slate-800">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-sm dark:text-white flex items-center gap-2"><Icon name="bar-chart-3" size={16}/> ภาพรวมรายจ่าย</h3>
+                            <h3 className="font-bold text-sm dark:text-white flex items-center gap-2"><Icon name="bar-chart-3" size={16}/> {t('spendingOverview')}</h3>
                             <select value={homeChartRange} onChange={e=>setHomeChartRange(e.target.value)} className="bg-slate-50 dark:bg-slate-800 text-[10px] font-bold px-3 py-1.5 rounded-full outline-none text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700">
-                                <option value="Daily">รายวัน</option>
-                                <option value="Weekly">รายอาทิตย์</option>
-                                <option value="Monthly">รายเดือน</option>
-                                <option value="Yearly">รายปี</option>
+                                <option value="Daily">{t('daily')}</option>
+                                <option value="Weekly">{t('weekly')}</option>
+                                <option value="Monthly">{t('monthly')}</option>
+                                <option value="Yearly">{t('yearly')}</option>
                             </select>
                         </div>
                         <div className="h-40">
-                            {homeChartData.length > 0 ? (<InteractiveBarChart data={homeChartData} color="var(--color-primary)" />) : (<div className="flex items-center justify-center h-full text-xs font-bold text-slate-400">ไม่มีข้อมูล</div>)}
+                            {homeChartData.length > 0 ? (<InteractiveBarChart data={homeChartData} color="var(--color-primary)" />) : (<div className="flex items-center justify-center h-full text-xs font-bold text-slate-400">{t('noData')}</div>)}
                         </div>
                         <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex justify-between items-center">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Average / Day</span>
@@ -774,26 +839,32 @@
             </div>
         );
 
-        const PocketsScreen = ({ pockets, go, t, Icon }) => (
-            <div className="p-6 pt-12 fade-in flex flex-col h-full bg-[var(--bg-color)]">
-                <div className="flex justify-between items-center mb-8"><h2 className="text-3xl font-bold leading-none dark:text-white">{t('yourPockets')}</h2><button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 active:scale-95 transition-transform hover:bg-slate-50 border border-slate-100 dark:border-slate-700 shrink-0"><Icon name="bell" size={20}/></button></div>
-                <div className="grid grid-cols-2 gap-4 mb-6 flex-1 overflow-y-auto no-scrollbar">
-                    {pockets.length===0 ? <div className="col-span-2 bg-white dark:bg-slate-800 soft-shadow border border-slate-100 dark:border-slate-700 rounded-[28px] text-center p-8"><p className="font-bold text-slate-400">{t('noData')}</p></div> : pockets.map(p => {
-                        const pct = p.hasTarget && p.target > 0 ? Math.min((p.balance / p.target) * 100, 100) : 0;
-                        return (
-                            <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700 active:scale-95 transition-all cursor-pointer h-fit relative overflow-hidden hover:-translate-y-1 hover:shadow-md">
-                                <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full opacity-20`} style={{backgroundColor: p.bg || 'var(--color-primary-light)'}}></div>
-                                <div className="mb-4 relative z-10"><PocketIcon pocket={p} size={18} /></div>
-                                <h4 className="font-bold text-sm mb-1 truncate relative z-10 dark:text-white">{p.name}</h4>
-                                <div className="flex items-baseline gap-1 mb-4 relative z-10"><p className="text-xl font-bold dark:text-white">฿ {formatMoney(p.balance)}</p></div>
-                                {p.hasTarget && (<div className="relative z-10"><div className="h-1 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-500" style={{width:`${pct}%`, backgroundColor: p.color||'var(--color-primary)'}}></div></div><div className="text-right text-[9px] font-bold mt-1 text-slate-400">{Math.round(pct)}%</div></div>)}
-                            </div>
-                        )
-                    })}
+        const PocketsScreen = ({ pockets, txs, go, t, Icon }) => {
+            return (
+                <div className="p-6 pt-12 fade-in flex flex-col h-full bg-[var(--bg-color)]">
+                    <div className="flex justify-between items-center mb-8"><h2 className="text-3xl font-bold leading-none dark:text-white">{t('yourPockets')}</h2><button onClick={()=>go('NOTIFICATIONS')} className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm text-slate-600 dark:text-slate-300 active:scale-95 transition-transform hover:bg-slate-50 border border-slate-100 dark:border-slate-700 shrink-0"><Icon name="bell" size={20}/></button></div>
+                    <div className="grid grid-cols-2 gap-4 mb-6 flex-1 overflow-y-auto no-scrollbar">
+                        {pockets.length===0 ? <div className="col-span-2 bg-white dark:bg-slate-800 soft-shadow border border-slate-100 dark:border-slate-700 rounded-[28px] text-center p-8"><p className="font-bold text-slate-400">{t('noData')}</p></div> : pockets.map(p => {
+                            // คำนวณรายจ่ายในกระเป๋าใหม่ ให้สอดคล้องกับ PocketDetails
+                            const pocketTxs = txs.filter(tx => tx.pocketId === p.id);
+                            const totalSpent = pocketTxs.reduce((sum, tx) => sum + Math.abs(Number(tx.amount)), 0);
+                            const pct = p.hasTarget && p.target > 0 ? Math.min((totalSpent / p.target) * 100, 100) : 0;
+                            
+                            return (
+                                <div key={p.id} onClick={()=>go('POCKET_DETAILS', null, p)} className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700 active:scale-95 transition-all cursor-pointer h-fit relative overflow-hidden hover:-translate-y-1 hover:shadow-md">
+                                    <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full opacity-20`} style={{backgroundColor: p.bg || 'var(--color-primary-light)'}}></div>
+                                    <div className="mb-4 relative z-10"><PocketIcon pocket={p} size={18} /></div>
+                                    <h4 className="font-bold text-sm mb-1 truncate relative z-10 dark:text-white">{p.name}</h4>
+                                    <div className="flex items-baseline gap-1 mb-4 relative z-10"><p className="text-xl font-bold dark:text-white">฿ {formatMoney(p.balance)}</p></div>
+                                    {p.hasTarget && (<div className="relative z-10"><div className="h-1 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-500" style={{width:`${pct}%`, backgroundColor: p.color||'var(--color-primary)'}}></div></div><div className="text-right text-[9px] font-bold mt-1 text-slate-400">{Math.round(pct)}%</div></div>)}
+                                </div>
+                            )
+                        })}
+                    </div>
+                    <button onClick={()=>go('ADD_POCKET')} className="w-full bg-primary/10 text-primary font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-95 transition-transform shrink-0 hover:bg-primary/20"><Icon name="plus" size={20}/> {t('createNewPocket')}</button>
                 </div>
-                <button onClick={()=>go('ADD_POCKET')} className="w-full bg-primary/10 text-primary font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-95 transition-transform shrink-0 hover:bg-primary/20"><Icon name="plus" size={20}/> {t('createNewPocket')}</button>
-            </div>
-        );
+            );
+        };
 
         const AddPocketScreen = ({ go, onSave, t, Icon, LoadingOverlay }) => {
             const [name, setName] = useState(''); const [balance, setBalance] = useState(''); 
@@ -838,7 +909,12 @@
         const PocketDetailsScreen = ({ go, pocket, txs, t, Icon }) => {
             if(!pocket) return null;
             const pocketTxs = txs.filter(tx => tx.pocketId === pocket.id);
-            const pct = pocket.hasTarget && pocket.target > 0 ? Math.min((pocket.balance / pocket.target) * 100, 100) : 0;
+            
+            // เปลี่ยน Logic คำนวณเป็นยอดที่ใช้ไป เทียบกับ เป้าหมาย 
+            const totalSpent = pocketTxs.reduce((sum, tx) => sum + Math.abs(Number(tx.amount)), 0);
+            const pct = pocket.hasTarget && pocket.target > 0 ? Math.min((totalSpent / pocket.target) * 100, 100) : 0;
+            const leftAmount = Math.max((pocket.target || 0) - totalSpent, 0);
+
             const barColor = pocket.color || 'var(--color-primary)';
             const bgColor = pocket.bg || 'var(--color-primary-light)';
             const [trendRange, setTrendRange] = useState('Weekly');
@@ -861,7 +937,7 @@
                             return txDMatch === dStr;
                         });
                         const daySum = dayTxs.reduce((a, b) => a + Math.abs(Number(b.amount)), 0);
-                        data.push({ label: i === 0 ? 'วันนี้' : `${d.getDate()}/${d.getMonth()+1}`, fullLabel: `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`, value: daySum });
+                        data.push({ label: i === 0 ? t('today') : `${d.getDate()}/${d.getMonth()+1}`, fullLabel: `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`, value: daySum });
                     }
                 } else if (trendRange === 'Monthly') {
                     for (let i = 3; i >= 0; i--) {
@@ -881,7 +957,7 @@
                     }
                 }
                 return data;
-            }, [pocketTxs, trendRange]);
+            }, [pocketTxs, trendRange, t]);
 
             return (
                 <div className="p-6 pt-12 h-full flex flex-col fade-in bg-[var(--bg-color)]">
@@ -892,15 +968,15 @@
                             <div className="flex items-center gap-4 mb-6 relative z-10"><div className="bg-white/50 rounded-[20px] w-14 h-14 flex items-center justify-center backdrop-blur-sm shadow-sm shrink-0" style={{color:barColor}}><Icon name={pocket.icon} size={24}/></div><h3 className="font-bold text-slate-800 text-xl">{pocket.name}</h3></div>
                             <h1 className="text-4xl font-bold text-slate-800 mb-2 relative z-10">฿ {formatMoney(pocket.balance)}</h1>
                             {pocket.hasTarget && <p className="text-xs font-bold text-slate-600 mb-6 relative z-10">Goal: ฿ {formatMoney(pocket.target)}</p>}
-                            {pocket.hasTarget && (<div className="relative z-10 bg-white/40 p-4 rounded-[20px] backdrop-blur-sm shadow-sm border border-white/20"><div className="flex justify-between text-[10px] font-bold text-slate-700 mb-2"><span>{Math.round(pct)}% {t('saved')}</span><span>฿ {formatMoney(pocket.target - pocket.balance)} {t('left')}</span></div><div className="h-1.5 w-full bg-slate-800/10 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`, backgroundColor: barColor}}></div></div></div>)}
+                            {pocket.hasTarget && (<div className="relative z-10 bg-white/40 p-4 rounded-[20px] backdrop-blur-sm shadow-sm border border-white/20"><div className="flex justify-between text-[10px] font-bold text-slate-700 mb-2"><span>{Math.round(pct)}% {t('used')}</span><span>฿ {formatMoney(leftAmount)} {t('left')}</span></div><div className="h-1.5 w-full bg-slate-800/10 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all duration-1000" style={{width:`${pct}%`, backgroundColor: barColor}}></div></div></div>)}
                         </div>
                         
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-6 soft-shadow border border-slate-100 dark:border-slate-700">
                             <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-bold text-sm dark:text-white">{t('spendingTrend')}</h3>
+                                <h3 className="font-bold text-sm dark:text-white flex items-center gap-2"><Icon name="trending-up" size={16}/> {t('spendingTrend')}</h3>
                                 <select value={trendRange} onChange={e=>setTrendRange(e.target.value)} className="bg-slate-50 dark:bg-slate-900 text-[10px] font-bold px-2 py-1 rounded-full outline-none text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700">
-                                    <option value="Weekly">รายอาทิตย์</option>
-                                    <option value="Monthly">รายเดือน</option>
+                                    <option value="Weekly">{t('weekly')}</option>
+                                    <option value="Monthly">{t('monthly')}</option>
                                 </select>
                             </div>
                             <div className="h-32 pt-2">
@@ -935,16 +1011,16 @@
                 <div className="p-6 pt-12 h-full flex flex-col fade-in relative bg-[var(--bg-color)]">
                     {showCustomModal && <CustomIconModal onClose={()=>setShowCustomModal(false)} onSelect={(ic)=>{setSelectedIcon({type:'lucide', icon:ic.icon, bg:`${ic.color}33`, color:ic.color})}} t={t} Icon={Icon} />}
                     
-                    {/* Modal ยืนยันการลบกระเป๋า (แทนที่ window.confirm) */}
+                    {/* Modal ยืนยันการลบกระเป๋า */}
                     {showDeleteConfirm && (
                         <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-6 fade-in backdrop-blur-sm">
                             <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 w-full max-w-sm slide-up shadow-2xl">
                                 <div className="w-16 h-16 bg-danger/10 text-danger rounded-full flex items-center justify-center mb-6 mx-auto"><Icon name="alert-triangle" size={32}/></div>
-                                <h3 className="text-xl font-bold text-center mb-2 dark:text-white">ยืนยันการลบ</h3>
-                                <p className="text-slate-500 text-center text-sm font-medium mb-8 leading-relaxed">คุณแน่ใจหรือไม่ว่าจะลบกระเป๋านี้? ข้อมูลธุรกรรมที่เกี่ยวข้องจะยังคงอยู่ในประวัติรวม</p>
+                                <h3 className="text-xl font-bold text-center mb-2 dark:text-white">{t('confirmDeleteTitle')}</h3>
+                                <p className="text-slate-500 text-center text-sm font-medium mb-8 leading-relaxed">{t('confirmDeletePocket')}</p>
                                 <div className="flex gap-4">
                                     <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 dark:bg-slate-700 rounded-full active:scale-95 transition-transform">{t('cancel')}</button>
-                                    <button onClick={() => { setShowDeleteConfirm(false); onDelete(pocket.id); }} className="flex-1 py-4 font-bold text-white bg-danger rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all">ลบกระเป๋า</button>
+                                    <button onClick={() => { setShowDeleteConfirm(false); onDelete(pocket.id); }} className="flex-1 py-4 font-bold text-white bg-danger rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all">{t('deletePocketBtn')}</button>
                                 </div>
                             </div>
                         </div>
@@ -977,16 +1053,16 @@
                 <div className="p-6 pt-12 fade-in relative h-full overflow-y-auto no-scrollbar bg-[var(--bg-color)]">
                     {loading && <LoadingOverlay text={t('loading')} />}
                     
-                    {/* Modal ยืนยันการล้างข้อมูลทั้งหมด (แทนที่ window.confirm) */}
+                    {/* Modal ยืนยันการล้างข้อมูลทั้งหมด */}
                     {showResetConfirm && (
                         <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-6 fade-in backdrop-blur-sm">
                             <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 w-full max-w-sm slide-up shadow-2xl">
                                 <div className="w-16 h-16 bg-danger/10 text-danger rounded-full flex items-center justify-center mb-6 mx-auto"><Icon name="alert-triangle" size={32}/></div>
-                                <h3 className="text-xl font-bold text-center mb-2 dark:text-white">ล้างข้อมูลทั้งหมด</h3>
+                                <h3 className="text-xl font-bold text-center mb-2 dark:text-white">{t('resetAllData')}</h3>
                                 <p className="text-slate-500 text-center text-sm font-medium mb-8 leading-relaxed">{t('confirmReset')}</p>
                                 <div className="flex gap-4">
                                     <button onClick={() => setShowResetConfirm(false)} className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 dark:bg-slate-700 rounded-full active:scale-95 transition-transform">{t('cancel')}</button>
-                                    <button onClick={() => { setShowResetConfirm(false); onResetData(); }} className="flex-1 py-4 font-bold text-white bg-danger rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all">ยืนยัน</button>
+                                    <button onClick={() => { setShowResetConfirm(false); onResetData(); }} className="flex-1 py-4 font-bold text-white bg-danger rounded-full shadow-md hover:shadow-lg active:scale-95 transition-all">{t('confirm')}</button>
                                 </div>
                             </div>
                         </div>
@@ -1045,7 +1121,7 @@
                     <div className="flex-1 overflow-y-auto no-scrollbar pb-6 space-y-6">
                         <div className="flex flex-col items-center mb-8 relative"><div className="relative"><div className="w-28 h-28 rounded-full border-4 border-white dark:border-slate-800 shadow-md overflow-hidden bg-white shrink-0"><img src={user?.photoURL} className="w-full h-full object-cover"/></div><button onClick={()=>fileInputRef.current.click()} className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full shadow-md flex items-center justify-center hover:scale-110 transition-transform shrink-0"><Icon name="camera" size={14}/></button></div><input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} /></div>
                         <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('name')}</label><input value={name} onChange={e=>setName(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" /></div>
-                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('bio')}</label><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm h-28 resize-none outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder="Add bio..." /></div>
+                        <div className="bg-white dark:bg-slate-800 rounded-[28px] p-5 soft-shadow border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 mb-2 block uppercase tracking-widest">{t('bio')}</label><textarea value={bio} onChange={e=>setBio(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl p-3 font-bold text-sm h-28 resize-none outline-none dark:text-white focus:ring-2 ring-primary/20 transition-colors" placeholder={t('enterNotes')} /></div>
                     </div>
                     <button onClick={handleUpdate} className="w-full bg-primary text-white py-4 rounded-full shadow-md font-bold text-sm uppercase tracking-widest mt-4 active:scale-95 transition-transform hover:shadow-lg shrink-0">{t('saveChanges')}</button>
                 </div>
@@ -1189,13 +1265,13 @@
                         if (prevTotal > 0) {
                             const pct = ((currTotal - prevTotal) / prevTotal) * 100;
                             diffIsUp = pct > 0;
-                            diffText = `${diffIsUp ? '+' : ''}${pct.toFixed(0)}% จากเมื่อวาน`;
+                            diffText = `${diffIsUp ? '+' : ''}${pct.toFixed(0)}% ${t('fromYesterday')}`;
                         } else if (currTotal > 0 && prevTotal === 0) {
                             diffIsUp = true;
-                            diffText = `+100% จากเมื่อวาน`;
+                            diffText = `+100% ${t('fromYesterday')}`;
                         } else if (currTotal === 0 && prevTotal > 0) {
                             diffIsUp = false;
-                            diffText = `-100% จากเมื่อวาน`;
+                            diffText = `-100% ${t('fromYesterday')}`;
                         }
 
                         g[dLabel] = { txs: [], diffText, diffIsUp };
@@ -1257,9 +1333,14 @@
                 if (streamRef.current) {
                     try {
                         const track = streamRef.current.getVideoTracks()[0];
-                        const newTorchState = !isTorchOn;
-                        await track.applyConstraints({ advanced: [{ torch: newTorchState }] });
-                        setIsTorchOn(newTorchState);
+                        const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+                        if (capabilities.torch) {
+                            const newTorchState = !isTorchOn;
+                            await track.applyConstraints({ advanced: [{ torch: newTorchState }] });
+                            setIsTorchOn(newTorchState);
+                        } else {
+                            alert(t('torchNotSupported'));
+                        }
                     } catch (e) { 
                         console.error("Torch error:", e);
                         alert(t('torchNotSupported'));
@@ -1282,7 +1363,7 @@
                 <div className="flex-1 bg-black relative flex flex-col h-full fade-in">
                     <div className="absolute top-10 left-0 w-full px-6 flex justify-between items-center z-40"><button onClick={()=>go('MAIN','HOME')} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white active:scale-95 backdrop-blur-md transition-colors hover:bg-white/30 shrink-0"><Icon name="x" size={20}/></button><button onClick={toggleFlash} className={`w-10 h-10 rounded-full flex items-center justify-center active:scale-95 backdrop-blur-md transition-colors shrink-0 ${isTorchOn ? 'bg-primary text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}><Icon name={isTorchOn ? 'zap' : 'zap-off'} size={20}/></button></div>
                     <div className="flex-1 relative overflow-hidden flex items-center justify-center"><video ref={videoRef} playsInline webkit-playsinline autoPlay muted className="absolute inset-0 w-full h-full object-cover opacity-90" /><div className="scan-frame"><div className="scan-corner tl"></div><div className="scan-corner tr"></div><div className="scan-corner bl"></div><div className="scan-corner br"></div><div className="laser"></div></div></div>
-                    <div className="bg-white dark:bg-dark rounded-t-[40px] p-8 pb-12 flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.3)] z-40 relative border-t border-slate-100 dark:border-slate-800"><div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mb-6 shrink-0"></div><h2 className="text-xl font-bold dark:text-white">{t('scanReceipt')}</h2><p className="text-[10px] font-bold text-slate-400 mt-2 mb-8 uppercase tracking-widest">{t('alignReceipt')}</p><div className="flex justify-between w-full px-4 items-center"><button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100 shrink-0"><Icon name="image" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('gallery')}</span></button><button onClick={capture} className="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:-translate-y-1 shrink-0"><Icon name="camera" size={28}/></button><button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100 shrink-0"><Icon name="edit-2" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('manual')}</span></button></div></div>
+                    <div className="bg-white dark:bg-dark rounded-t-[40px] p-8 pb-[calc(2rem+env(safe-area-inset-bottom))] flex flex-col items-center shadow-[0_-20px_50px_rgba(0,0,0,0.3)] z-40 relative border-t border-slate-100 dark:border-slate-800"><div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mb-6 shrink-0"></div><h2 className="text-xl font-bold dark:text-white">{t('scanReceipt')}</h2><p className="text-[10px] font-bold text-slate-400 mt-2 mb-8 uppercase tracking-widest">{t('alignReceipt')}</p><div className="flex justify-between w-full px-4 items-center"><button onClick={()=>fileInputRef.current.click()} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100 shrink-0"><Icon name="image" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('gallery')}</span></button><button onClick={capture} className="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:-translate-y-1 shrink-0"><Icon name="camera" size={28}/></button><button onClick={()=>go('ADD_TX')} className="flex flex-col items-center gap-3 group"><div className="w-14 h-14 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-all shadow-sm dark:text-white group-hover:bg-slate-100 shrink-0"><Icon name="edit-2" size={20}/></div><span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest">{t('manual')}</span></button></div></div>
                     <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e=>{if(e.target.files[0]){ processReceiptImage(e.target.files[0], (data)=>{ setScanning(false); onNext(data); }); }}} />
                 </div>
             );
@@ -1308,7 +1389,7 @@
                         {screenData?.imageUrl && (<div className="w-full h-32 bg-white dark:bg-slate-900 rounded-[28px] p-2 flex justify-center items-center soft-shadow border border-slate-100 dark:border-slate-800 relative"><img src={screenData.imageUrl} className="max-w-full max-h-full object-contain rounded-[20px]" /><div className="absolute right-3 bottom-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-primary shadow-sm shrink-0"><Icon name="scan-line" size={14}/></div></div>)}
                         <div className="bg-white dark:bg-slate-900 rounded-[32px] soft-shadow border border-slate-100 dark:border-slate-800 p-8 flex flex-col items-center relative">{screenData?.isAuto && <div className="absolute top-4 right-4 bg-primaryLight text-primary w-8 h-8 rounded-full flex items-center justify-center shrink-0"><Icon name="sparkles" size={14}/></div>}<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('extractedAmount')}</p><div className="flex items-center gap-2"><span className="text-2xl font-bold text-slate-300">฿</span><input type="number" value={amount} onChange={e=>setAmount(e.target.value)} className="text-5xl font-bold bg-transparent text-center w-full outline-none border-b-2 border-slate-100 dark:border-slate-700 focus:border-primary transition-colors dark:text-white" placeholder="0.00"/></div></div>
                         <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] border border-slate-100 dark:border-slate-800 soft-shadow space-y-5">
-                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchant')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="store" size={18} className="text-primary mr-3 shrink-0" /><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder="ระบุชื่อร้านค้า"/></div></div>
+                            <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchant')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="store" size={18} className="text-primary mr-3 shrink-0" /><input value={merchant} onChange={e=>setMerchant(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white" placeholder={t('enterMerchantName')}/></div></div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="calendar" size={16} className="text-slate-400 mr-2 shrink-0" /><input type="date" value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none dark:text-white"/></div></div>
                                 <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center relative focus-within:ring-2 ring-primary/20 transition-colors"><Icon name="wallet" size={16} className="text-primary mr-2 shrink-0" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-xs outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
@@ -1356,7 +1437,7 @@
                                 <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl flex items-center transition-colors focus-within:ring-2 ring-primary/20"><Icon name="calendar" size={18} className="text-slate-400 mr-3 shrink-0" /><input type="date" value={txDate} onChange={e=>setTxDate(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
                                 <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-2">{t('pocketDeducted')}</label><div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl flex items-center relative transition-colors focus-within:ring-2 ring-primary/20"><Icon name="wallet" size={18} className="text-primary mr-3 shrink-0" /><select value={selectedPocket} onChange={e=>setSelectedPocket(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none appearance-none pr-4 dark:text-white"><option value="none">{t('noPocket')}</option>{pockets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div></div>
                             </div>
-                            <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-1">{t('notes')}</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="ระบุบันทึกย่อ..." className="w-full bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 text-base font-bold outline-none resize-none h-28 dark:text-white transition-colors focus:ring-2 ring-primary/20" /></div>
+                            <div><label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 block mb-1">{t('notes')}</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder={t('enterNotes')} className="w-full bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 text-base font-bold outline-none resize-none h-28 dark:text-white transition-colors focus:ring-2 ring-primary/20" /></div>
                         </div>
                         <button disabled={!amount} onClick={handleSave} className="w-full bg-danger text-white py-5 rounded-full font-bold text-sm tracking-widest uppercase shadow-md active:scale-95 transition-all hover:-translate-y-0.5 disabled:opacity-50 shrink-0">{t('saveTx')}</button>
                     </div>
@@ -1396,9 +1477,9 @@
                         
                         {isEditing ? (
                             <div className="bg-white dark:bg-slate-900 rounded-[28px] p-6 soft-shadow space-y-5 border border-slate-100 dark:border-slate-800 fade-in">
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">ชื่อรายการ / ร้านค้า</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="edit-3" size={18} className="text-primary mr-3 shrink-0" /><input value={editTitle} onChange={e=>setEditTitle(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('merchantName')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="edit-3" size={18} className="text-primary mr-3 shrink-0" /><input value={editTitle} onChange={e=>setEditTitle(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
                                 <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('date')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="calendar" size={18} className="text-primary mr-3 shrink-0" /><input type="date" value={editDate} onChange={e=>setEditDate(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"/></div></div>
-                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="tag" size={18} className="text-primary mr-3 shrink-0" /><select value={editCat} onChange={e=>setEditCat(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"><option value="">เลือกหมวดหมู่</option>{userCategories.map(c => <option key={c.id} value={c.id}>{c.id}</option>)}</select></div></div>
+                                <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 block mb-2">{t('category')}</label><div className="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-2xl flex items-center focus-within:ring-2 ring-primary/20"><Icon name="tag" size={18} className="text-primary mr-3 shrink-0" /><select value={editCat} onChange={e=>setEditCat(e.target.value)} className="w-full bg-transparent font-bold text-sm outline-none dark:text-white"><option value="">{t('selectCategory')}</option>{userCategories.map(c => <option key={c.id} value={c.id}>{c.id}</option>)}</select></div></div>
                                 <button onClick={handleSaveEdit} className="w-full bg-primary text-white font-bold py-4 rounded-full mt-4 active:scale-95 shrink-0">{t('done')}</button>
                             </div>
                         ) : (
@@ -1460,6 +1541,10 @@
             const [txs, setTxs] = useState([]); const [pockets, setPockets] = useState([]); const [dismissedNotifs, setDismissedNotifs] = useState([]);
             const [accentColor, setAccentColor] = useState(localStorage.getItem('cozy_accent') || '#8cb1ff');
             
+            // 🌟 State ควบคุมหน้าจอทักทายเมื่อเปิดแอป 🌟
+            const hasGreeted = useRef(false);
+            const [showGreeting, setShowGreeting] = useState(false);
+
             const defaultCatIds = ['Food & Drink', 'Shopping', 'Transport', 'Bills'];
             const [userCategories, setUserCategories] = useState([{ id: 'Food & Drink', icon: 'coffee', color: '#ff9800' },{ id: 'Shopping', icon: 'shopping-bag', color: '#ffde6a' },{ id: 'Transport', icon: 'car', color: '#94e4ae' },{ id: 'Bills', icon: 'zap', color: '#ff9494' }]);
             
@@ -1502,6 +1587,14 @@
                 });
                 return unsub;
             }, [go, isLocked]);
+
+            // เช็คและแสดงหน้าทักทาย (เมื่อปลดล็อกสำเร็จ และมีประวัติเข้าสู่ระบบแล้วเท่านั้น)
+            useEffect(() => {
+                if (user && !isLocked && !hasGreeted.current) {
+                    setShowGreeting(true);
+                    hasGreeted.current = true;
+                }
+            }, [user, isLocked]);
 
             const handleResetData = async () => {
                 try {
@@ -1570,12 +1663,12 @@
                     if (dbTotal > 0) diffPct = ((yTotal - dbTotal) / dbTotal) * 100;
                     else if (yTotal > 0) diffPct = 100;
                     
-                    const dirStr = diffPct > 0 ? 'เพิ่มขึ้น' : 'ลดลง';
+                    const dirStr = diffPct > 0 ? t('increased') : t('decreased');
                     notifs.push({
                         id: `daily-sum-${yestStr}`,
                         type: 'alert',
-                        title: 'สรุปการใช้จ่ายรายวัน',
-                        desc: `เมื่อวานคุณใช้เงิน${dirStr} ${Math.abs(diffPct).toFixed(0)}% เทียบกับวันก่อนหน้า`,
+                        title: t('dailySummary'),
+                        desc: `${t('yesterdayYouSpent')} ${dirStr} ${Math.abs(diffPct).toFixed(0)}% ${t('fromYesterday')}`,
                         time: '00:00'
                     });
                 }
@@ -1589,12 +1682,12 @@
                         let wDiffPct = 0;
                         if (lastWeekTotal > 0) wDiffPct = ((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100;
                         else if (thisWeekTotal > 0) wDiffPct = 100;
-                        const wDirStr = wDiffPct > 0 ? 'เพิ่มขึ้น' : 'ลดลง';
+                        const wDirStr = wDiffPct > 0 ? t('increased') : t('decreased');
                         notifs.push({
                             id: `weekly-sum-${getStr(yest)}`,
                             type: 'alert',
-                            title: 'สรุปการใช้จ่ายรายสัปดาห์',
-                            desc: `สัปดาห์ที่ผ่านมาใช้เงิน${wDirStr} ${Math.abs(wDiffPct).toFixed(0)}% เทียบกับสัปดาห์ก่อน`,
+                            title: t('weeklySummary'),
+                            desc: `${t('lastWeekYouSpent')} ${wDirStr} ${Math.abs(wDiffPct).toFixed(0)}% ${t('fromLastWeek')}`,
                             time: '00:00'
                         });
                     }
@@ -1610,6 +1703,7 @@
 
             return (
                 <div className={`app-container ${reduceMotion?'no-motion':''} ${themeMode==='Dark'?'theme-dark':''}`}>
+                    {showGreeting && <GreetingScreen userName={user?.displayName} onComplete={() => setShowGreeting(false)} />}
                     {screen === 'SIGN_IN' && <LoginScreen {...p} />}
                     {screen === 'SIGN_UP' && <SignUpScreen {...p} />}
                     {screen === 'FORGOT_PASS' && <ForgotScreen {...p} />}
