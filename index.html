@@ -19,6 +19,12 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script>
+        // ตั้งค่าให้ Babel ใช้ React runtime แบบ Classic อย่างถูกต้อง (ป้องกัน Error jsx-runtime และ importSource)
+        Babel.registerPreset('my-react', {
+            presets: [[Babel.availablePresets.react, { runtime: 'classic' }]]
+        });
+    </script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <!-- Firebase -->
@@ -89,11 +95,7 @@
 <body>
     <div id="root"></div>
 
-    <script type="text/babel">
-        /** @jsxRuntime classic */
-        /** @jsx React.createElement */
-        /** @jsxFrag React.Fragment */
-
+    <script type="text/babel" data-presets="env,my-react">
         const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
         // ----------------------------------------------------
