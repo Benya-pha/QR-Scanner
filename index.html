@@ -5,15 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Slip & Expense Tracker</title>
     
-    <!-- Standard Favicons -->
-    <link rel="icon" type="image/png" sizes="512x512" href="iconApp512.png">
-    <link rel="icon" type="image/png" sizes="256x256" href="iconApp256.png">
-    <link rel="shortcut icon" href="iconApp120.png">
-    
-    <!-- Apple Touch Icons (iOS/iPadOS) -->
-    <link rel="apple-touch-icon" href="iconApp120.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="iconApp180.png">
-
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
@@ -86,12 +77,12 @@
         .fab-shadow { box-shadow: 0 10px 25px -5px rgba(140, 177, 255, 0.5); }
         
         /* Scanner UI */
-        .scan-frame { position: absolute; top: 15%; bottom: 30%; left: 10%; right: 10%; border-radius: 24px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7); z-index: 10; border: 2px solid rgba(255,255,255,0.5); }
+        .scan-frame { position: absolute; top: 15%; bottom: 30%; left: 10%; right: 10%; border-radius: 24px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7); z-index: 10; border: 2px solid rgba(255,255,255,0.5); pointer-events: none; }
         .laser { position: absolute; width: 100%; height: 3px; background: #8cb1ff; box-shadow: 0 0 20px #8cb1ff; animation: scanLine 2s linear infinite; z-index: 11; border-radius: 10px; }
         @keyframes scanLine { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
         /* Spinner */
-        .spinner { width: 40px; height: 40px; border: 4px solid var(--color-primary-light); border-top: 4px solid #8cb1ff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(140, 177, 255, 0.3); border-top: 4px solid #8cb1ff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -105,6 +96,33 @@
 
         const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
+        // ----------------------------------------------------
+        // ERROR BOUNDARY (ป้องกันหน้าจอขาว)
+        // ----------------------------------------------------
+        class ErrorBoundary extends React.Component {
+            constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+            static getDerivedStateFromError(error) { return { hasError: true, error }; }
+            componentDidCatch(error, errorInfo) { console.error("App Crashed:", error, errorInfo); }
+            render() {
+                if (this.state.hasError) {
+                    return (
+                        <div className="p-6 h-screen flex flex-col items-center justify-center bg-red-50 text-red-900">
+                            <h1 className="text-2xl font-bold mb-4">แอปพลิเคชันเกิดข้อผิดพลาด 💥</h1>
+                            <p className="mb-4 text-center">รบกวนแคปเจอร์หน้าจอนี้ส่งให้ผู้พัฒนา</p>
+                            <pre className="bg-white p-4 rounded text-xs overflow-auto w-full border border-red-200">
+                                {this.state.error && this.state.error.toString()}
+                            </pre>
+                            <button onClick={() => window.location.reload()} className="mt-6 px-6 py-2 bg-red-500 text-white rounded-full font-bold">รีเฟรชหน้าจอ</button>
+                        </div>
+                    );
+                }
+                return this.props.children; 
+            }
+        }
+
+        // ----------------------------------------------------
+        // FIREBASE SETUP
+        // ----------------------------------------------------
         const fbConfig = { 
             apiKey: "AIzaSyCv1D7XjSuSYWJxpFxT7umaCAb9o8fY2o8", 
             authDomain: "qr-scanner-a29e3.firebaseapp.com", 
@@ -134,10 +152,15 @@
         const formatMoney = (num) => Number(num || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         const formatDate = (dateStr) => {
             if(!dateStr) return '';
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+            try {
+                const d = new Date(dateStr);
+                return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch(e) { return dateStr; }
         };
 
+        // ----------------------------------------------------
+        // UI COMPONENTS
+        // ----------------------------------------------------
         const Icon = ({ name, size=24, className="", strokeWidth=1.5 }) => {
             const spanRef = useRef(null);
             useEffect(() => { 
@@ -145,7 +168,7 @@
                     try { 
                         spanRef.current.innerHTML = `<i data-lucide="${name}" class="${className}"></i>`; 
                         lucide.createIcons({ root: spanRef.current, attrs: { 'stroke-width': strokeWidth, width: size, height: size } }); 
-                    } catch (e) {}
+                    } catch (e) { console.error("Icon error:", e); }
                 }
             }, [name, size, strokeWidth, className]);
             return <span ref={spanRef} className={`inline-flex items-center justify-center shrink-0 ${className}`} style={{width: size, height: size, minWidth: size, minHeight: size}}></span>;
@@ -161,9 +184,11 @@
 
         const Toast = ({ message, type="error", onClose }) => {
             useEffect(() => {
+                if(!message) return;
                 const timer = setTimeout(() => onClose(), 3000);
                 return () => clearTimeout(timer);
             }, [message, onClose]);
+            
             if(!message) return null;
             return (
                 <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-full shadow-lg fade-in flex items-center gap-3 text-white text-sm font-semibold whitespace-nowrap" style={{backgroundColor: type === 'error' ? '#FF4D4D' : '#94e4ae', color: type==='error'? '#fff' : '#0f172a'}}>
@@ -184,7 +209,6 @@
                 let amount = ''; 
                 let merchant = ''; 
                 
-                // Parse lines
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0); 
                 
                 // Regex to find amount (Look for keywords followed by numbers)
@@ -197,7 +221,7 @@
                     } 
                 }
                 
-                // Guess merchant name (First valid string line)
+                // Guess merchant name
                 for(let line of lines) {
                     const cleanLine = line.replace(/[^a-zA-Zก-๙0-9\s]/g, '').trim();
                     if(cleanLine.length > 3 && !cleanLine.includes(amount) && !cleanLine.match(/^[0-9\/:-]+$/)) {
@@ -214,7 +238,6 @@
                     type: 'expense'
                 };
                 
-                // Convert file to Data URL for preview
                 if (typeof file === 'string') { 
                     onComplete({ ...resultData, imageUrl: file }); 
                 } else { 
@@ -242,7 +265,7 @@
                 try {
                     await auth.signInWithEmailAndPassword(email, password);
                 } catch(err) {
-                    setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+                    setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือสร้างบัญชีใหม่');
                 }
                 setLoading(false);
             };
@@ -260,11 +283,11 @@
                         <div className="-rotate-12"><Icon name="wallet" size={48} strokeWidth={2} /></div>
                     </div>
                     <h1 className="text-3xl font-extrabold text-slate-800 dark:text-white mb-2">Slip Tracker</h1>
-                    <p className="text-slate-500 mb-10 text-center">บันทึกรายรับรายจ่ายอัตโนมัติ<br/>เพียงแค่สแกนสลิปโอนเงิน</p>
+                    <p className="text-slate-500 mb-10 text-center">บันทึกรายรับรายจ่ายอัตโนมัติ<br/>ด้วยการสแกนสลิปโอนเงิน</p>
 
                     <form onSubmit={handleLogin} className="w-full max-w-sm flex flex-col gap-4">
-                        <input type="email" placeholder="อีเมล" value={email} onChange={e=>setEmail(e.target.value)} required className="w-full bg-slate-50 dark:bg-darkCard px-5 py-4 rounded-2xl border-none outline-none focus:ring-2 focus:ring-primary/50 transition-all dark:text-white" />
-                        <input type="password" placeholder="รหัสผ่าน" value={password} onChange={e=>setPassword(e.target.value)} required className="w-full bg-slate-50 dark:bg-darkCard px-5 py-4 rounded-2xl border-none outline-none focus:ring-2 focus:ring-primary/50 transition-all dark:text-white" />
+                        <input type="email" placeholder="อีเมล" value={email} onChange={e=>setEmail(e.target.value)} required className="w-full bg-slate-50 dark:bg-darkCard px-5 py-4 rounded-2xl border border-slate-100 dark:border-slate-800 outline-none focus:border-primary transition-all dark:text-white" />
+                        <input type="password" placeholder="รหัสผ่าน" value={password} onChange={e=>setPassword(e.target.value)} required className="w-full bg-slate-50 dark:bg-darkCard px-5 py-4 rounded-2xl border border-slate-100 dark:border-slate-800 outline-none focus:border-primary transition-all dark:text-white" />
                         
                         {error && <p className="text-danger text-sm text-center">{error}</p>}
                         
@@ -287,32 +310,32 @@
         };
 
         const HomeScreen = ({ transactions, userName }) => {
-            // Calculate totals for current month
             const currentMonth = new Date().getMonth();
-            const monthlyTxs = transactions.filter(t => new Date(t.date).getMonth() === currentMonth);
+            const monthlyTxs = transactions.filter(t => {
+                try { return new Date(t.date).getMonth() === currentMonth; } 
+                catch(e) { return false; }
+            });
             const totalExpense = monthlyTxs.filter(t => t.type === 'expense').reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
 
             return (
                 <div className="flex-1 overflow-y-auto no-scrollbar pb-24 fade-in">
-                    {/* Header bg */}
                     <div className="bg-primary pt-14 pb-20 px-6 rounded-b-[40px] shadow-lg relative">
                         <div className="flex justify-between items-center mb-8">
                             <div>
                                 <p className="text-white/80 text-sm font-medium">ยินดีต้อนรับกลับมา</p>
-                                <h2 className="text-white text-2xl font-bold">{userName || 'ผู้ใช้งาน'}</h2>
+                                <h2 className="text-white text-2xl font-bold truncate max-w-[200px]">{userName || 'ผู้ใช้งาน'}</h2>
                             </div>
-                            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white backdrop-blur-sm">
+                            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white backdrop-blur-sm shrink-0">
                                 <Icon name="user" size={24} />
                             </div>
                         </div>
                         
-                        {/* Balance Card overlay */}
                         <div className="absolute -bottom-16 left-6 right-6 bg-white dark:bg-darkCard rounded-3xl p-6 soft-shadow border border-slate-100 dark:border-slate-800">
                             <div className="flex items-center gap-3 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-danger/10 text-danger flex items-center justify-center"><Icon name="arrow-down-right" size={16}/></div>
                                 <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">รายจ่ายเดือนนี้</p>
                             </div>
-                            <h1 className="text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight">
+                            <h1 className="text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight truncate">
                                 ฿{formatMoney(totalExpense)}
                             </h1>
                         </div>
@@ -380,7 +403,7 @@
                             stream.getTracks().forEach(track => track.stop());
                         }
                     } catch(err) {
-                        setToast({message: 'ไม่สามารถเข้าถึงกล้องได้', type: 'error'});
+                        if(isMounted.current) setToast({message: 'ไม่สามารถเข้าถึงกล้องได้', type: 'error'});
                     }
                 };
                 startCamera();
@@ -394,7 +417,7 @@
                         });
                     }
                 };
-            }, [isTorchOn]);
+            }, [isTorchOn, setToast]);
 
             const toggleFlash = async () => {
                 if (streamRef.current) {
@@ -432,6 +455,8 @@
                     ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
                     const imgData = canvas.toDataURL('image/jpeg', 0.8);
                     processImage(imgData);
+                } else {
+                    setToast({message: 'กล้องยังไม่พร้อมทำงาน', type: 'error'});
                 }
             };
 
@@ -507,19 +532,16 @@
                     </div>
 
                     <form onSubmit={handleSave} className="p-6 flex flex-col gap-6 pb-24">
-                        {/* Type Toggle */}
                         <div className="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
                             <button type="button" onClick={()=>setType('expense')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${type==='expense' ? 'bg-white dark:bg-darkCard shadow text-danger' : 'text-slate-500'}`}>รายจ่าย</button>
                             <button type="button" onClick={()=>setType('income')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${type==='income' ? 'bg-white dark:bg-darkCard shadow text-success' : 'text-slate-500'}`}>รายรับ</button>
                         </div>
 
-                        {/* Amount Input */}
                         <div className="bg-slate-50 dark:bg-darkCard rounded-2xl p-4 border border-slate-100 dark:border-slate-800 text-center">
                             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">จำนวนเงิน (บาท)</p>
                             <input type="number" step="0.01" value={amount} onChange={e=>setAmount(e.target.value)} required placeholder="0.00" className="w-full bg-transparent text-center text-4xl font-extrabold outline-none text-slate-800 dark:text-white" />
                         </div>
 
-                        {/* Details */}
                         <div className="flex flex-col gap-4">
                             <div>
                                 <label className="text-xs text-slate-500 font-bold mb-2 block">ชื่อรายการ / ร้านค้า</label>
@@ -538,7 +560,6 @@
                             </div>
                         </div>
 
-                        {/* Categories */}
                         <div>
                             <label className="text-xs text-slate-500 font-bold mb-3 block">หมวดหมู่</label>
                             <div className="grid grid-cols-4 gap-4">
@@ -562,49 +583,47 @@
             );
         };
 
-        const HistoryScreen = ({ transactions }) => {
-            return (
-                <div className="flex-1 overflow-y-auto no-scrollbar pb-24 bg-white dark:bg-dark fade-in">
-                    <div className="px-6 py-8 pb-4 sticky top-0 bg-white/90 dark:bg-dark/90 backdrop-blur-md z-10 border-b border-slate-100 dark:border-slate-800">
-                        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">ประวัติการใช้จ่าย</h1>
-                    </div>
-                    
-                    <div className="px-6 pt-4 flex flex-col gap-3">
-                        {transactions.length === 0 ? (
-                            <div className="py-20 text-center text-slate-400">ยังไม่มีรายการใช้จ่าย</div>
-                        ) : (
-                            transactions.map(tx => {
-                                const cat = getCategory(tx.categoryId);
-                                return (
-                                    <div key={tx.id} className="bg-white dark:bg-darkCard p-4 rounded-2xl flex items-center gap-4 border border-slate-100 dark:border-slate-800">
-                                        <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{backgroundColor: `${cat.color}20`, color: cat.color}}>
-                                            <Icon name={cat.icon} size={20} />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="font-bold text-slate-800 dark:text-white truncate">{tx.merchant}</h4>
-                                            <p className="text-xs text-slate-400">{formatDate(tx.date)}</p>
-                                        </div>
-                                        <div className="text-right shrink-0">
-                                            <p className={`font-bold ${tx.type === 'expense' ? 'text-slate-800 dark:text-white' : 'text-success'}`}>
-                                                {tx.type === 'expense' ? '-' : '+'}฿{formatMoney(tx.amount)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                )
-                            })
-                        )}
-                    </div>
+        const HistoryScreen = ({ transactions }) => (
+            <div className="flex-1 overflow-y-auto no-scrollbar pb-24 bg-white dark:bg-dark fade-in">
+                <div className="px-6 py-8 pb-4 sticky top-0 bg-white/90 dark:bg-dark/90 backdrop-blur-md z-10 border-b border-slate-100 dark:border-slate-800">
+                    <h1 className="text-2xl font-bold text-slate-800 dark:text-white">ประวัติการใช้จ่าย</h1>
                 </div>
-            );
-        };
+                
+                <div className="px-6 pt-4 flex flex-col gap-3">
+                    {transactions.length === 0 ? (
+                        <div className="py-20 text-center text-slate-400">ยังไม่มีรายการใช้จ่าย</div>
+                    ) : (
+                        transactions.map(tx => {
+                            const cat = getCategory(tx.categoryId);
+                            return (
+                                <div key={tx.id} className="bg-white dark:bg-darkCard p-4 rounded-2xl flex items-center gap-4 border border-slate-100 dark:border-slate-800">
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{backgroundColor: `${cat.color}20`, color: cat.color}}>
+                                        <Icon name={cat.icon} size={20} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-bold text-slate-800 dark:text-white truncate">{tx.merchant}</h4>
+                                        <p className="text-xs text-slate-400">{formatDate(tx.date)}</p>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                        <p className={`font-bold ${tx.type === 'expense' ? 'text-slate-800 dark:text-white' : 'text-success'}`}>
+                                            {tx.type === 'expense' ? '-' : '+'}฿{formatMoney(tx.amount)}
+                                        </p>
+                                    </div>
+                                </div>
+                            )
+                        })
+                    )}
+                </div>
+            </div>
+        );
 
         const ProfileScreen = ({ user, onLogout, toggleDark, isDark }) => (
             <div className="flex-1 bg-slate-50 dark:bg-dark fade-in overflow-y-auto pb-24">
                 <div className="bg-primary px-6 pt-12 pb-16 rounded-b-[40px] shadow-sm text-center">
-                    <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center text-white mx-auto mb-4 backdrop-blur-sm border-4 border-white/30">
+                    <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center text-white mx-auto mb-4 backdrop-blur-sm border-4 border-white/30 shrink-0">
                         <Icon name="user" size={40} />
                     </div>
-                    <h2 className="text-white text-xl font-bold">{user?.isAnonymous ? 'ผู้เยี่ยมชม (Guest)' : user?.email}</h2>
+                    <h2 className="text-white text-xl font-bold truncate px-4">{user?.isAnonymous ? 'ผู้เยี่ยมชม (Guest)' : user?.email}</h2>
                 </div>
 
                 <div className="px-6 -mt-8">
@@ -645,13 +664,13 @@
                         const isActive = current === item.id;
                         if(item.isFab) {
                             return (
-                                <button key={item.id} onClick={() => go(item.id)} className="relative -top-6 w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform fab-shadow border-4 border-white dark:border-darkCard">
+                                <button key={item.id} onClick={() => go(item.id)} className="relative -top-6 w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform fab-shadow border-4 border-white dark:border-darkCard shrink-0">
                                     <Icon name={item.icon} size={28} />
                                 </button>
                             );
                         }
                         return (
-                            <button key={item.id} onClick={() => go(item.id)} className={`flex flex-col items-center gap-1 p-2 min-w-[60px] transition-colors ${isActive ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
+                            <button key={item.id} onClick={() => go(item.id)} className={`flex flex-col items-center gap-1 p-2 min-w-[60px] transition-colors shrink-0 ${isActive ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
                                 <Icon name={item.icon} size={24} className={isActive ? 'fill-primary/20' : ''} />
                                 <span className={`text-[10px] font-bold ${isActive ? 'opacity-100' : 'opacity-0'} transition-opacity`}>{item.label}</span>
                             </button>
@@ -670,33 +689,38 @@
             const [toast, setToast] = useState(null);
             const [isDark, setIsDark] = useState(false);
 
-            // Toggle Dark Mode
             useEffect(() => {
                 if(isDark) document.documentElement.classList.add('dark');
                 else document.documentElement.classList.remove('dark');
             }, [isDark]);
 
-            // Auth Listener
+            // FIX: Safe useEffect for Firestore Subscription
             useEffect(() => {
-                const unsubscribe = auth.onAuthStateChanged(usr => {
+                let unsubTx = null;
+                const unsubscribeAuth = auth.onAuthStateChanged(usr => {
                     setUser(usr);
                     if (usr) {
                         setScreen('HOME');
-                        // Fetch Transactions
-                        const unsubTx = db.collection('users').doc(usr.uid).collection('transactions')
+                        unsubTx = db.collection('users').doc(usr.uid).collection('transactions')
                             .orderBy('date', 'desc').orderBy('createdAt', 'desc')
                             .onSnapshot(snap => {
                                 const txs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                                 setTransactions(txs);
+                            }, err => {
+                                console.error("Firestore Error:", err);
                             });
-                        return () => unsubTx();
                     } else {
                         setScreen('LOGIN');
                         setTransactions([]);
+                        if(unsubTx) { unsubTx(); unsubTx = null; }
                     }
                     setAuthLoading(false);
                 });
-                return unsubscribe;
+                
+                return () => {
+                    unsubscribeAuth();
+                    if (unsubTx) unsubTx();
+                };
             }, []);
 
             const go = useCallback((s) => setScreen(s), []);
@@ -719,7 +743,7 @@
                     {screen === 'LOGIN' && <LoginScreen onLogin={() => go('HOME')} />}
                     {screen === 'HOME' && <HomeScreen transactions={transactions} userName={user?.isAnonymous ? 'Guest' : user?.email?.split('@')[0]} />}
                     {screen === 'HISTORY' && <HistoryScreen transactions={transactions} />}
-                    {screen === 'WALLET' && <div className="flex-1 flex items-center justify-center text-slate-400">ฟีเจอร์ Wallet เร็วๆนี้</div>}
+                    {screen === 'WALLET' && <div className="flex-1 flex items-center justify-center text-slate-400 fade-in">ฟีเจอร์ Wallet เร็วๆนี้</div>}
                     {screen === 'PROFILE' && <ProfileScreen user={user} onLogout={handleLogout} toggleDark={()=>setIsDark(!isDark)} isDark={isDark} />}
                     
                     {screen === 'SCAN' && <ScanScreen go={go} setToast={setToast} onResult={(res) => { setScanResult(res); go('ADD_TX'); }} />}
@@ -732,7 +756,7 @@
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        root.render(<ErrorBoundary><App /></ErrorBoundary>);
     </script>
 </body>
 </html>
